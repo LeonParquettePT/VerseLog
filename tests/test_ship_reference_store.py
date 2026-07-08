@@ -7,6 +7,8 @@ ARROW = ShipReference(
     quantum_fuel_capacity=3.6,
     quantum_range=660550458716.0,
     fuel_usage_main=331.25,
+    quantum_speed=171000000.0,
+    quantum_spool_time=6.0,
 )
 
 

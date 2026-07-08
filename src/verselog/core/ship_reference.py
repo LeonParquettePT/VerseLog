@@ -10,3 +10,5 @@ class ShipReference:
     quantum_fuel_capacity: float
     quantum_range: float
     fuel_usage_main: float
+    quantum_speed: float
+    quantum_spool_time: float
