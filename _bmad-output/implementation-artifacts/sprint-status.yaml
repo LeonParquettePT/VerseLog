@@ -54,7 +54,7 @@ development_status:
   1-3-trust-layer-validation-and-quarantine: done
   1-4-voice-trigger-voiceattack-windows: done
   1-5-local-vision-provider-ollama: done
-  1-6-hardware-benchmark-model-tier-and-worker-count: ready-for-dev
+  1-6-hardware-benchmark-model-tier-and-worker-count: review
   1-7-batch-scanning-parallel-workers: backlog
   epic-1-retrospective: optional
 
