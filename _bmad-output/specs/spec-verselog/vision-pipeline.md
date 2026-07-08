@@ -15,11 +15,12 @@ A single internal `Contract` data model (departure, arrival, SCU, reward, ...) s
 
 Swapping the active provider must not require changes to route/cargo optimization (CAP-4) or any other downstream capability.
 
-## Adaptive model fallback chain (CAP-3)
+## Adaptive model fallback chain and worker pool (CAP-3)
 
-1. On first launch, auto-benchmark the most precise available vision model **while Star Citizen is actually running** — an idle-PC benchmark reads as artificially more powerful and leads to selecting a model that later misses the time budget during real play.
+1. Auto-benchmark the most precise available vision model **while Star Citizen is actually running** — automatically on first launch, on detected hardware change, or any time the user manually triggers "Re-run benchmark" from settings. An idle-PC benchmark reads as artificially more powerful and leads to selecting a model that later misses the time budget during real play.
 2. If it exceeds the user's time budget (default 30s), fall back one tier: `Phi-3-Vision → Moondream2 → classic OCR`.
-3. The model loads only at scan time (lazy load) and unloads from VRAM immediately after extraction — footprint is a short burst, not a sustained background cost.
-4. Re-benchmark only on detected hardware change, not on every launch.
+3. The benchmark also determines a safe **worker count (N)**: how many contracts can be captured/extracted in parallel without breaking the time budget — needed because a player can have dozens of contracts visible at once (confirmed in practice, not just theoretical). Extraction runs on a pool of 1..N workers; N is re-evaluated every time the benchmark re-runs.
+4. Regardless of how many workers extract in parallel, every result is handed to the trust-layer validation/quarantine service **serially** — that service is the only writer to quarantine/confidence state, so parallel capture never races on shared state.
+5. The model loads only at scan time (lazy load) and unloads from VRAM immediately after extraction — footprint is a short burst, not a sustained background cost.
 
-Dedicated tests must verify the auto-benchmark switches correctly between all three tiers (see SPEC.md CAP-3 success criterion).
+Dedicated tests must verify the auto-benchmark switches correctly between all three model tiers, that the worker count adapts sensibly to hardware, and that manual re-benchmarking updates both (see SPEC.md CAP-3 success criterion).

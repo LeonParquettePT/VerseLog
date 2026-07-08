@@ -1,6 +1,6 @@
 ---
 id: SPEC-verselog
-companions: [vision-pipeline.md, contract-ui-reference.md]
+companions: [vision-pipeline.md, contract-ui-reference.md, ../../planning-artifacts/architecture/architecture-VERSELOG-2026-07-08/ARCHITECTURE-SPINE.md]
 sources: [../../brainstorming/brainstorm-verselog-2026-07-07/brainstorm-intent.md]
 ---
 
@@ -23,8 +23,8 @@ A pain to solve, paired with a vision to realize: a solo, self-taught developer 
   - **success:** A deliberately malformed or suspect extraction is quarantined (its source image retained, the user alerted) rather than silently accepted, and each on-screen suggestion displays its confidence state.
 
 - **CAP-3**
-  - **intent:** The system auto-benchmarks on first launch and adapts its extraction model to the host machine so that scanning stays within the user's time budget, loading the model only on demand rather than running continuously.
-  - **success:** On a given machine, benchmarked while Star Citizen is actually running (not idle, which reads as artificially more powerful), a full scan-to-result cycle completes within the user-configured threshold (default 30s), and VRAM/CPU usage returns to baseline immediately after each scan.
+  - **intent:** The system benchmarks the host machine — automatically on first launch, and any time the user manually re-triggers it from settings (e.g. after a hardware upgrade) — to pick an extraction model tier AND a safe number of parallel extraction workers, so scanning a handful or several dozen contracts at once both stay within the user's time budget. Models load only on demand, never running continuously.
+  - **success:** On a given machine, benchmarked while Star Citizen is actually running (not idle, which reads as artificially more powerful), a full scan-to-result cycle completes within the user-configured threshold (default 30s) whether scanning one contract or a large batch (e.g. ~30 at once), VRAM/CPU usage returns to baseline immediately after each scan, and a manual re-benchmark action is available and produces an updated model tier/worker count.
 
 - **CAP-4**
   - **intent:** User can get a computed route and cargo-loading plan that maximizes aUEC/min across one or more accepted contracts, including contracts the game itself cannot link together into a single itinerary, adapted to the selected ship's actual SCU capacity and legible to every crew member sharing its cargo slots.
