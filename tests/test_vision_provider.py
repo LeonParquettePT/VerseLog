@@ -7,26 +7,8 @@ from verselog.adapters.capture import vision_provider as vision_provider_module
 from verselog.adapters.capture.vision_provider import VisionProvider, _contract_from_json
 
 
-class _FakeShot:
-    size = (2, 1)
-    rgb = b"\x00" * (2 * 1 * 3)
-
-
-class _FakeSct:
-    monitors = [None, {"left": 0, "top": 0, "width": 2, "height": 1}]
-
-    def grab(self, monitor):
-        return _FakeShot()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc_info):
-        return False
-
-
 def _patch_screenshot(monkeypatch):
-    monkeypatch.setattr(vision_provider_module.mss, "mss", lambda: _FakeSct())
+    monkeypatch.setattr(vision_provider_module, "take_screenshot", lambda: b"fake-png-bytes")
 
 
 def test_parses_a_well_formed_json_response():

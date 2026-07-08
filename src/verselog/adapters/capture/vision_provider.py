@@ -1,10 +1,8 @@
-import io
 import json
 
-import mss
 import ollama
-from PIL import Image
 
+from verselog.adapters.capture.screenshot import take_screenshot
 from verselog.core.capture_result import CaptureResult
 from verselog.core.contract import Contract
 from verselog.core.ports.capture_port import CapturePort
@@ -50,13 +48,7 @@ class VisionProvider(CapturePort):
         self._model = model
 
     def capture(self) -> CaptureResult:
-        with mss.mss() as sct:
-            shot = sct.grab(sct.monitors[0])
-            image = Image.frombytes("RGB", shot.size, shot.rgb)
-
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        source_image = buffer.getvalue()
+        source_image = take_screenshot()
 
         try:
             response = ollama.chat(

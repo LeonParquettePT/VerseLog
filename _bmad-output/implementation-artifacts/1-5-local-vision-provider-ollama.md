@@ -76,3 +76,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — VisionProvider added (Ollama structured outputs), all tasks complete, 19/19 tests passing, status moved to review.
+- 2026-07-08: Code review found duplicated screenshot-capture logic between `OCRProvider` and `VisionProvider` (identical mss+PIL+PNG-encode block). Extracted a shared `adapters/capture/screenshot.py::take_screenshot()`, updated both providers and the vision-provider tests to use it. 19/19 tests still passing.
