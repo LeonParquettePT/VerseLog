@@ -4,7 +4,7 @@ baseline_commit: 65cabd8b47b6410dd326f068812bcbc5127922a7
 
 # Story 1.6: Hardware Benchmark (Model Tier + Worker Count)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -19,23 +19,23 @@ so that scanning stays fast without me tuning anything.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Settings persistence (AC: #1, #2)
-  - [ ] `src/verselog/core/settings_store.py` — `SettingsStore`, a small JSON-file-backed key/value store (`data/settings.json` default path, matching the `data/` runtime-data convention from Story 1.1). `get(key, default=None)` / `set(key, value)`, persists immediately on `set`.
-- [ ] Task 2: Benchmark routine (AC: #1)
-  - [ ] `src/verselog/adapters/capture/benchmark.py` — `BenchmarkResult` dataclass (`tier_name: str`, `worker_count: int`, `elapsed_seconds: float`); `Benchmark.run(candidates: list[tuple[str, CapturePort]], time_budget: float) -> BenchmarkResult`
-  - [ ] Times each candidate's `.capture()` call in the given order (the established fallback chain: Phi-3-Vision → Moondream2 → classic OCR); returns the **first** candidate whose elapsed time fits `time_budget`; if none fit, returns the **last** (lightest) candidate anyway with its actual elapsed time (never leaves the player with no provider at all)
-  - [ ] Worker count heuristic: `max(1, floor(time_budget / elapsed_seconds))`, capped at `os.cpu_count()` — documented as a starting heuristic, not a precisely-tuned formula (no real-world timing data exists yet to tune it further)
-  - [ ] Benchmark timing is about **speed only**, not extraction correctness — do not route trial captures through `TrustLayer` (that's a separate concern, already handled by Story 1.3)
-- [ ] Task 3: Re-run trigger and coarse hardware-change detection (AC: #1, #2)
-  - [ ] `Benchmark.should_rerun(settings_store: SettingsStore) -> bool`: `True` if no prior benchmark result is stored, or if the stored CPU core count (`os.cpu_count()`) differs from the current one. **Documented limitation**: this only catches a CPU core-count change, not e.g. a GPU swap — a fuller hardware fingerprint is future work, not invented here without real signal to base it on.
-  - [ ] `Benchmark.run(...)` is itself the "Re-run benchmark" action at the code level — there is no settings UI yet to wire a literal button to (same flagged gap as prior stories); calling `run()` again *is* the manual re-trigger.
-  - [ ] Persist the result via `SettingsStore`: tier name, worker count, and the CPU core count used for the hardware-change check
-- [ ] Task 4: Tests (AC: #1, #2)
-  - [ ] Unit test `Benchmark.run` with fake `CapturePort`s whose `capture()` calls `time.sleep()` for a small, known duration — assert the first candidate within budget is selected, and that a too-slow first candidate correctly falls back to the next
-  - [ ] Unit test the "never leaves the player with no provider" case: all candidates too slow → last (lightest) candidate still returned
-  - [ ] Unit test the worker-count heuristic's arithmetic directly
-  - [ ] Unit test `should_rerun`: no stored result → `True`; same CPU count stored → `False`; different CPU count stored → `True`
-  - [ ] Unit test `SettingsStore` against a temp-directory JSON file (`tmp_path`), not the real `data/settings.json`
+- [x] Task 1: Settings persistence (AC: #1, #2)
+  - [x] `src/verselog/core/settings_store.py` — `SettingsStore`, a small JSON-file-backed key/value store (`data/settings.json` default path, matching the `data/` runtime-data convention from Story 1.1). `get(key, default=None)` / `set(key, value)`, persists immediately on `set`.
+- [x] Task 2: Benchmark routine (AC: #1)
+  - [x] `src/verselog/adapters/capture/benchmark.py` — `BenchmarkResult` dataclass (`tier_name: str`, `worker_count: int`, `elapsed_seconds: float`); `Benchmark.run(candidates: list[tuple[str, CapturePort]], time_budget: float) -> BenchmarkResult`
+  - [x] Times each candidate's `.capture()` call in the given order (the established fallback chain: Phi-3-Vision → Moondream2 → classic OCR); returns the **first** candidate whose elapsed time fits `time_budget`; if none fit, returns the **last** (lightest) candidate anyway with its actual elapsed time (never leaves the player with no provider at all)
+  - [x] Worker count heuristic: `max(1, floor(time_budget / elapsed_seconds))`, capped at `os.cpu_count()` — documented as a starting heuristic, not a precisely-tuned formula (no real-world timing data exists yet to tune it further)
+  - [x] Benchmark timing is about **speed only**, not extraction correctness — do not route trial captures through `TrustLayer` (that's a separate concern, already handled by Story 1.3)
+- [x] Task 3: Re-run trigger and coarse hardware-change detection (AC: #1, #2)
+  - [x] `Benchmark.should_rerun(settings_store: SettingsStore) -> bool`: `True` if no prior benchmark result is stored, or if the stored CPU core count (`os.cpu_count()`) differs from the current one. **Documented limitation**: this only catches a CPU core-count change, not e.g. a GPU swap — a fuller hardware fingerprint is future work, not invented here without real signal to base it on.
+  - [x] `Benchmark.run(...)` is itself the "Re-run benchmark" action at the code level — there is no settings UI yet to wire a literal button to (same flagged gap as prior stories); calling `run()` again *is* the manual re-trigger.
+  - [x] Persist the result via `SettingsStore`: tier name, worker count, and the CPU core count used for the hardware-change check
+- [x] Task 4: Tests (AC: #1, #2)
+  - [x] Unit test `Benchmark.run` with fake `CapturePort`s whose `capture()` calls `time.sleep()` for a small, known duration — assert the first candidate within budget is selected, and that a too-slow first candidate correctly falls back to the next
+  - [x] Unit test the "never leaves the player with no provider" case: all candidates too slow → last (lightest) candidate still returned
+  - [x] Unit test the worker-count heuristic's arithmetic directly
+  - [x] Unit test `should_rerun`: no stored result → `True`; same CPU count stored → `False`; different CPU count stored → `True`
+  - [x] Unit test `SettingsStore` against a temp-directory JSON file (`tmp_path`), not the real `data/settings.json`
 
 ## Dev Notes
 
@@ -62,10 +62,28 @@ so that scanning stays fast without me tuning anything.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `30 passed in 0.96s`
+
 ### Completion Notes List
 
+- Implemented `SettingsStore` (JSON-file-backed, `data/settings.json` default), the first story to actually persist settings per AD-7.
+- Implemented `Benchmark.run`: times ordered candidates, returns the first within budget, falls back to the last (lightest) candidate if none fit — never leaves no provider chosen. Worker-count heuristic documented as a starting point, not tuned.
+- Implemented `Benchmark.should_rerun` (coarse CPU-core-count check) and `Benchmark.persist` (writes tier/worker-count/cpu-count to `SettingsStore`).
+- Did NOT implement game-process detection or a real settings UI — both explicitly out of scope per Dev Notes; `Benchmark.run()` itself is the manual re-trigger at the code level.
+- All acceptance criteria satisfied; 30/30 tests passing (19 pre-existing + 11 new).
+
 ### File List
+
+- `src/verselog/core/settings_store.py` (new)
+- `src/verselog/adapters/capture/benchmark.py` (new)
+- `tests/test_settings_store.py` (new)
+- `tests/test_benchmark.py` (new)
+
+## Change Log
+
+- 2026-07-08: Story implemented — SettingsStore and Benchmark added, all tasks complete, 30/30 tests passing, status moved to review.
+- 2026-07-08: Code review found and fixed one correctness bug — `should_rerun` used `None` both as the "never stored" sentinel and as a value `os.cpu_count()` can legitimately return, so on a platform where cpu_count is undetermined the benchmark would re-run on every launch instead of once. Fixed with a distinct `_NEVER_STORED` sentinel object; added a regression test with `os.cpu_count` monkeypatched to `None`. 31/31 tests passing.
