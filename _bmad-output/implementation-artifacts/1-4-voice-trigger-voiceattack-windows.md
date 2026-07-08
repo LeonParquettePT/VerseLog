@@ -4,7 +4,7 @@ baseline_commit: 09aa2741899c16466433e263ac815c884405c402
 
 # Story 1.4: Voice Trigger (VoiceAttack, Windows)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -19,12 +19,12 @@ so that I don't have to alt-tab or click while playing.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Implement `VoiceTriggerAdapter` (AC: #1)
-  - [ ] `src/verselog/adapters/trigger/voice_trigger.py` — same composition pattern as `ManualTriggerAdapter` (Story 1.2): constructed with a `CapturePort`, `on_triggered()` delegates to it
-  - [ ] No VoiceAttack-specific Python import — VoiceAttack integrates by calling OUT to an external command/script when its voice command fires, not by our code calling INTO a VoiceAttack SDK. That "how VoiceAttack's profile invokes this adapter" plumbing is explicitly Deferred in the architecture (VoiceAttack plugin integration mechanics) and out of scope here.
-- [ ] Task 2: Tests (AC: #1, #2)
-  - [ ] Unit test `VoiceTriggerAdapter` with a fake `CapturePort`, mirroring `test_manual_trigger.py` — proves delegation works and returns the same `CaptureResult` shape as the manual trigger
-  - [ ] No platform-conditional test needed for AC #2: since `VoiceTriggerAdapter` has zero VoiceAttack-specific imports or Windows-only code, it is trivially importable/usable on any platform — the module itself never raises on Linux. Document this reasoning in Dev Notes rather than fabricating a Linux-specific test double for something that never diverges by platform.
+- [x] Task 1: Implement `VoiceTriggerAdapter` (AC: #1)
+  - [x] `src/verselog/adapters/trigger/voice_trigger.py` — same composition pattern as `ManualTriggerAdapter` (Story 1.2): constructed with a `CapturePort`, `on_triggered()` delegates to it
+  - [x] No VoiceAttack-specific Python import — VoiceAttack integrates by calling OUT to an external command/script when its voice command fires, not by our code calling INTO a VoiceAttack SDK. That "how VoiceAttack's profile invokes this adapter" plumbing is explicitly Deferred in the architecture (VoiceAttack plugin integration mechanics) and out of scope here.
+- [x] Task 2: Tests (AC: #1, #2)
+  - [x] Unit test `VoiceTriggerAdapter` with a fake `CapturePort`, mirroring `test_manual_trigger.py` — proves delegation works and returns the same `CaptureResult` shape as the manual trigger
+  - [x] No platform-conditional test needed for AC #2: since `VoiceTriggerAdapter` has zero VoiceAttack-specific imports or Windows-only code, it is trivially importable/usable on any platform — the module itself never raises on Linux. Document this reasoning in Dev Notes rather than fabricating a Linux-specific test double for something that never diverges by platform.
 
 ## Dev Notes
 
@@ -47,10 +47,24 @@ so that I don't have to alt-tab or click while playing.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `13 passed in 0.14s`
+
 ### Completion Notes List
 
+- Implemented `VoiceTriggerAdapter`, identical composition pattern to `ManualTriggerAdapter` — no VoiceAttack-specific code, since VoiceAttack calls out to us rather than us calling into it.
+- AC #2 (no error on Linux) is satisfied by construction: the class has zero platform-specific logic, so there's nothing to fail on any platform. Documented this reasoning rather than fabricating a platform-conditional test.
+- The actual VoiceAttack profile/script wiring remains explicitly Deferred (architecture spine) — not this story's scope.
+- All acceptance criteria satisfied; 13/13 tests passing (12 pre-existing + 1 new).
+
 ### File List
+
+- `src/verselog/adapters/trigger/voice_trigger.py` (new)
+- `tests/test_voice_trigger.py` (new)
+
+## Change Log
+
+- 2026-07-08: Story implemented — VoiceTriggerAdapter added, all tasks complete, 13/13 tests passing, status moved to review.
