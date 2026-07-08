@@ -6,7 +6,7 @@ Un assistant logistique gratuit, open-source et collaboratif pour [Star Citizen]
 
 ## État du projet
 
-Phase de planification initiale. Pas encore de code — le contrat complet de ce que ce projet va construire se trouve dans [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md) (en anglais).
+Phase de planification initiale. Pas encore de code — le contrat complet de ce que ce projet va construire se trouve dans [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md) (en anglais). Les risques connus et comment on les gère sont suivis dans [RISKS.fr.md](RISKS.fr.md).
 
 ## Contribuer
 

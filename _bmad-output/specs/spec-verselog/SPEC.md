@@ -55,7 +55,7 @@ A pain to solve, paired with a vision to realize: a solo, self-taught developer 
 
 ## Non-goals
 
-- Not an in-game automation or macro tool: no input injection into gameplay and no game-state modification — only external, passive screen-reading plus optional voice-triggered capture.
+- Not an in-game automation or macro tool: no input injection into gameplay (e.g. never auto-accepts a contract) and no game-state/memory reading — only external, passive screen-reading plus optional voice-triggered capture. Confirmed against CIG's EULA/ToS, which explicitly bans automation software giving a gameplay advantage and software that intercepts/mines game data — this non-goal is a hard line, not just a style preference. Recommendations are shown in VerseLog's own separate window (not a live overlay tracking the in-game list), for the player to act on manually.
 - Not targeting production-polished code at this stage: functional correctness is prioritized over code elegance for the initial build.
 - No official CIG data-API integration (none exists today) — the provider abstraction allows adding one later, but it is out of scope now.
 - Contract-type universality (cargo/bounty/mercenary) only — not extending the tool's overall architecture to other categories of tool beyond contract types.
