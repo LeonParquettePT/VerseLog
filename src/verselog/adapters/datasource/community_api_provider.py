@@ -25,6 +25,8 @@ def _ship_from_json(item: dict) -> ShipReference:
         quantum_fuel_capacity=quantum.get("quantum_fuel_capacity") or 0.0,
         quantum_range=quantum.get("quantum_range") or 0.0,
         fuel_usage_main=fuel_usage.get("main") or 0.0,
+        quantum_speed=quantum.get("quantum_speed") or 0.0,
+        quantum_spool_time=quantum.get("quantum_spool_time") or 0.0,
     )
 
 

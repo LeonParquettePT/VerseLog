@@ -9,6 +9,7 @@ _STARLANCER_JSON = {
     "cargo_capacity": 8,
     "quantum": {
         "quantum_speed": 171000000,
+        "quantum_spool_time": 6,
         "quantum_fuel_capacity": 3.6,
         "quantum_range": 660550458716,
     },
@@ -48,6 +49,8 @@ def test_imports_a_single_page_of_ships(tmp_path):
     assert ship.quantum_fuel_capacity == 3.6
     assert ship.quantum_range == 660550458716
     assert ship.fuel_usage_main == 331.25
+    assert ship.quantum_speed == 171000000
+    assert ship.quantum_spool_time == 6
 
 
 def test_follows_pagination_across_multiple_pages(tmp_path):

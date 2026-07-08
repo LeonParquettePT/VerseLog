@@ -18,7 +18,9 @@ class ShipReferenceStore:
                     cargo_capacity_scu INTEGER NOT NULL,
                     quantum_fuel_capacity REAL NOT NULL,
                     quantum_range REAL NOT NULL,
-                    fuel_usage_main REAL NOT NULL
+                    fuel_usage_main REAL NOT NULL,
+                    quantum_speed REAL NOT NULL,
+                    quantum_spool_time REAL NOT NULL
                 )
                 """
             )
@@ -30,16 +32,29 @@ class ShipReferenceStore:
         with self._connect() as conn:
             conn.executemany(
                 """
-                INSERT INTO ships (name, cargo_capacity_scu, quantum_fuel_capacity, quantum_range, fuel_usage_main)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO ships (
+                    name, cargo_capacity_scu, quantum_fuel_capacity, quantum_range,
+                    fuel_usage_main, quantum_speed, quantum_spool_time
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(name) DO UPDATE SET
                     cargo_capacity_scu = excluded.cargo_capacity_scu,
                     quantum_fuel_capacity = excluded.quantum_fuel_capacity,
                     quantum_range = excluded.quantum_range,
-                    fuel_usage_main = excluded.fuel_usage_main
+                    fuel_usage_main = excluded.fuel_usage_main,
+                    quantum_speed = excluded.quantum_speed,
+                    quantum_spool_time = excluded.quantum_spool_time
                 """,
                 [
-                    (s.name, s.cargo_capacity_scu, s.quantum_fuel_capacity, s.quantum_range, s.fuel_usage_main)
+                    (
+                        s.name,
+                        s.cargo_capacity_scu,
+                        s.quantum_fuel_capacity,
+                        s.quantum_range,
+                        s.fuel_usage_main,
+                        s.quantum_speed,
+                        s.quantum_spool_time,
+                    )
                     for s in ships
                 ],
             )
@@ -47,8 +62,8 @@ class ShipReferenceStore:
     def get_ship(self, name: str) -> ShipReference | None:
         with self._connect() as conn:
             row = conn.execute(
-                "SELECT name, cargo_capacity_scu, quantum_fuel_capacity, quantum_range, fuel_usage_main "
-                "FROM ships WHERE name = ?",
+                "SELECT name, cargo_capacity_scu, quantum_fuel_capacity, quantum_range, "
+                "fuel_usage_main, quantum_speed, quantum_spool_time FROM ships WHERE name = ?",
                 (name,),
             ).fetchone()
         return ShipReference(*row) if row else None
