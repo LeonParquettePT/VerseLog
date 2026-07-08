@@ -1,0 +1,18 @@
+# BMad Method / Claude Code tooling - internal planning process, not part of the product
+_bmad/
+.claude/
+
+# Raw planning-process logs - not meant for public reading
+**/.memlog.md
+_bmad-output/brainstorming/*/brainstorm.html
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+
+# Python (adjust once the stack is finalized)
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
