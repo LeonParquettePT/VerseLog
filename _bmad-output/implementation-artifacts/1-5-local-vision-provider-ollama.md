@@ -4,7 +4,7 @@ baseline_commit: 0afe12dc669cfd379706414209a37c1bb3911455
 
 # Story 1.5: Local Vision Provider (Ollama)
 
-Status: review
+Status: done
 
 ## Story
 
