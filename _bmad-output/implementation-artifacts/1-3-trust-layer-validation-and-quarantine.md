@@ -4,7 +4,7 @@ baseline_commit: fc9b4fe40194d0cc32e7d797c8ab898059036eb7
 
 # Story 1.3: Trust Layer — Validation and Quarantine
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -19,25 +19,25 @@ so that I can trust the result or know when to double-check it.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Evolve the capture interface to carry the source image and parse failures explicitly (AC: #1)
-  - [ ] `src/verselog/core/capture_result.py` — new `CaptureResult` dataclass: `contract: Contract | None`, `source_image: bytes`, `parse_error: str | None`
-  - [ ] `src/verselog/adapters/capture/ocr_parser.py` — add `ContractParseError` and raise it (with a clear message naming which field failed to match) instead of letting a bare `AttributeError`/`ValueError` propagate when a regex doesn't match or a value can't be converted
-  - [ ] Update `CapturePort.capture()` return type from `Contract` to `CaptureResult` [Source: src/verselog/core/ports/capture_port.py — Story 1.1]
-  - [ ] Update `OCRProvider.capture()`: always capture the screenshot bytes; wrap the `parse_contract_text` call in `try/except ContractParseError`, returning a `CaptureResult` with `contract=None, parse_error=str(e)` on failure or `contract=..., parse_error=None` on success — either way `source_image` is populated [Source: src/verselog/adapters/capture/ocr_provider.py — Story 1.2]
-  - [ ] Update `TriggerPort.on_triggered()` return type and `ManualTriggerAdapter` accordingly (pure type/delegation update, no new logic) [Source: src/verselog/core/ports/trigger_port.py, src/verselog/adapters/trigger/manual_trigger.py — Stories 1.1/1.2]
-- [ ] Task 2: Implement the trust-layer validation rules (AC: #1, #2)
-  - [ ] `src/verselog/core/trust_layer.py` — a `looks_like_a_station_name(name: str) -> bool` heuristic (non-empty, reasonable length, letters/digits/spaces/hyphens/apostrophes only). **Placeholder**: there is no real station database yet (arrives in Epic 2 Story 2.1) — this heuristic exists to catch obviously-garbled OCR output, not to verify a station actually exists in Star Citizen. Replace with a real lookup once Epic 2 Story 2.1 ships.
-  - [ ] Validate `scu > 0` and `reward > 0`
-  - [ ] A parse failure (`capture_result.parse_error is not None` or `contract is None`) is automatically a validation failure — no field checks needed in that case
-- [ ] Task 3: Implement `TrustLayer` as the single service every capture result passes through (AC: #1, #2)
-  - [ ] `TrustResult` dataclass: `contract: Contract | None`, `confidence: str | None`, `quarantined: bool`, `quarantine_path: Path | None`, `reasons: list[str]`
-  - [ ] `TrustLayer(quarantine_dir: Path = Path("data/quarantine"))` — constructor takes the quarantine directory so tests don't have to write into the real `data/` folder
-  - [ ] `TrustLayer.process(capture_result: CaptureResult) -> TrustResult`: runs the Task 2 checks; on any failure, writes `source_image` to `quarantine_dir` (creating it if needed) with a timestamp-based filename and returns a `TrustResult` with `quarantined=True`, the reasons, and the saved path; on success returns `TrustResult` with `quarantined=False`, `confidence="high"`, and no reasons
-  - [ ] Single tier of confidence (`"high"`) is enough for now — a graduated scale isn't required by this story's AC and would be invented scope
-- [ ] Task 4: Tests (AC: #1, #2)
-  - [ ] Unit test `TrustLayer.process` with hand-built `CaptureResult`s (no real image/OCR/screen involved): a fully valid contract → not quarantined, confidence `"high"`; a contract with `scu=0` → quarantined, reason mentions SCU; a contract with `reward=0` → quarantined; a `CaptureResult` with `parse_error` set and `contract=None` → quarantined, reason mentions the parse error; verify the quarantined image bytes actually land in the (temp, test-only) quarantine directory
-  - [ ] Update `test_ocr_parser.py` for the new `ContractParseError` behavior: craft OCR text missing the SCU pattern and assert `ContractParseError` is raised (rather than an unhandled `AttributeError`)
-  - [ ] Update `test_manual_trigger.py`'s fake `CapturePort` to return a `CaptureResult` instead of a bare `Contract`, matching the new port signature
+- [x] Task 1: Evolve the capture interface to carry the source image and parse failures explicitly (AC: #1)
+  - [x] `src/verselog/core/capture_result.py` — new `CaptureResult` dataclass: `contract: Contract | None`, `source_image: bytes`, `parse_error: str | None`
+  - [x] `src/verselog/adapters/capture/ocr_parser.py` — add `ContractParseError` and raise it (with a clear message naming which field failed to match) instead of letting a bare `AttributeError`/`ValueError` propagate when a regex doesn't match or a value can't be converted
+  - [x] Update `CapturePort.capture()` return type from `Contract` to `CaptureResult` [Source: src/verselog/core/ports/capture_port.py — Story 1.1]
+  - [x] Update `OCRProvider.capture()`: always capture the screenshot bytes; wrap the `parse_contract_text` call in `try/except ContractParseError`, returning a `CaptureResult` with `contract=None, parse_error=str(e)` on failure or `contract=..., parse_error=None` on success — either way `source_image` is populated [Source: src/verselog/adapters/capture/ocr_provider.py — Story 1.2]
+  - [x] Update `TriggerPort.on_triggered()` return type and `ManualTriggerAdapter` accordingly (pure type/delegation update, no new logic) [Source: src/verselog/core/ports/trigger_port.py, src/verselog/adapters/trigger/manual_trigger.py — Stories 1.1/1.2]
+- [x] Task 2: Implement the trust-layer validation rules (AC: #1, #2)
+  - [x] `src/verselog/core/trust_layer.py` — a `looks_like_a_station_name(name: str) -> bool` heuristic (non-empty, reasonable length, letters/digits/spaces/hyphens/apostrophes only). **Placeholder**: there is no real station database yet (arrives in Epic 2 Story 2.1) — this heuristic exists to catch obviously-garbled OCR output, not to verify a station actually exists in Star Citizen. Replace with a real lookup once Epic 2 Story 2.1 ships.
+  - [x] Validate `scu > 0` and `reward > 0`
+  - [x] A parse failure (`capture_result.parse_error is not None` or `contract is None`) is automatically a validation failure — no field checks needed in that case
+- [x] Task 3: Implement `TrustLayer` as the single service every capture result passes through (AC: #1, #2)
+  - [x] `TrustResult` dataclass: `contract: Contract | None`, `confidence: str | None`, `quarantined: bool`, `quarantine_path: Path | None`, `reasons: list[str]`
+  - [x] `TrustLayer(quarantine_dir: Path = Path("data/quarantine"))` — constructor takes the quarantine directory so tests don't have to write into the real `data/` folder
+  - [x] `TrustLayer.process(capture_result: CaptureResult) -> TrustResult`: runs the Task 2 checks; on any failure, writes `source_image` to `quarantine_dir` (creating it if needed) with a timestamp-based filename and returns a `TrustResult` with `quarantined=True`, the reasons, and the saved path; on success returns `TrustResult` with `quarantined=False`, `confidence="high"`, and no reasons
+  - [x] Single tier of confidence (`"high"`) is enough for now — a graduated scale isn't required by this story's AC and would be invented scope
+- [x] Task 4: Tests (AC: #1, #2)
+  - [x] Unit test `TrustLayer.process` with hand-built `CaptureResult`s (no real image/OCR/screen involved): a fully valid contract → not quarantined, confidence `"high"`; a contract with `scu=0` → quarantined, reason mentions SCU; a contract with `reward=0` → quarantined; a `CaptureResult` with `parse_error` set and `contract=None` → quarantined, reason mentions the parse error; verify the quarantined image bytes actually land in the (temp, test-only) quarantine directory
+  - [x] Update `test_ocr_parser.py` for the new `ContractParseError` behavior: craft OCR text missing the SCU pattern and assert `ContractParseError` is raised (rather than an unhandled `AttributeError`)
+  - [x] Update `test_manual_trigger.py`'s fake `CapturePort` to return a `CaptureResult` instead of a bare `Contract`, matching the new port signature
 
 ## Dev Notes
 
@@ -63,10 +63,35 @@ so that I can trust the result or know when to double-check it.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `12 passed in 0.14s`
+- `uv run --extra dev python -c "import verselog.adapters.capture.ocr_provider"` → imports cleanly after the `CaptureResult` interface change
+
 ### Completion Notes List
 
+- Evolved `CapturePort`/`TriggerPort` to return `CaptureResult` (contract-or-parse-error + source image bytes) instead of a bare `Contract`, updating `OCRProvider` and `ManualTriggerAdapter` accordingly — necessary for this story's own AC (quarantine must keep the source image).
+- Added `ContractParseError` to the parser; missing/invalid field patterns now raise a named, catchable error instead of a bare `AttributeError`/`ValueError`.
+- Implemented `TrustLayer` (single validate+quarantine service per AD-3): station-name heuristic (placeholder pending Epic 2's real location data), positive-SCU/positive-reward checks, and parse-error handling. Quarantined captures write the source image to a caller-supplied directory with a timestamp filename.
+- Confidence is a single `"high"` tier for now — no UI exists yet to display it (flagged gap, unchanged from Story 1.1).
+- Did NOT wire trigger → capture → trust layer → UI end-to-end — no owning story for that orchestration yet; stayed scoped to this story's AC.
+- All acceptance criteria satisfied; 12/12 tests passing (5 pre-existing + 7 new/updated).
+
 ### File List
+
+- `src/verselog/core/capture_result.py` (new)
+- `src/verselog/core/trust_layer.py` (new)
+- `src/verselog/core/ports/capture_port.py` (modified — return type)
+- `src/verselog/core/ports/trigger_port.py` (modified — return type)
+- `src/verselog/adapters/capture/ocr_parser.py` (modified — `ContractParseError`)
+- `src/verselog/adapters/capture/ocr_provider.py` (modified — returns `CaptureResult`)
+- `src/verselog/adapters/trigger/manual_trigger.py` (modified — type update only)
+- `tests/test_manual_trigger.py` (modified — fake port returns `CaptureResult`)
+- `tests/test_ocr_parser.py` (modified — added parse-error test)
+- `tests/test_trust_layer.py` (new)
+
+## Change Log
+
+- 2026-07-08: Story implemented — capture interface evolved to carry source image + parse errors, TrustLayer added, all tasks complete, 12/12 tests passing, status moved to review.

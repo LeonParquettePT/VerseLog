@@ -51,7 +51,7 @@ development_status:
   epic-1: in-progress
   1-1-project-scaffold: done
   1-2-manual-capture-via-classic-ocr: done
-  1-3-trust-layer-validation-and-quarantine: ready-for-dev
+  1-3-trust-layer-validation-and-quarantine: review
   1-4-voice-trigger-voiceattack-windows: backlog
   1-5-local-vision-provider-ollama: backlog
   1-6-hardware-benchmark-model-tier-and-worker-count: backlog
