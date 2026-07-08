@@ -4,7 +4,7 @@ baseline_commit: 0afe12dc669cfd379706414209a37c1bb3911455
 
 # Story 1.5: Local Vision Provider (Ollama)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -18,16 +18,16 @@ so that OCR errors on tricky UI elements are reduced.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add the `ollama` dependency (AC: #1)
-  - [ ] Add `ollama` to `pyproject.toml` `[project] dependencies`
-- [ ] Task 2: Implement `VisionProvider` (`CapturePort`) using Ollama structured outputs (AC: #1)
-  - [ ] `src/verselog/adapters/capture/vision_provider.py` — screenshot via `mss` (reuse the same capture approach as `OCRProvider`), then `ollama.chat(...)` with the screenshot image and a hand-written JSON schema (`format=`) matching `Contract`'s fields (departure, arrival, scu, reward, remaining_time) — no need for a `pydantic` dependency just to generate one schema
-  - [ ] Default model name `phi3-vision`, constructor parameter so Story 1.6's benchmark can swap tiers later without touching this class (`Phi-3-Vision → Moondream2 → classic OCR` fallback chain already established) [Source: vision-pipeline.md]
-  - [ ] Parse the JSON response into a `Contract`; on any failure (Ollama unreachable, model not pulled, malformed/incomplete JSON) catch it and return `CaptureResult(contract=None, source_image=..., parse_error=str(exc))` — same graceful-degradation lesson Story 1.3's code review established for `OCRProvider`, applied here from the start rather than reactively
-- [ ] Task 3: Tests (AC: #1)
-  - [ ] Unit test the JSON-response-to-Contract parsing logic in isolation (extract it as its own small function, e.g. `_contract_from_json(raw_json: str) -> Contract`) using hand-written JSON strings — no real Ollama call involved
-  - [ ] Unit test that a malformed/incomplete JSON response is caught and produces a `CaptureResult` with `parse_error` set, not an uncaught exception
-  - [ ] Do NOT attempt to unit test `VisionProvider.capture()` end-to-end against a real Ollama instance — same documented limitation as `OCRProvider`'s live screen/tesseract path (Story 1.2): needs a live display and a running Ollama with the model pulled, neither guaranteed in a dev/CI environment
+- [x] Task 1: Add the `ollama` dependency (AC: #1)
+  - [x] Add `ollama` to `pyproject.toml` `[project] dependencies`
+- [x] Task 2: Implement `VisionProvider` (`CapturePort`) using Ollama structured outputs (AC: #1)
+  - [x] `src/verselog/adapters/capture/vision_provider.py` — screenshot via `mss` (reuse the same capture approach as `OCRProvider`), then `ollama.chat(...)` with the screenshot image and a hand-written JSON schema (`format=`) matching `Contract`'s fields (departure, arrival, scu, reward, remaining_time) — no need for a `pydantic` dependency just to generate one schema
+  - [x] Default model name `phi3-vision`, constructor parameter so Story 1.6's benchmark can swap tiers later without touching this class (`Phi-3-Vision → Moondream2 → classic OCR` fallback chain already established) [Source: vision-pipeline.md]
+  - [x] Parse the JSON response into a `Contract`; on any failure (Ollama unreachable, model not pulled, malformed/incomplete JSON) catch it and return `CaptureResult(contract=None, source_image=..., parse_error=str(exc))` — same graceful-degradation lesson Story 1.3's code review established for `OCRProvider`, applied here from the start rather than reactively
+- [x] Task 3: Tests (AC: #1)
+  - [x] Unit test the JSON-response-to-Contract parsing logic in isolation (extract it as its own small function, e.g. `_contract_from_json(raw_json: str) -> Contract`) using hand-written JSON strings — no real Ollama call involved
+  - [x] Unit test that a malformed/incomplete JSON response is caught and produces a `CaptureResult` with `parse_error` set, not an uncaught exception
+  - [x] Do NOT attempt to unit test `VisionProvider.capture()` end-to-end against a real Ollama instance — same documented limitation as `OCRProvider`'s live screen/tesseract path (Story 1.2): needs a live display and a running Ollama with the model pulled, neither guaranteed in a dev/CI environment
 
 ## Dev Notes
 
@@ -52,10 +52,27 @@ so that OCR errors on tricky UI elements are reduced.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `19 passed in 12.41s`
+
 ### Completion Notes List
 
+- Added `ollama` dependency; implemented `VisionProvider` (`CapturePort`) using Ollama's structured-output `format=` parameter with a hand-written JSON schema (no `pydantic` dependency needed for one schema).
+- Extracted `_contract_from_json` as its own testable function; unit-tested directly with hand-written JSON (well-formed, missing field, malformed JSON).
+- Applied Story 1.3's graceful-degradation lesson proactively: the Ollama call + JSON parsing are wrapped in one broad `try/except` from the start, verified with monkeypatched `mss`/`ollama.chat` so `capture()` itself is exercised without a real screen or running Ollama instance.
+- Model name (`phi3-vision` default) is a constructor parameter, ready for Story 1.6's benchmark to swap tiers.
+- All acceptance criteria satisfied; 19/19 tests passing (13 pre-existing + 6 new).
+
 ### File List
+
+- `pyproject.toml` (modified — added `ollama` dependency)
+- `src/verselog/adapters/capture/vision_provider.py` (new)
+- `tests/test_vision_provider.py` (new)
+- `uv.lock` (modified)
+
+## Change Log
+
+- 2026-07-08: Story implemented — VisionProvider added (Ollama structured outputs), all tasks complete, 19/19 tests passing, status moved to review.
