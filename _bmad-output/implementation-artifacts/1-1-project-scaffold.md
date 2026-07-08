@@ -1,6 +1,10 @@
+---
+baseline_commit: 194e95f8a0f4993976efb462219d2a84f119a535
+---
+
 # Story 1.1: Project Scaffold
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -17,31 +21,31 @@ so that features can be built on a consistent structure instead of everyone inve
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Initialize Python packaging (AC: #1)
-  - [ ] Create `pyproject.toml` at repo root: project metadata, `requires-python = ">=3.12"`, `pytest` as a dev dependency, `[tool.pytest.ini_options]` with `testpaths = ["tests"]`
-  - [ ] Use the **src layout**: package code lives under `src/verselog/`, tests under a sibling `tests/` — do not put package code at repo root or tests inside the package
-- [ ] Task 2: Create the domain core and port interfaces (AC: #1)
-  - [ ] `src/verselog/core/__init__.py`
-  - [ ] `src/verselog/core/contract.py` — the `Contract` dataclass: `departure: str`, `arrival: str`, `scu: int`, `reward: float`, `remaining_time: str | None`. This is the **only** shape allowed to cross a port boundary — do not create parallel/competing data shapes in adapters.
-  - [ ] `src/verselog/core/ports/__init__.py`
-  - [ ] `src/verselog/core/ports/capture_port.py` — abstract `CapturePort` (one method stub, e.g. `capture(self) -> Contract`)
-  - [ ] `src/verselog/core/ports/datasource_port.py` — abstract `DataSourcePort` (stub only — concrete needs arrive in Epic 2 Story 2.1)
-  - [ ] `src/verselog/core/ports/trigger_port.py` — abstract `TriggerPort` (stub only — concrete needs arrive in Stories 1.2/1.4)
-  - [ ] `src/verselog/core/ports/ui_port.py` — abstract `UIPort` (stub only — concrete needs arrive in later stories, see Dev Notes gap below)
-  - [ ] Use Python's `abc.ABC` + `@abstractmethod` (stdlib, no new dependency) for every port
-- [ ] Task 3: Create empty adapter packages (AC: #1)
-  - [ ] `src/verselog/adapters/__init__.py`
-  - [ ] `src/verselog/adapters/capture/__init__.py`
-  - [ ] `src/verselog/adapters/datasource/__init__.py`
-  - [ ] `src/verselog/adapters/trigger/__init__.py`
-  - [ ] `src/verselog/adapters/ui/__init__.py`
-  - [ ] No concrete adapter classes yet — empty packages only, ready for the stories that populate them
-- [ ] Task 4: Create the local data directory (AC: #1)
-  - [ ] `data/.gitkeep` at repo root (sibling of `src/`, not inside the package — it holds the runtime SQLite file created later by Epic 2 Story 2.1, not source code)
-- [ ] Task 5: Write and pass the scaffold test (AC: #2)
-  - [ ] `tests/__init__.py`
-  - [ ] `tests/test_scaffold.py` — imports `verselog.core.contract.Contract`, constructs one with dummy values, asserts its fields round-trip; this proves the src-layout package installs/imports correctly, which is the actual value of a "hello world" test at this layer, not a trivial `assert True`
-  - [ ] Run `pytest` and confirm it passes
+- [x] Task 1: Initialize Python packaging (AC: #1)
+  - [x] Create `pyproject.toml` at repo root: project metadata, `requires-python = ">=3.12"`, `pytest` as a dev dependency, `[tool.pytest.ini_options]` with `testpaths = ["tests"]`
+  - [x] Use the **src layout**: package code lives under `src/verselog/`, tests under a sibling `tests/` — do not put package code at repo root or tests inside the package
+- [x] Task 2: Create the domain core and port interfaces (AC: #1)
+  - [x] `src/verselog/core/__init__.py`
+  - [x] `src/verselog/core/contract.py` — the `Contract` dataclass: `departure: str`, `arrival: str`, `scu: int`, `reward: float`, `remaining_time: str | None`. This is the **only** shape allowed to cross a port boundary — do not create parallel/competing data shapes in adapters.
+  - [x] `src/verselog/core/ports/__init__.py`
+  - [x] `src/verselog/core/ports/capture_port.py` — abstract `CapturePort` (one method stub, e.g. `capture(self) -> Contract`)
+  - [x] `src/verselog/core/ports/datasource_port.py` — abstract `DataSourcePort` (stub only — concrete needs arrive in Epic 2 Story 2.1)
+  - [x] `src/verselog/core/ports/trigger_port.py` — abstract `TriggerPort` (stub only — concrete needs arrive in Stories 1.2/1.4)
+  - [x] `src/verselog/core/ports/ui_port.py` — abstract `UIPort` (stub only — concrete needs arrive in later stories, see Dev Notes gap below)
+  - [x] Use Python's `abc.ABC` + `@abstractmethod` (stdlib, no new dependency) for every port
+- [x] Task 3: Create empty adapter packages (AC: #1)
+  - [x] `src/verselog/adapters/__init__.py`
+  - [x] `src/verselog/adapters/capture/__init__.py`
+  - [x] `src/verselog/adapters/datasource/__init__.py`
+  - [x] `src/verselog/adapters/trigger/__init__.py`
+  - [x] `src/verselog/adapters/ui/__init__.py`
+  - [x] No concrete adapter classes yet — empty packages only, ready for the stories that populate them
+- [x] Task 4: Create the local data directory (AC: #1)
+  - [x] `data/.gitkeep` at repo root (sibling of `src/`, not inside the package — it holds the runtime SQLite file created later by Epic 2 Story 2.1, not source code)
+- [x] Task 5: Write and pass the scaffold test (AC: #2)
+  - [x] `tests/__init__.py`
+  - [x] `tests/test_scaffold.py` — imports `verselog.core.contract.Contract`, constructs one with dummy values, asserts its fields round-trip; this proves the src-layout package installs/imports correctly, which is the actual value of a "hello world" test at this layer, not a trivial `assert True`
+  - [x] Run `pytest` and confirm it passes
 
 ## Dev Notes
 
@@ -102,10 +106,44 @@ verselog/                      (repo root — already has README, LICENSE, CONTR
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `1 passed in 0.09s` (first run, no failures encountered)
+
 ### Completion Notes List
 
+- Implemented src-layout Python package (`src/verselog/`) with `pyproject.toml` (hatchling build backend, pytest as dev dependency), matching current (2026) Python packaging best practice.
+- Created all four port interfaces (`CapturePort`, `DataSourcePort`, `TriggerPort`, `UIPort`) as `abc.ABC` classes with a single abstract method stub each — intentionally minimal, no concrete logic, per the "don't build ahead of the story that needs it" rule.
+- Created the `Contract` dataclass as the single cross-port data shape.
+- Created empty `adapters/{capture,datasource,trigger,ui}` packages, ready for later stories.
+- `data/.gitkeep` placeholder added at repo root (sibling of `src/`), not inside the package.
+- Wrote `tests/test_scaffold.py`, which imports and round-trips a `Contract` — proves the src-layout package actually installs/imports correctly rather than asserting something trivial.
+- Used `uv` (already present on this machine, manages Python 3.14.6) to create the virtual environment and run the test suite; `uv.lock` committed for reproducibility, `.venv/` already excluded via the existing `.gitignore` Python section.
+- All acceptance criteria satisfied: AC1 (full directory tree + port interfaces exist), AC2 (the scaffold test passes).
+
 ### File List
+
+- `pyproject.toml` (new)
+- `uv.lock` (new)
+- `src/verselog/__init__.py` (new)
+- `src/verselog/core/__init__.py` (new)
+- `src/verselog/core/contract.py` (new)
+- `src/verselog/core/ports/__init__.py` (new)
+- `src/verselog/core/ports/capture_port.py` (new)
+- `src/verselog/core/ports/datasource_port.py` (new)
+- `src/verselog/core/ports/trigger_port.py` (new)
+- `src/verselog/core/ports/ui_port.py` (new)
+- `src/verselog/adapters/__init__.py` (new)
+- `src/verselog/adapters/capture/__init__.py` (new)
+- `src/verselog/adapters/datasource/__init__.py` (new)
+- `src/verselog/adapters/trigger/__init__.py` (new)
+- `src/verselog/adapters/ui/__init__.py` (new)
+- `data/.gitkeep` (new)
+- `tests/__init__.py` (new)
+- `tests/test_scaffold.py` (new)
+
+## Change Log
+
+- 2026-07-08: Story implemented — full scaffold created, all tasks complete, 1/1 tests passing, status moved to review.
