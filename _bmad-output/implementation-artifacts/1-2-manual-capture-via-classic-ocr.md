@@ -4,7 +4,7 @@ baseline_commit: 6083bf2cf443cc0cee7d391a849c253ddd4a5a1c
 
 # Story 1.2: Manual Capture via Classic OCR
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -18,24 +18,24 @@ so that I get structured data instead of reading it myself.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add capture dependencies (AC: #1)
-  - [ ] Add `mss` (screenshot) and `pytesseract` (OCR wrapper) to `pyproject.toml` `[project] dependencies`
-  - [ ] Note in Dev Notes that the `tesseract` binary itself is an external system dependency (not pip-installable) — not yet documented in `CONTRIBUTING.md`'s empty "Setup instructions", flagged as a gap for a later docs pass, not blocking this story
-- [ ] Task 2: Implement the OCR text parser as a pure, testable function (AC: #1)
-  - [ ] `src/verselog/adapters/capture/ocr_parser.py` — `parse_contract_text(raw_text: str) -> Contract`
-  - [ ] Extract reward from a `¤<number>` pattern
-  - [ ] Extract SCU as the second (total) number in an `X/Y SCU` pattern
-  - [ ] Extract arrival from a `Deliver ... to <LOCATION>.` pattern
-  - [ ] Extract departure from a `Collect ... from <LOCATION>.` pattern
-  - [ ] Extract remaining_time from a `Contract Availability <value>` pattern; map literal `N/A` to `None`
-- [ ] Task 3: Implement `OCRProvider` (`CapturePort`) (AC: #1)
-  - [ ] `src/verselog/adapters/capture/ocr_provider.py` — `OCRProvider` implements `CapturePort.capture()`: takes a screenshot via `mss`, runs `pytesseract.image_to_string`, passes the raw text to `parse_contract_text`
-- [ ] Task 4: Implement the manual trigger (AC: #1)
-  - [ ] `src/verselog/adapters/trigger/manual_trigger.py` — `ManualTriggerAdapter` implements `TriggerPort`; constructed with a `CapturePort` dependency, `on_triggered()` delegates to it
-- [ ] Task 5: Tests (AC: #1)
-  - [ ] Unit test `parse_contract_text` against realistic OCR-like text modeled on the real contract screenshot already on file (`contract-ui-reference.md`) — assert departure/arrival/scu/reward parse correctly, and that a `Contract Availability N/A` line maps to `remaining_time=None`
-  - [ ] Unit test `ManualTriggerAdapter` with a fake in-test `CapturePort` (no real screen/OCR involved) — assert `on_triggered()` delegates to the injected capture port and returns its `Contract`
-  - [ ] Do NOT attempt to unit test `OCRProvider.capture()` end-to-end against a real screen/tesseract binary — that requires a live display and installed `tesseract`, neither guaranteed in a dev/CI environment; its correctness rests on the already-tested parser plus manual verification, noted as a limitation, not silently skipped
+- [x] Task 1: Add capture dependencies (AC: #1)
+  - [x] Add `mss` (screenshot) and `pytesseract` (OCR wrapper) to `pyproject.toml` `[project] dependencies`
+  - [x] Note in Dev Notes that the `tesseract` binary itself is an external system dependency (not pip-installable) — not yet documented in `CONTRIBUTING.md`'s empty "Setup instructions", flagged as a gap for a later docs pass, not blocking this story
+- [x] Task 2: Implement the OCR text parser as a pure, testable function (AC: #1)
+  - [x] `src/verselog/adapters/capture/ocr_parser.py` — `parse_contract_text(raw_text: str) -> Contract`
+  - [x] Extract reward from a `¤<number>` pattern
+  - [x] Extract SCU as the second (total) number in an `X/Y SCU` pattern
+  - [x] Extract arrival from a `Deliver ... to <LOCATION>.` pattern
+  - [x] Extract departure from a `Collect ... from <LOCATION>.` pattern
+  - [x] Extract remaining_time from a `Contract Availability <value>` pattern; map literal `N/A` to `None`
+- [x] Task 3: Implement `OCRProvider` (`CapturePort`) (AC: #1)
+  - [x] `src/verselog/adapters/capture/ocr_provider.py` — `OCRProvider` implements `CapturePort.capture()`: takes a screenshot via `mss`, runs `pytesseract.image_to_string`, passes the raw text to `parse_contract_text`
+- [x] Task 4: Implement the manual trigger (AC: #1)
+  - [x] `src/verselog/adapters/trigger/manual_trigger.py` — `ManualTriggerAdapter` implements `TriggerPort`; constructed with a `CapturePort` dependency, `on_triggered()` delegates to it
+- [x] Task 5: Tests (AC: #1)
+  - [x] Unit test `parse_contract_text` against realistic OCR-like text modeled on the real contract screenshot already on file (`contract-ui-reference.md`) — assert departure/arrival/scu/reward parse correctly, and that a `Contract Availability N/A` line maps to `remaining_time=None`
+  - [x] Unit test `ManualTriggerAdapter` with a fake in-test `CapturePort` (no real screen/OCR involved) — assert `on_triggered()` delegates to the injected capture port and returns its `Contract`
+  - [x] Do NOT attempt to unit test `OCRProvider.capture()` end-to-end against a real screen/tesseract binary — that requires a live display and installed `tesseract`, neither guaranteed in a dev/CI environment; its correctness rests on the already-tested parser plus manual verification, noted as a limitation, not silently skipped
 
 ## Dev Notes
 
@@ -63,10 +63,32 @@ so that I get structured data instead of reading it myself.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `5 passed in 0.06s`
+- `uv run --extra dev python -c "import verselog.adapters.capture.ocr_provider"` → imports cleanly (sanity check only; `capture()` itself needs a live display + installed `tesseract` binary, not exercised in this environment)
+
 ### Completion Notes List
 
+- Added `mss`, `pytesseract`, `Pillow` as direct dependencies.
+- Implemented `parse_contract_text` as a pure function, tested against text modeled on the one real captured contract screenshot (Hauling category) — flagged the known limitation that other contract types may need broader patterns later.
+- Implemented `OCRProvider` (screenshot via `mss` → OCR via `pytesseract` → parse). Not unit-tested end-to-end (needs a live display/tesseract binary); import-sanity-checked instead, limitation stated explicitly rather than silently skipped.
+- Implemented `ManualTriggerAdapter` using the trigger/capture composition pattern, unit-tested with a fake `CapturePort`.
+- Trust-layer validation/quarantine intentionally NOT implemented here — that's Story 1.3.
+- All acceptance criteria satisfied; 5/5 tests passing (1 from Story 1.1 + 4 new).
+
 ### File List
+
+- `pyproject.toml` (modified — added mss/pytesseract/Pillow dependencies)
+- `src/verselog/adapters/capture/ocr_parser.py` (new)
+- `src/verselog/adapters/capture/ocr_provider.py` (new)
+- `src/verselog/adapters/trigger/manual_trigger.py` (new)
+- `tests/test_ocr_parser.py` (new)
+- `tests/test_manual_trigger.py` (new)
+- `uv.lock` (modified)
+
+## Change Log
+
+- 2026-07-08: Story implemented — OCR parser, OCRProvider, and manual trigger added, all tasks complete, 5/5 tests passing, status moved to review.
