@@ -59,7 +59,7 @@ development_status:
   epic-1-retrospective: optional
 
   epic-2: in-progress
-  2-1-reference-data-import-local-sqlite: review
+  2-1-reference-data-import-local-sqlite: done
   2-2-point-to-point-route-cost-calculation: backlog
   2-3-loading-plan-derived-from-single-missions-route: backlog
   2-4-combined-route-and-loading-plan-for-multiple-missions: backlog

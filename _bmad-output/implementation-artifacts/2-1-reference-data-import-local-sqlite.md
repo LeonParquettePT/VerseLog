@@ -4,7 +4,7 @@ baseline_commit: b28b2b24ce4db986a6a11dd0647f4a950e754a08
 
 # Story 2.1: Reference Data Import (Local SQLite)
 
-Status: review
+Status: done
 
 ## Story
 
