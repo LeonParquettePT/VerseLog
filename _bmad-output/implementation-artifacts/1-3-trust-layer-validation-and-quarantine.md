@@ -95,3 +95,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — capture interface evolved to carry source image + parse errors, TrustLayer added, all tasks complete, 12/12 tests passing, status moved to review.
+- 2026-07-08: Code review found and fixed one correctness bug — `pytesseract.image_to_string()` was called outside the try/except in `OCRProvider.capture()`, so a missing tesseract binary would crash uncaught instead of degrading into a quarantine-able `CaptureResult`. Fixed by widening the try/except to also catch `pytesseract.TesseractError`/`TesseractNotFoundError`. 12/12 tests still passing (no new test added — reproducing a missing-binary condition isn't practical to unit test; the fix is a straightforward except-clause widening, verified by code inspection and the existing ContractParseError test path).

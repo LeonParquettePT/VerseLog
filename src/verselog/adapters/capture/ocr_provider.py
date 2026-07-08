@@ -21,10 +21,13 @@ class OCRProvider(CapturePort):
         image.save(buffer, format="PNG")
         source_image = buffer.getvalue()
 
-        raw_text = pytesseract.image_to_string(image)
         try:
+            raw_text = pytesseract.image_to_string(image)
             contract = parse_contract_text(raw_text)
-        except ContractParseError as exc:
+        except (ContractParseError, pytesseract.TesseractError, pytesseract.TesseractNotFoundError) as exc:
+            # A missing tesseract binary or an OCR-engine failure is exactly
+            # the kind of extraction failure the trust layer should quarantine,
+            # not an uncaught crash - the source image is still worth keeping.
             return CaptureResult(contract=None, source_image=source_image, parse_error=str(exc))
 
         return CaptureResult(contract=contract, source_image=source_image, parse_error=None)
