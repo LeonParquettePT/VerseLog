@@ -10,7 +10,7 @@ Phase de planification initiale. Pas encore de code — le contrat complet de ce
 
 ## Contribuer
 
-Les contributions sont les bienvenues — ce projet est ouvert dès le départ pour que n'importe qui puisse le lire, le comprendre et l'améliorer. Consulte le SPEC ci-dessus pour connaître le périmètre et les contraintes actuelles avant d'ouvrir une PR. Un `CONTRIBUTING.md` avec des conventions concrètes arrive bientôt.
+Les contributions sont les bienvenues — ce projet est ouvert dès le départ pour que n'importe qui puisse le lire, le comprendre et l'améliorer. Consulte [`CONTRIBUTING.fr.md`](CONTRIBUTING.fr.md) pour les règles de base et comment proposer un changement.
 
 ## Licence
 

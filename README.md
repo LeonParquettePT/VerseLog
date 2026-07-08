@@ -10,7 +10,7 @@ Early planning stage. No code yet — the full contract for what this project bu
 
 ## Contributing
 
-Contributions are welcome — this project is open from day one so anyone can read, understand, and improve it. See the SPEC above for the current scope and constraints before opening a PR. A `CONTRIBUTING.md` with concrete conventions is coming soon.
+Contributions are welcome — this project is open from day one so anyone can read, understand, and improve it. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for ground rules and how to propose a change.
 
 ## License
 
