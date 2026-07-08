@@ -1,6 +1,10 @@
+---
+baseline_commit: 194e95f8a0f4993976efb462219d2a84f119a535
+---
+
 # Story 1.1: Project Scaffold
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
