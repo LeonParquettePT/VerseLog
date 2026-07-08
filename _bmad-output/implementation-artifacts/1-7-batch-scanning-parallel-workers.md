@@ -77,3 +77,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — BatchScanner added, all tasks complete, 36/36 tests passing, status moved to review.
+- 2026-07-08: Code review flagged a flaky-test risk — the parallelism test used a tight absolute timing threshold, a classic source of spurious CI failures under scheduler load. Widened the margin (relative to sleep duration × count, generous safety factor) instead of a tight absolute number. 36/36 tests still passing.

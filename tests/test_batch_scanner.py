@@ -50,15 +50,22 @@ class _RecordingTrustLayer(TrustLayer):
 
 
 def test_captures_run_in_parallel(tmp_path):
-    ports = [_SlowCapturePort(0.05) for _ in range(4)]
+    # Sleep duration and margin sized to be robust on a slow/loaded CI runner,
+    # not just a quiet dev machine - a tight timing threshold here would be a
+    # flaky test waiting to happen.
+    sleep_seconds = 0.1
+    port_count = 4
+    ports = [_SlowCapturePort(sleep_seconds) for _ in range(port_count)]
     scanner = BatchScanner(TrustLayer(quarantine_dir=tmp_path / "quarantine"))
 
     start = time.monotonic()
-    scanner.scan_all(ports, worker_count=4)
+    scanner.scan_all(ports, worker_count=port_count)
     elapsed = time.monotonic() - start
 
-    # 4 sequential 0.05s captures would take ~0.2s; in parallel, well under that.
-    assert elapsed < 0.15
+    # True parallel execution: ~1x sleep_seconds plus overhead. Sequential
+    # execution would be ~4x. Assert well below the sequential total, with a
+    # generous margin for scheduling jitter on a busy machine.
+    assert elapsed < sleep_seconds * port_count * 0.6
 
 
 def test_result_order_matches_input_order_regardless_of_completion_order(tmp_path):
