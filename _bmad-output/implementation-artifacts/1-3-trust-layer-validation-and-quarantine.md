@@ -4,7 +4,7 @@ baseline_commit: fc9b4fe40194d0cc32e7d797c8ab898059036eb7
 
 # Story 1.3: Trust Layer — Validation and Quarantine
 
-Status: review
+Status: done
 
 ## Story
 
