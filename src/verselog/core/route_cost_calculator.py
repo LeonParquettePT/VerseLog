@@ -31,6 +31,12 @@ class RouteCostCalculator:
         ship = self._ship_store.get_ship(ship_name)
         if ship is None:
             raise ValueError(f"unknown ship: {ship_name!r}")
+        if ship.quantum_speed <= 0 or ship.quantum_range <= 0:
+            # Real data confirms this happens: ground vehicles (e.g. the Nox
+            # speeder bike) have no quantum drive at all, so the API returns
+            # null/0 for these fields. Dividing by them would otherwise raise
+            # an opaque ZeroDivisionError instead of an explicit, actionable one.
+            raise ValueError(f"ship {ship_name!r} has no quantum drive capability")
 
         distance_meters = math.dist(
             (departure_location.x, departure_location.y, departure_location.z),

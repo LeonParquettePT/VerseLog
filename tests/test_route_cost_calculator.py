@@ -101,6 +101,35 @@ def test_raises_on_unknown_arrival(tmp_path):
         RouteCostCalculator(location_store, ship_store).calculate("A", "Nowhere", "Nothing")
 
 
+def test_raises_a_clear_error_for_a_ship_with_no_quantum_drive(tmp_path):
+    # Real data confirms this: ground vehicles (e.g. the Nox speeder bike)
+    # have quantum_speed/quantum_range = None from the API, defaulted to 0.0
+    # by _ship_from_json. Must not crash with a raw ZeroDivisionError.
+    location_store, ship_store = _stores(tmp_path)
+    location_store.save_locations(
+        [
+            LocationReference(name="A", system="stanton", x=0, y=0, z=0),
+            LocationReference(name="B", system="stanton", x=1, y=1, z=1),
+        ]
+    )
+    ship_store.save_ships(
+        [
+            ShipReference(
+                name="Nox",
+                cargo_capacity_scu=0,
+                quantum_fuel_capacity=0.0,
+                quantum_range=0.0,
+                fuel_usage_main=0.0,
+                quantum_speed=0.0,
+                quantum_spool_time=0.0,
+            )
+        ]
+    )
+
+    with pytest.raises(ValueError, match="quantum drive"):
+        RouteCostCalculator(location_store, ship_store).calculate("A", "B", "Nox")
+
+
 def test_raises_on_unknown_ship(tmp_path):
     location_store, ship_store = _stores(tmp_path)
     location_store.save_locations(

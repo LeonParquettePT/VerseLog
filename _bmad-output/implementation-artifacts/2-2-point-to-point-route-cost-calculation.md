@@ -96,3 +96,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — location coordinate source discovered and integrated, ShipReference extended, RouteCostCalculator added, all tasks complete, 52/52 tests passing, status moved to review.
+- 2026-07-09: Code review found and fixed one correctness bug — `calculate()` divided by `quantum_speed`/`quantum_range` without checking they're non-zero, crashing with an opaque `ZeroDivisionError` for ships with no quantum drive (confirmed real: ground vehicles like the Nox speeder bike have `null` quantum stats in the live API). Fixed with an explicit `ValueError` matching the method's existing validation-error pattern. 53/53 tests passing.
