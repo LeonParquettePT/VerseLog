@@ -92,3 +92,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — OCR parser, OCRProvider, and manual trigger added, all tasks complete, 5/5 tests passing, status moved to review.
+- 2026-07-08: Code review found and fixed one correctness bug — departure/arrival regexes searched the whole OCR text unscoped, risking a false match against Details/flavor text containing similar phrasing (e.g. "deliver ... to ..." in narrative prose). Fixed by scoping extraction to the text after the "Primary Objectives" heading when present; added a regression test with decoy flavor text. 6/6 tests passing.
