@@ -2,6 +2,11 @@ import re
 
 from verselog.core.contract import Contract
 
+
+class ContractParseError(Exception):
+    """Raised when OCR'd text doesn't match an expected contract field pattern."""
+
+
 _PRIMARY_OBJECTIVES_RE = re.compile(r"Primary Objectives", re.IGNORECASE)
 _REWARD_RE = re.compile(r"¤\s*([\d,]+)")
 _SCU_RE = re.compile(r"\d+\s*/\s*(\d+)\s*SCU")
@@ -36,13 +41,28 @@ def parse_contract_text(raw_text: str) -> Contract:
     departure_match = _DEPARTURE_RE.search(objectives_text)
     availability_match = _AVAILABILITY_RE.search(raw_text)
 
+    if departure_match is None:
+        raise ContractParseError("could not find a 'Collect ... from <location>.' departure line")
+    if arrival_match is None:
+        raise ContractParseError("could not find a 'Deliver ... to <location>.' arrival line")
+    if scu_match is None:
+        raise ContractParseError("could not find an 'X/Y SCU' pattern")
+    if reward_match is None:
+        raise ContractParseError("could not find a '¤<amount>' reward pattern")
+
     availability = availability_match.group(1) if availability_match else None
     remaining_time = None if availability in (None, "N/A") else availability
+
+    try:
+        scu = int(scu_match.group(1))
+        reward = float(reward_match.group(1).replace(",", ""))
+    except ValueError as exc:
+        raise ContractParseError(f"matched SCU/reward text was not a valid number: {exc}") from exc
 
     return Contract(
         departure=departure_match.group(1).strip(),
         arrival=arrival_match.group(1).strip(),
-        scu=int(scu_match.group(1)),
-        reward=float(reward_match.group(1).replace(",", "")),
+        scu=scu,
+        reward=reward,
         remaining_time=remaining_time,
     )

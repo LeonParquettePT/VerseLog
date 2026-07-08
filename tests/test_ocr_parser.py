@@ -1,4 +1,6 @@
-from verselog.adapters.capture.ocr_parser import parse_contract_text
+import pytest
+
+from verselog.adapters.capture.ocr_parser import ContractParseError, parse_contract_text
 
 # Modeled on the real contract screenshot on file (contract-ui-reference.md),
 # including the Details flavor paragraph that precedes Primary Objectives.
@@ -63,3 +65,10 @@ def test_decoy_collect_from_in_flavor_text_does_not_confuse_the_parser():
 
     assert contract.departure == "Port Tressler"
     assert contract.arrival == "Greycat Stanton IV Production Complex-A"
+
+
+def test_raises_contract_parse_error_when_scu_pattern_is_missing():
+    text_without_scu = REAL_CONTRACT_TEXT.replace("Deliver 0/6 SCU to", "Deliver to")
+
+    with pytest.raises(ContractParseError):
+        parse_contract_text(text_without_scu)
