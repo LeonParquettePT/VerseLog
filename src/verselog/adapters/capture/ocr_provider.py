@@ -1,10 +1,10 @@
 import io
 
-import mss
 import pytesseract
 from PIL import Image
 
 from verselog.adapters.capture.ocr_parser import ContractParseError, parse_contract_text
+from verselog.adapters.capture.screenshot import take_screenshot
 from verselog.core.capture_result import CaptureResult
 from verselog.core.ports.capture_port import CapturePort
 
@@ -13,13 +13,8 @@ class OCRProvider(CapturePort):
     """Classic-OCR capture: screenshot the current screen, run Tesseract, parse the result."""
 
     def capture(self) -> CaptureResult:
-        with mss.mss() as sct:
-            shot = sct.grab(sct.monitors[0])
-            image = Image.frombytes("RGB", shot.size, shot.rgb)
-
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        source_image = buffer.getvalue()
+        source_image = take_screenshot()
+        image = Image.open(io.BytesIO(source_image))
 
         try:
             raw_text = pytesseract.image_to_string(image)
