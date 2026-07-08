@@ -84,3 +84,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — ShipReference/ShipReferenceStore/CommunityAPIProvider added, all tasks complete, 42/42 tests passing, status moved to review.
+- 2026-07-08: Code review verified the `links.next` pagination assumption directly against the live API (via curl, not the lossy AI-summarized fetch that gave contradictory answers first) — confirmed correct as implemented. Real numbers for the record: 290 vehicles across 10 pages of 30, `links`/`meta` present exactly as coded, field names (`name`, `cargo_capacity`, `quantum.quantum_fuel_capacity`/`quantum_range`, `fuel.usage.main`) all match. No code changes needed; this closes out what could otherwise have been a silent under-import bug.
