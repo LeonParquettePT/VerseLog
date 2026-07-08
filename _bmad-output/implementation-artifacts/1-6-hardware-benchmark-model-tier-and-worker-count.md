@@ -86,3 +86,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-08: Story implemented — SettingsStore and Benchmark added, all tasks complete, 30/30 tests passing, status moved to review.
+- 2026-07-08: Code review found and fixed one correctness bug — `should_rerun` used `None` both as the "never stored" sentinel and as a value `os.cpu_count()` can legitimately return, so on a platform where cpu_count is undetermined the benchmark would re-run on every launch instead of once. Fixed with a distinct `_NEVER_STORED` sentinel object; added a regression test with `os.cpu_count` monkeypatched to `None`. 31/31 tests passing.

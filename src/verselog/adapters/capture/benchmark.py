@@ -5,6 +5,12 @@ from dataclasses import dataclass
 from verselog.core.ports.capture_port import CapturePort
 from verselog.core.settings_store import SettingsStore
 
+# os.cpu_count() can legitimately return None ("undetermined") on some
+# platforms. A sentinel lets should_rerun tell "never stored" apart from
+# "stored as None" - using None as the .get() default would confuse the two
+# and cause a permanent re-benchmark-every-launch on such platforms.
+_NEVER_STORED = object()
+
 
 @dataclass
 class BenchmarkResult:
@@ -42,8 +48,8 @@ class Benchmark:
         return BenchmarkResult(tier_name=tier_name, worker_count=worker_count, elapsed_seconds=elapsed_seconds)
 
     def should_rerun(self, settings_store: SettingsStore) -> bool:
-        stored_cpu_count = settings_store.get("benchmark_cpu_count")
-        if stored_cpu_count is None:
+        stored_cpu_count = settings_store.get("benchmark_cpu_count", _NEVER_STORED)
+        if stored_cpu_count is _NEVER_STORED:
             return True
         return stored_cpu_count != os.cpu_count()
 

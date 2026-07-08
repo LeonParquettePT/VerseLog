@@ -68,6 +68,20 @@ def test_should_rerun_is_false_when_cpu_count_matches(tmp_path):
     assert Benchmark().should_rerun(store) is False
 
 
+def test_should_rerun_is_false_when_stored_none_matches_an_undetermined_cpu_count(tmp_path, monkeypatch):
+    # os.cpu_count() can legitimately return None ("undetermined") on some
+    # platforms. A stored None must be treated as a real prior value, not
+    # confused with "never benchmarked" - otherwise this platform would
+    # re-benchmark on every single launch.
+    import verselog.adapters.capture.benchmark as benchmark_module
+
+    monkeypatch.setattr(benchmark_module.os, "cpu_count", lambda: None)
+    store = SettingsStore(path=tmp_path / "settings.json")
+    store.set("benchmark_cpu_count", None)
+
+    assert Benchmark().should_rerun(store) is False
+
+
 def test_should_rerun_is_true_when_cpu_count_differs(tmp_path):
     store = SettingsStore(path=tmp_path / "settings.json")
     store.set("benchmark_cpu_count", -1)  # guaranteed to differ from any real count
