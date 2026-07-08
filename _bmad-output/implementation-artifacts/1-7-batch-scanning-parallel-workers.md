@@ -4,7 +4,7 @@ baseline_commit: 94ce7ccb171de9e2286e8e00e3809b680bf43145
 
 # Story 1.7: Batch Scanning (Parallel Workers)
 
-Status: review
+Status: done
 
 ## Story
 
