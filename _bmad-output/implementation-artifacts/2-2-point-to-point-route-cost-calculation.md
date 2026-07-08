@@ -4,7 +4,7 @@ baseline_commit: ddc9f01e593379b3470744aeb8f27d4e485e9f99
 
 # Story 2.2: Point-to-Point Route Cost Calculation
 
-Status: review
+Status: done
 
 ## Story
 
