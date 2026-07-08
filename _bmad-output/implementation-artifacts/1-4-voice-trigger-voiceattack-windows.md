@@ -4,7 +4,7 @@ baseline_commit: 09aa2741899c16466433e263ac815c884405c402
 
 # Story 1.4: Voice Trigger (VoiceAttack, Windows)
 
-Status: review
+Status: done
 
 ## Story
 
