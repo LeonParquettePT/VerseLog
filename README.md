@@ -1,5 +1,7 @@
 # VerseLog
 
+*[🇫🇷 Lire en français](README.fr.md)*
+
 A free, open-source, community-collaborative logistics assistant for [Star Citizen](https://robertsspaceindustries.com/). VerseLog reads your contract board, validates what it reads, and hands back a route and cargo plan that maximizes aUEC earned per minute — built to run alongside the game on modest hardware, not to fight it for resources.
 
 ## Status
