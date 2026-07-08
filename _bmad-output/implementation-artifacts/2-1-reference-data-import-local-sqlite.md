@@ -4,7 +4,7 @@ baseline_commit: b28b2b24ce4db986a6a11dd0647f4a950e754a08
 
 # Story 2.1: Reference Data Import (Local SQLite)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -18,21 +18,21 @@ so that route calculations aren't guesswork.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add the `requests` dependency (AC: #1)
-  - [ ] Add `requests` to `pyproject.toml` `[project] dependencies` — the simplest, most standard synchronous HTTP client for a one-off/periodic bulk-import call, no async needed here
-- [ ] Task 2: Define the ship reference schema (AC: #1)
-  - [ ] `src/verselog/core/ship_reference.py` — `ShipReference` dataclass: `name: str`, `cargo_capacity_scu: int`, `quantum_fuel_capacity: float`, `quantum_range: float`, `fuel_usage_main: float`. Deliberately lean — the architecture explicitly left the SQLite schema as Deferred/code-owned; this story is where it gets defined, scoped to exactly what the AC asks for (cargo capacity, fuel/quantum stats), not the full field set the API exposes.
-  - [ ] `src/verselog/core/ship_reference_store.py` — `ShipReferenceStore(db_path: Path = Path("data/verselog.db"))`: creates a single `ships` table if missing (`name TEXT PRIMARY KEY, cargo_capacity_scu INTEGER, quantum_fuel_capacity REAL, quantum_range REAL, fuel_usage_main REAL`), `save_ships(ships: list[ShipReference])` (upsert, so re-running the import refreshes existing rows), `get_ship(name: str) -> ShipReference | None`
-- [ ] Task 3: Implement `CommunityAPIProvider` (`DataSourcePort`) (AC: #1)
-  - [ ] `src/verselog/adapters/datasource/community_api_provider.py` — `refresh()` fetches `https://api.star-citizen.wiki/api/vehicles`, follows `links.next` pagination if present, maps each item's `cargo_capacity`, `quantum.quantum_fuel_capacity`, `quantum.quantum_range`, `fuel.usage.main` into a `ShipReference`, and calls `ShipReferenceStore.save_ships(...)`
-  - [ ] Inject the HTTP call (`http_get` constructor parameter, defaulting to `requests.get`) so tests supply canned responses instead of hitting the real network
-  - [ ] Send an identifying `User-Agent` header (e.g. `"VerseLog (github.com/LeonParquettePT/VerseLog)"`) and a small delay between paginated page requests — the conservative, self-throttled posture already established in `SPEC.md`'s assumptions for this third-party dependency, applied here rather than invented fresh
-  - [ ] On an HTTP error, raise a clear, specific exception rather than silently swallowing it — this is a distinct concern from the capture pipeline's graceful-degradation pattern (Stories 1.2/1.3/1.5): a bulk import is an explicit action, not a per-scan extraction the trust layer must never crash on, so a clear failure here is the right behavior, not a defect to paper over
-- [ ] Task 4: Tests (AC: #1)
-  - [ ] Unit test `CommunityAPIProvider.refresh()` with an injected fake `http_get` returning canned JSON shaped like the real, already-confirmed API response (cargo_capacity, cargo_grids, quantum fields, fuel.usage) — assert the resulting `ShipReference`s land in the store correctly
-  - [ ] Unit test pagination: a fake `http_get` returning a `links.next` on page 1 and no `next` on page 2 — assert both pages' ships are imported
-  - [ ] Unit test `ShipReferenceStore` directly against a temp-file SQLite DB (`tmp_path`): save then get round-trips; saving the same ship name twice (re-running the import) updates rather than duplicates
-  - [ ] Unit test that an HTTP error from the injected `http_get` raises clearly, rather than being silently swallowed
+- [x] Task 1: Add the `requests` dependency (AC: #1)
+  - [x] Add `requests` to `pyproject.toml` `[project] dependencies` — the simplest, most standard synchronous HTTP client for a one-off/periodic bulk-import call, no async needed here
+- [x] Task 2: Define the ship reference schema (AC: #1)
+  - [x] `src/verselog/core/ship_reference.py` — `ShipReference` dataclass: `name: str`, `cargo_capacity_scu: int`, `quantum_fuel_capacity: float`, `quantum_range: float`, `fuel_usage_main: float`. Deliberately lean — the architecture explicitly left the SQLite schema as Deferred/code-owned; this story is where it gets defined, scoped to exactly what the AC asks for (cargo capacity, fuel/quantum stats), not the full field set the API exposes.
+  - [x] `src/verselog/core/ship_reference_store.py` — `ShipReferenceStore(db_path: Path = Path("data/verselog.db"))`: creates a single `ships` table if missing (`name TEXT PRIMARY KEY, cargo_capacity_scu INTEGER, quantum_fuel_capacity REAL, quantum_range REAL, fuel_usage_main REAL`), `save_ships(ships: list[ShipReference])` (upsert, so re-running the import refreshes existing rows), `get_ship(name: str) -> ShipReference | None`
+- [x] Task 3: Implement `CommunityAPIProvider` (`DataSourcePort`) (AC: #1)
+  - [x] `src/verselog/adapters/datasource/community_api_provider.py` — `refresh()` fetches `https://api.star-citizen.wiki/api/vehicles`, follows `links.next` pagination if present, maps each item's `cargo_capacity`, `quantum.quantum_fuel_capacity`, `quantum.quantum_range`, `fuel.usage.main` into a `ShipReference`, and calls `ShipReferenceStore.save_ships(...)`
+  - [x] Inject the HTTP call (`http_get` constructor parameter, defaulting to `requests.get`) so tests supply canned responses instead of hitting the real network
+  - [x] Send an identifying `User-Agent` header (e.g. `"VerseLog (github.com/LeonParquettePT/VerseLog)"`) and a small delay between paginated page requests — the conservative, self-throttled posture already established in `SPEC.md`'s assumptions for this third-party dependency, applied here rather than invented fresh
+  - [x] On an HTTP error, raise a clear, specific exception rather than silently swallowing it — this is a distinct concern from the capture pipeline's graceful-degradation pattern (Stories 1.2/1.3/1.5): a bulk import is an explicit action, not a per-scan extraction the trust layer must never crash on, so a clear failure here is the right behavior, not a defect to paper over
+- [x] Task 4: Tests (AC: #1)
+  - [x] Unit test `CommunityAPIProvider.refresh()` with an injected fake `http_get` returning canned JSON shaped like the real, already-confirmed API response (cargo_capacity, cargo_grids, quantum fields, fuel.usage) — assert the resulting `ShipReference`s land in the store correctly
+  - [x] Unit test pagination: a fake `http_get` returning a `links.next` on page 1 and no `next` on page 2 — assert both pages' ships are imported
+  - [x] Unit test `ShipReferenceStore` directly against a temp-file SQLite DB (`tmp_path`): save then get round-trips; saving the same ship name twice (re-running the import) updates rather than duplicates
+  - [x] Unit test that an HTTP error from the injected `http_get` raises clearly, rather than being silently swallowed
 
 ## Dev Notes
 
@@ -57,10 +57,31 @@ so that route calculations aren't guesswork.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-sonnet-5
 
 ### Debug Log References
 
+- `uv run --extra dev pytest -q` → `42 passed in 3.47s` (includes a real 0.2s inter-page delay exercised by the pagination test)
+
 ### Completion Notes List
 
+- Defined the SQLite schema for ship reference data (first story to do so, per the architecture's Deferred note) — a single lean `ships` table with only the fields this story's AC needs.
+- Implemented `ShipReferenceStore` with upsert semantics (`ON CONFLICT ... DO UPDATE`) so re-running the import refreshes rather than duplicates.
+- Implemented `CommunityAPIProvider.refresh()`: paginates via `links.next`, injects an identifying `User-Agent` and a conservative inter-page delay (the already-decided safe-default posture, not new scope), raises `CommunityAPIError` clearly on HTTP failure rather than swallowing it.
+- HTTP call is injectable (`http_get` parameter) so tests never hit the real network.
+- All acceptance criteria satisfied; 42/42 tests passing (36 pre-existing + 6 new).
+
 ### File List
+
+- `pyproject.toml` (modified — added `requests` dependency)
+- `src/verselog/core/ship_reference.py` (new)
+- `src/verselog/core/ship_reference_store.py` (new)
+- `src/verselog/adapters/datasource/community_api_provider.py` (new)
+- `tests/test_ship_reference_store.py` (new)
+- `tests/test_community_api_provider.py` (new)
+- `uv.lock` (modified)
+
+## Change Log
+
+- 2026-07-08: Story implemented — ShipReference/ShipReferenceStore/CommunityAPIProvider added, all tasks complete, 42/42 tests passing, status moved to review.
+- 2026-07-08: Code review verified the `links.next` pagination assumption directly against the live API (via curl, not the lossy AI-summarized fetch that gave contradictory answers first) — confirmed correct as implemented. Real numbers for the record: 290 vehicles across 10 pages of 30, `links`/`meta` present exactly as coded, field names (`name`, `cargo_capacity`, `quantum.quantum_fuel_capacity`/`quantum_range`, `fuel.usage.main`) all match. No code changes needed; this closes out what could otherwise have been a silent under-import bug.
