@@ -4,7 +4,7 @@ baseline_commit: 65cabd8b47b6410dd326f068812bcbc5127922a7
 
 # Story 1.6: Hardware Benchmark (Model Tier + Worker Count)
 
-Status: review
+Status: done
 
 ## Story
 
