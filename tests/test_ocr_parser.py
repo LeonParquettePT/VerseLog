@@ -67,6 +67,33 @@ def test_decoy_collect_from_in_flavor_text_does_not_confuse_the_parser():
     assert contract.arrival == "Greycat Stanton IV Production Complex-A"
 
 
+def test_reward_parses_when_ocr_drops_or_mangles_the_currency_glyph():
+    # Confirmed against real screenshots: Tesseract does not reliably render
+    # the game's ¤ currency glyph - it's dropped entirely on one real
+    # contract and misread as "&" on another. The parser must not depend on
+    # literally seeing "¤".
+    text_without_symbol = REAL_CONTRACT_TEXT.replace("¤50,250", "50,250")
+    contract = parse_contract_text(text_without_symbol)
+    assert contract.reward == 50250.0
+
+    text_with_garbled_symbol = REAL_CONTRACT_TEXT.replace("¤50,250", "& 50,250")
+    contract = parse_contract_text(text_with_garbled_symbol)
+    assert contract.reward == 50250.0
+
+
+def test_arrival_name_wrapped_across_two_lines_by_ocr_is_collapsed_to_one_line():
+    # Confirmed against a real screenshot: a location name that wraps across
+    # two lines in the UI comes through OCR with an embedded newline.
+    text_with_wrap = REAL_CONTRACT_TEXT.replace(
+        "Greycat Stanton IV Production Complex-A.",
+        "Greycat Stanton IV Production\nComplex-A.",
+    )
+
+    contract = parse_contract_text(text_with_wrap)
+
+    assert contract.arrival == "Greycat Stanton IV Production Complex-A"
+
+
 def test_raises_contract_parse_error_when_scu_pattern_is_missing():
     text_without_scu = REAL_CONTRACT_TEXT.replace("Deliver 0/6 SCU to", "Deliver to")
 
