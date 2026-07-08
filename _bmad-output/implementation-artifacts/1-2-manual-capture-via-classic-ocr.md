@@ -4,7 +4,7 @@ baseline_commit: 6083bf2cf443cc0cee7d391a849c253ddd4a5a1c
 
 # Story 1.2: Manual Capture via Classic OCR
 
-Status: review
+Status: done
 
 ## Story
 
