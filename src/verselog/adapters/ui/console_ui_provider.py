@@ -9,31 +9,10 @@ class ConsoleUIProvider(UIPort):
 
     def show_results(self, results: list[ScanResult]) -> None:
         for result in results:
-            if result.contract is None:
-                print("No trustworthy contract this scan:")
-                for reason in result.quarantine_reasons:
-                    print(f"  - {reason}")
-                continue
-
-            print(self._format_contract(result.contract))
-            if result.route_cost is not None:
-                cost = result.route_cost
-                print(
-                    f"  Route: {cost.distance_meters:,.0f} m, "
-                    f"{cost.travel_time_seconds:,.0f} s, {cost.fuel_cost:,.2f} fuel"
-                )
-            if result.loading_plan is not None:
-                for step in result.loading_plan.steps:
-                    print(f"  {step.action} {step.scu} SCU @ {step.location}")
+            print(result.describe())
 
     def confirm_risky_contract(self, contract: Contract, risk: LegalityRisk) -> bool:
-        print(self._format_contract(contract))
+        print(f"{contract.departure} -> {contract.arrival}: {contract.scu} SCU, {contract.reward:,.0f} reward")
         print(f"  Risk: {risk.reason}")
         answer = input("Proceed anyway? [y/N]: ")
         return answer.strip().lower() in ("y", "yes")
-
-    def _format_contract(self, contract: Contract) -> str:
-        return (
-            f"{contract.departure} -> {contract.arrival}: "
-            f"{contract.scu} SCU, {contract.reward:,.0f} reward"
-        )
