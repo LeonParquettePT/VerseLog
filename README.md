@@ -6,7 +6,7 @@ A free, open-source, community-collaborative logistics assistant for [Star Citiz
 
 ## Status
 
-Core logic and capture/data-source adapters are built and tested (3 epics, 14 stories, 92 tests) — see the [project docs](https://leonparquettept.github.io/VerseLog/) for the full review. Not runnable yet: no application entrypoint and no UI adapter exist, so there's no packaged build to install. The full contract for what this project builds is in [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md). Known risks and how they're handled are tracked in [RISKS.md](RISKS.md).
+Core logic, capture/data-source adapters, the application entrypoint, and a Tkinter results UI are built and tested (4 epics done, 114 tests) — see the [project docs](https://leonparquettept.github.io/VerseLog/) for the full review. A packaged Windows build is available now: **[Download verselog.exe](https://github.com/LeonParquettePT/VerseLog/releases/latest)** — single file, no Python install required (Tesseract and Ollama are still separate installs). Windows may show a false-positive antivirus/SmartScreen warning on first run (unsigned executable) — see the Release notes for how to allow it. Linux packaging isn't published yet. The full contract for what this project builds is in [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md). Known risks and how they're handled are tracked in [RISKS.md](RISKS.md).
 
 ## Contributing
 

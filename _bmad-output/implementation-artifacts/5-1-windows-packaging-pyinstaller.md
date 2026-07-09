@@ -4,7 +4,7 @@ baseline_commit: 54f9f899f994a32d69258afce54b19693a771f78
 
 # Story 5.1: Windows Packaging (PyInstaller)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -24,9 +24,9 @@ so that I don't need Python or any dependencies installed to try it.
   - [x] Add `pyinstaller>=6.21` to `pyproject.toml`'s `dev` optional-dependencies (confirmed current version, Tkinter-compatible out of the box, as of this story's research).
   - [x] Build command: `pyinstaller --onefile --name verselog --console src/verselog/__main__.py` (or an equivalent `.spec` file if the one-liner needs adjusting for the `src/` layout — check that `verselog` resolves as an installed package or add `--paths src` as needed). `--console` (not `--windowed`): `--ship` is still a required CLI argument with no default and no ship-selection UI exists yet (out of scope here, see Dev Notes) — a windowed-only build would show no error message if the argument is missing.
   - [x] Verify the built `dist/verselog.exe` actually runs: at minimum, `verselog.exe --help` prints the same usage text as `uv run python -m verselog --help`, and `verselog.exe` (no args) prints the same "--ship is required" error — both exercised directly against the real built executable, not just the source-run version.
-- [ ] Task 3: Publish via GitHub Release, not committed to the repo (AC: #1) — deliberately done AFTER this PR merges to main, not on the feature branch (see Completion Notes): a Release should tag the actual merged state, not an in-progress branch.
-  - [ ] Create a GitHub Release (tag e.g. `v0.1.0-windows` or similar) with `dist/verselog.exe` attached as a release asset. Do not `git add` the `.exe` itself — binaries don't belong in version control history, and GitHub Releases already provides a stable, versioned download URL.
-  - [ ] Update `docs/index.html` (and README.md/README.fr.md's "no packaged build" line) to link the real Release download instead of saying no installer exists — but keep the honest caveat that Tesseract and Ollama are separate installs the player still needs (link to their own installers), and that this build is Windows-only (Linux is Story 5.2, explicit backlog).
+- [x] Task 3: Publish via GitHub Release, not committed to the repo (AC: #1) — done AFTER this PR merged to main, not on the feature branch (see Completion Notes): the Release tags the actual merged state, not an in-progress branch.
+  - [x] Created GitHub Release `v0.1.0-windows` (tagging merged `main` commit `105b9ee`) with `dist/verselog.exe` attached as a release asset. The `.exe` itself was never `git add`ed — binaries stay out of version control history, and GitHub Releases provides the stable, versioned download URL. Release notes document the Tesseract/Ollama prerequisite installs, Windows-only scope, and the antivirus false-positive warning.
+  - [x] Updated `docs/index.html` and both `README.md`/`README.fr.md` to link the real Release download (`.../releases/latest`), replacing the "no installer yet" language, with the antivirus caveat, the Tesseract/Ollama-separate-installs caveat, and the Linux-not-yet-published caveat all stated plainly.
 - [x] Task 4: Tests (AC: #1)
   - [x] No new unit tests for the PyInstaller build itself — it's a packaging/build-tooling step, not application logic, and there is nothing meaningful to unit-test about "did a binary get produced" beyond actually running it (done in Task 2's verification, not via `pytest`).
   - [x] Do add a small unit test for `__main__.py`'s new `--console-ui` flag / default Tkinter wiring: monkeypatch `verselog.__main__.run` to a spy, invoke `main()` with parsed args for both the default case and `--console-ui`, and assert the spy received a `TkinterUIProvider` instance in one case and a `ConsoleUIProvider` instance in the other. This is real application logic (which adapter gets wired), unlike the packaging step itself.
@@ -65,6 +65,7 @@ claude-sonnet-5
 - `uv run pyinstaller --onefile --name verselog --console --paths src src/verselog/__main__.py` → build succeeded, `dist/verselog.exe` (~29 MB)
 - `./dist/verselog.exe --help` and `./dist/verselog.exe` (no args) → identical output to the source-run version, verified directly against the real built executable
 - Attempted a real full scan through the packaged exe (`--ship "Test Ship"`); a 45s test timeout was too short for the first-run benchmark's real Ollama vision call (cold model load, consistent with 1.4–92s timing variance already observed earlier this session) — not a bug, just an impatient verification timeout on my part. Tkinter itself is confirmed working in the frozen exe: `TkinterUIProvider` is imported at module level in `__main__.py`, and that import already succeeds cleanly on every CLI path exercised (`--help`, no-args error).
+- After this story's PR merged to `main`, rebuilding `dist/verselog.exe` fresh from `main` and attempting to run it was blocked by Windows: `Une stratégie de contrôle d'application a bloqué ce fichier` (Windows Defender / Application Control Policy). Confirmed with the user this is standard Windows Defender auto-blocking the freshly-built, unsigned exe — a well-known false positive for unsigned PyInstaller `--onefile` binaries (the self-extracting bootloader pattern trips antivirus heuristics), not an actual security issue. Confirmed the file itself was not deleted or quarantined (still present on disk, unchanged size). Must be documented transparently for end users in release notes/docs rather than hidden.
 
 ### Completion Notes List
 
@@ -73,6 +74,7 @@ claude-sonnet-5
 - Added `.gitignore` entries for PyInstaller's `build/`/`dist/`/`*.spec` output and the runtime `data/` directory (an untracked `data/verselog.db` had been created locally during verification — confirmed it was never meant to be tracked).
 - **Task 3 (GitHub Release + docs link) is deliberately not done in this PR** — a Release should tag the actual merged `main` state, not an in-progress feature branch. Will be completed as a follow-up immediately after this PR merges, then the story marked fully done (mirrors this project's established "mark done after merge" pattern).
 - 114/114 tests passing (112 pre-existing + 2 new for the `__main__.py` UI-wiring fix).
+- **Known distribution issue confirmed by the user: Windows Defender blocks the unsigned exe on first run** (`Une stratégie de contrôle d'application a bloqué ce fichier`). This is a common false positive for unsigned PyInstaller executables, not a real security problem — the file is not deleted, just blocked from executing until the user allows it (e.g. via "More info → Run anyway" in the SmartScreen prompt, or an antivirus exclusion). Documented in the GitHub Release notes and `docs/index.html` so players aren't surprised. Future improvement to consider (not done here): free code-signing for open-source projects (e.g. SignPath.io) or submitting the binary to Microsoft for a false-positive review.
 
 ### File List
 
@@ -80,7 +82,10 @@ claude-sonnet-5
 - `pyproject.toml` (modified — added `pyinstaller` dev dependency)
 - `.gitignore` (modified — `build/`, `dist/`, `*.spec`, `data/*` except `.gitkeep`)
 - `tests/test_main.py` (new)
+- `docs/index.html` (modified, post-merge — real Windows download link, antivirus/Linux caveats)
+- `README.md` / `README.fr.md` (modified, post-merge — real download link, updated status)
 
 ## Change Log
 
 - 2026-07-10: Story implemented — `__main__.py`'s Tkinter-default gap fixed, PyInstaller added, a working Windows executable built and verified directly. Task 3 (GitHub Release + docs link) deliberately deferred to a post-merge follow-up. 114/114 tests passing, status moved to review.
+- 2026-07-10: Task 3 completed post-merge — GitHub Release `v0.1.0-windows` published with `dist/verselog.exe` attached, tagging merged `main` commit `105b9ee`; `docs/index.html` and both READMEs updated with the real download link. Also documented a real finding: Windows Defender/Application Control blocked the freshly-rebuilt exe on first run (confirmed false positive for unsigned PyInstaller builds, not a security issue) — captured in Dev Notes/Completion Notes and in the Release notes for end users. Story marked done.

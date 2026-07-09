@@ -92,6 +92,14 @@
 
   <div class="row">
     <div>
+      <div class="t">Download — Windows</div>
+      <div class="d">Single .exe, no Python required. Tesseract and Ollama still needed separately.</div>
+    </div>
+    <a href="https://github.com/LeonParquettePT/VerseLog/releases/latest">Get verselog.exe →</a>
+  </div>
+
+  <div class="row">
+    <div>
       <div class="t">Source code</div>
       <div class="d">Read the code, open an issue, or propose a change.</div>
     </div>
@@ -99,7 +107,10 @@
   </div>
 
   <div class="note">
-    <strong>No installer yet.</strong> VerseLog isn't packaged into a runnable build — there's no application entrypoint or UI adapter built yet (see the review's "What's not built yet" section). For now the only way to run it is from source (Python 3.12+, <code>uv</code>) via the repo above. A one-click install is planned once packaging is tackled.
+    <strong>Windows may block the .exe on first run</strong> ("an app control policy has blocked this file" / SmartScreen warning). This is a known false positive for unsigned PyInstaller builds, not malware — click "More info → Run anyway", or allow it in your antivirus. See the Release page for details.
+  </div>
+  <div class="note">
+    <strong>Linux build not published yet.</strong> Windows is the only packaged build for now. Linux packaging is tracked for later. Tesseract and Ollama are always separate installs on any OS — VerseLog doesn't bundle them.
   </div>
 </main>
 </body>
