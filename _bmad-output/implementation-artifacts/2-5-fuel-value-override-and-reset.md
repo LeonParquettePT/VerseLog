@@ -4,7 +4,7 @@ baseline_commit: 05f69484e5589c85c3f9cd9ac86c67c504ab6ce8
 
 # Story 2.5: Fuel Value Override and Reset
 
-Status: review
+Status: done
 
 ## Story
 

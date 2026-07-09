@@ -58,12 +58,12 @@ development_status:
   1-7-batch-scanning-parallel-workers: done
   epic-1-retrospective: optional
 
-  epic-2: in-progress
+  epic-2: done
   2-1-reference-data-import-local-sqlite: done
   2-2-point-to-point-route-cost-calculation: done
   2-3-loading-plan-derived-from-single-missions-route: done
   2-4-combined-route-and-loading-plan-for-multiple-missions: done
-  2-5-fuel-value-override-and-reset: review
+  2-5-fuel-value-override-and-reset: done
   epic-2-retrospective: optional
 
   epic-3: backlog
