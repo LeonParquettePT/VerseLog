@@ -11,6 +11,7 @@ class ScanResult:
     route_cost: RouteCost | None
     loading_plan: LoadingPlan | None
     quarantine_reasons: list[str] = field(default_factory=list)
+    declined_reason: str | None = None
 
     def describe(self) -> str:
         if self.contract is None:
@@ -22,6 +23,9 @@ class ScanResult:
             f"{self.contract.departure} -> {self.contract.arrival}: "
             f"{self.contract.scu} SCU, {self.contract.reward:,.0f} reward"
         ]
+        if self.declined_reason is not None:
+            lines.append(f"  Declined: {self.declined_reason}")
+            return "\n".join(lines)
         if self.route_cost is not None:
             cost = self.route_cost
             lines.append(
