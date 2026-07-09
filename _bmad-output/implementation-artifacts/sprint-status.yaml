@@ -1,5 +1,5 @@
 # generated: 2026-07-08
-# last_updated: 2026-07-08
+# last_updated: 2026-07-09
 # project: VerseLog
 # project_key: NOKEY
 # tracking_system: file-system
@@ -41,7 +41,7 @@
 # - Retrospective appends its action items to action_items; sprint-status surfaces open ones
 
 generated: 2026-07-08
-last_updated: 2026-07-08
+last_updated: 2026-07-09
 project: VerseLog
 project_key: NOKEY
 tracking_system: file-system
@@ -61,7 +61,7 @@ development_status:
   epic-2: in-progress
   2-1-reference-data-import-local-sqlite: done
   2-2-point-to-point-route-cost-calculation: done
-  2-3-loading-plan-derived-from-single-missions-route: backlog
+  2-3-loading-plan-derived-from-single-missions-route: review
   2-4-combined-route-and-loading-plan-for-multiple-missions: backlog
   2-5-fuel-value-override-and-reset: backlog
   epic-2-retrospective: optional
