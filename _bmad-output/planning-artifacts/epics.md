@@ -374,3 +374,18 @@ So that I'm not a second-class target despite NFR7 naming Linux explicitly.
 **When** a suitable disposable build environment is set up (a GitHub Actions Linux runner is the likely candidate — it needs no local install and leaves no footprint on the developer's machine)
 **Then** an equivalent Linux artifact (e.g. an AppImage) is produced and published as a GitHub Release asset alongside the Windows one
 **And** until this story is picked up, Linux users are told plainly (README, docs site) that only source installation is available for their platform — not silently left to discover this themselves
+
+### Story 5.4: Code Signing for the Windows Build (Deferred — Tracked, Not Forgotten)
+
+As a player downloading VerseLog for Windows,
+I want the .exe to come from a verified publisher,
+So that Windows Smart App Control and SmartScreen don't block or scare me away from a legitimate tool.
+
+**Acceptance Criteria:**
+
+**Given** `dist/verselog.exe` is unsigned today, which causes Windows Smart App Control to block it outright (no per-app override exists) and re-block it on every subsequent launch
+**When** the executable is code-signed via a legitimate free program for open-source projects (SignPath Foundation is the leading candidate: OSI-approved MIT license qualifies, public GitHub repo, actively maintained, already has a published release — confirmed eligible via web research 2026-07-10)
+**Then** the published GitHub Release asset is signed, and Smart App Control/SmartScreen treat it as a verified-publisher app rather than an unknown binary
+**And** the Windows build process moves to a GitHub Actions CI pipeline (required for SignPath's signing integration — not a local, manual `pyinstaller` invocation as done in Story 5.1)
+
+Added 2026-07-10: raised after the project's own author hit a real Smart App Control block running the packaged exe locally, confirming this isn't a hypothetical concern. Explicitly deferred: SignPath Foundation's application/review process takes days to weeks and is out of this session's control, and migrating the build to CI is real engineering work — not a five-minute fix. User's explicit call: finish Linux packaging (Story 5.2) first, since NFR7's cross-platform target is a bigger gap than the Windows-only signing friction.

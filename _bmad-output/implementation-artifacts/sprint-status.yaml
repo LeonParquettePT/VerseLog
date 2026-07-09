@@ -81,4 +81,5 @@ development_status:
   5-1-windows-packaging-pyinstaller: done
   5-2-linux-packaging-deferred: backlog
   5-3-prerequisite-check-tesseract-ollama: backlog
+  5-4-code-signing-windows-build: backlog
   epic-5-retrospective: optional
