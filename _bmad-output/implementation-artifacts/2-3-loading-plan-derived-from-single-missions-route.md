@@ -4,7 +4,7 @@ baseline_commit: 8b67690ef3ac72c3a1086976413931b6d55b17b6
 
 # Story 2.3: Loading Plan Derived From a Single Mission's Route
 
-Status: review
+Status: done
 
 ## Story
 
