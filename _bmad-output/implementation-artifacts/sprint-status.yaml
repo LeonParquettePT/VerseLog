@@ -78,6 +78,7 @@ development_status:
   epic-4-retrospective: optional
 
   epic-5: backlog
-  5-1-windows-packaging-pyinstaller: backlog
+  5-1-windows-packaging-pyinstaller: in-progress
   5-2-linux-packaging-deferred: backlog
+  5-3-prerequisite-check-tesseract-ollama: backlog
   epic-5-retrospective: optional
