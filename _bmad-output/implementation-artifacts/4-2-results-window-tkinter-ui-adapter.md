@@ -4,7 +4,7 @@ baseline_commit: 3ae97648a3c4e739e179c9ee3d88a940b575911c
 
 # Story 4.2: Results Window (Tkinter UI Adapter)
 
-Status: review
+Status: done
 
 ## Story
 
