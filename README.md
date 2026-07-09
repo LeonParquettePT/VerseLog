@@ -6,7 +6,7 @@ A free, open-source, community-collaborative logistics assistant for [Star Citiz
 
 ## Status
 
-Early planning stage. No code yet — the full contract for what this project builds is in [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md). Known risks and how they're handled are tracked in [RISKS.md](RISKS.md).
+Core logic and capture/data-source adapters are built and tested (3 epics, 14 stories, 92 tests) — see the [project docs](https://leonparquettept.github.io/VerseLog/) for the full review. Not runnable yet: no application entrypoint and no UI adapter exist, so there's no packaged build to install. The full contract for what this project builds is in [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md). Known risks and how they're handled are tracked in [RISKS.md](RISKS.md).
 
 ## Contributing
 

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VerseLog — Docs</title>
+<style>
+  :root {
+    --bg: #0F1720;
+    --surface: #16212C;
+    --surface-2: #1C2933;
+    --border: #2A3B49;
+    --text: #E8EDF2;
+    --text-dim: #8C9BAB;
+    --text-faint: #5E7085;
+    --accent: #D9A441;
+    --accent-soft: #D9A44122;
+    --accent-text: #F0C878;
+    --gap: #D97748;
+    --gap-soft: #D977481A;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+    --sans: -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+    --radius: 4px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #F2F4F6; --surface: #FFFFFF; --surface-2: #EBEEF1; --border: #D4DBE1;
+      --text: #172026; --text-dim: #52626F; --text-faint: #8494A1;
+      --accent: #A6741F; --accent-soft: #A6741F16; --accent-text: #8A5E14;
+      --gap: #B5502A; --gap-soft: #B5502A14;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent-text); margin-bottom: 10px;
+  }
+  h1 { font-family: var(--mono); font-size: 30px; margin: 0 0 12px; text-wrap: balance; }
+  p.lede { color: var(--text-dim); max-width: 62ch; margin: 0 0 34px; font-size: 15.5px; }
+  a { color: var(--accent-text); }
+
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 34px; }
+  .card {
+    display: block; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+    padding: 20px 22px; text-decoration: none; color: var(--text);
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .flag { font-size: 22px; margin-bottom: 8px; }
+  .card .t { font-family: var(--mono); font-weight: 600; font-size: 15px; }
+  .card .d { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+
+  .row {
+    display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--surface-2); margin-bottom: 12px;
+  }
+  .row .t { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  .row .d { color: var(--text-dim); font-size: 13px; }
+  .row a { margin-left: auto; white-space: nowrap; font-family: var(--mono); font-size: 13px; }
+
+  .note {
+    margin-top: 30px; padding: 14px 18px; background: var(--gap-soft); border-left: 3px solid var(--gap);
+    border-radius: 0 var(--radius) var(--radius) 0; font-size: 13.5px; color: var(--text-dim);
+  }
+  .note strong { color: var(--text); }
+
+  @media (max-width: 560px) { .card-grid { grid-template-columns: 1fr; } .row { flex-wrap: wrap; } .row a { margin-left: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">VerseLog · Documentation</div>
+  <h1>Project docs</h1>
+  <p class="lede">A free, open-source logistics assistant for Star Citizen. Below: the full project review (architecture, all shipped stories, real-world verification log) in English and French, and a link back to the source.</p>
+
+  <div class="card-grid">
+    <a class="card" href="project-review.html">
+      <div class="flag">🇬🇧</div>
+      <div class="t">Project Review — English</div>
+      <div class="d">Architecture, all 14 stories across 3 epics, real-world bugs found and fixed.</div>
+    </a>
+    <a class="card" href="project-review-fr.html">
+      <div class="flag">🇫🇷</div>
+      <div class="t">Revue de projet — Français</div>
+      <div class="d">Architecture, les 14 stories des 3 epics, le journal de vérification réelle.</div>
+    </a>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="t">Source code</div>
+      <div class="d">Read the code, open an issue, or propose a change.</div>
+    </div>
+    <a href="https://github.com/LeonParquettePT/VerseLog">github.com/LeonParquettePT/VerseLog →</a>
+  </div>
+
+  <div class="note">
+    <strong>No installer yet.</strong> VerseLog isn't packaged into a runnable build — there's no application entrypoint or UI adapter built yet (see the review's "What's not built yet" section). For now the only way to run it is from source (Python 3.12+, <code>uv</code>) via the repo above. A one-click install is planned once packaging is tackled.
+  </div>
+</main>
+</body>
+</html>

@@ -6,7 +6,7 @@ Un assistant logistique gratuit, open-source et collaboratif pour [Star Citizen]
 
 ## État du projet
 
-Phase de planification initiale. Pas encore de code — le contrat complet de ce que ce projet va construire se trouve dans [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md) (en anglais). Les risques connus et comment on les gère sont suivis dans [RISKS.fr.md](RISKS.fr.md).
+Le cœur logique et les adaptateurs de capture/source de données sont construits et testés (3 epics, 14 stories, 92 tests) — voir la [documentation du projet](https://leonparquettept.github.io/VerseLog/) pour la revue complète. Pas encore utilisable : aucun point d'entrée applicatif ni adaptateur d'interface n'existe encore, donc il n'y a pas de version packagée à installer. Le contrat complet de ce que ce projet va construire se trouve dans [`_bmad-output/specs/spec-verselog/SPEC.md`](_bmad-output/specs/spec-verselog/SPEC.md) (en anglais). Les risques connus et comment on les gère sont suivis dans [RISKS.fr.md](RISKS.fr.md).
 
 ## Contribuer
 
