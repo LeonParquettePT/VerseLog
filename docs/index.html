@@ -107,7 +107,7 @@
   </div>
 
   <div class="note">
-    <strong>Windows may block the .exe on first run</strong> ("an app control policy has blocked this file" / SmartScreen warning). This is a known false positive for unsigned PyInstaller builds, not malware — click "More info → Run anyway", or allow it in your antivirus. See the Release page for details.
+    <strong>Windows Smart App Control may block the .exe outright</strong> ("we've blocked an app that could put your device at risk... we couldn't verify its publisher"). This is a real limitation, not malware: the app isn't code-signed yet, and Smart App Control has no per-app "Run anyway" override — it's allow or block. To run VerseLog: temporarily disable Smart App Control (Windows Security → App &amp; Browser Control → Smart App Control settings), install/run the .exe, then turn it back on — since a Windows update in early 2026 this no longer requires reinstalling Windows. If you instead see an older-style SmartScreen warning ("an app control policy has blocked this file"), that one does have "More info → Run anyway". See the Release page for details.
   </div>
   <div class="note">
     <strong>Linux build not published yet.</strong> Windows is the only packaged build for now. Linux packaging is tracked for later. Tesseract and Ollama are always separate installs on any OS — VerseLog doesn't bundle them.
