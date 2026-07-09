@@ -21,5 +21,6 @@ class FuelOverrideStore:
 
     def reset(self, ship_name: str) -> None:
         overrides = self._settings_store.get(_SETTINGS_KEY, {})
-        overrides.pop(ship_name, None)
-        self._settings_store.set(_SETTINGS_KEY, overrides)
+        if ship_name in overrides:
+            del overrides[ship_name]
+            self._settings_store.set(_SETTINGS_KEY, overrides)
