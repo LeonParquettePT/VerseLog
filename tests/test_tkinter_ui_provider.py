@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font
 
 from verselog.adapters.ui.tkinter_ui_provider import TkinterUIProvider
 from verselog.core.contract import Contract

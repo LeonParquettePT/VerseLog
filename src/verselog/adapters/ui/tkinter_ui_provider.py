@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import font, messagebox
+from tkinter import messagebox
 
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
