@@ -78,7 +78,10 @@ claude-sonnet-5
 
 - `src/verselog/core/loading_plan_calculator.py` (new)
 - `tests/test_loading_plan_calculator.py` (new)
+- `src/verselog/core/route_cost_calculator.py` (modified — `RouteCost` now carries the already-fetched `ship`, see Change Log)
+- `tests/test_route_cost_calculator.py` (modified — added a regression assertion for the new `ship` field)
 
 ## Change Log
 
 - 2026-07-09: Story implemented — `LoadingStep`/`LoadingPlan`/`LoadingPlanCalculator` added, deriving the loading plan from `RouteCostCalculator` rather than independently, all tasks complete, 60/60 tests passing, status moved to review.
+- 2026-07-09: Code review found `derive()` fetched the same ship from `ShipReferenceStore` twice — once inside `route_cost_calculator.calculate()`, once again explicitly for `cargo_capacity_scu`. Fixed by adding a `ship: ShipReference` field to `RouteCost` (Story 2.2's `route_cost_calculator.py`) so the already-fetched ship comes back on the route itself; `LoadingPlanCalculator` no longer needs a `ShipReferenceStore` constructor dependency at all. 60/60 tests passing.

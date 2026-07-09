@@ -44,6 +44,7 @@ def test_calculates_distance_time_and_fuel_from_simple_fixtures(tmp_path):
     assert cost.distance_meters == 5.0  # 3-4-5 triangle
     assert cost.travel_time_seconds == 2.0 + 5.0 / 1.0  # spool_time + distance/speed
     assert cost.fuel_cost == 5.0 * (10.0 / 1000.0)  # distance * (fuel_capacity/range)
+    assert cost.ship.name == "Test Ship"  # already-fetched ship, no second lookup needed by callers
 
 
 def test_matches_the_real_captured_contract_locations(tmp_path):

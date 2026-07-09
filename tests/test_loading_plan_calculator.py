@@ -19,7 +19,7 @@ def _stores(tmp_path):
 def _calculator(tmp_path):
     location_store, ship_store = _stores(tmp_path)
     route_cost_calculator = RouteCostCalculator(location_store, ship_store)
-    return LoadingPlanCalculator(route_cost_calculator, ship_store), location_store, ship_store
+    return LoadingPlanCalculator(route_cost_calculator), location_store, ship_store
 
 
 def test_derives_a_two_step_plan_from_simple_fixtures(tmp_path):

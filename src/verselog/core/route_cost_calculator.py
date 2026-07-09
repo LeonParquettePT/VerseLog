@@ -2,6 +2,7 @@ import math
 from dataclasses import dataclass
 
 from verselog.core.location_reference_store import LocationReferenceStore
+from verselog.core.ship_reference import ShipReference
 from verselog.core.ship_reference_store import ShipReferenceStore
 
 
@@ -10,6 +11,7 @@ class RouteCost:
     distance_meters: float
     travel_time_seconds: float
     fuel_cost: float
+    ship: ShipReference
 
 
 class RouteCostCalculator:
@@ -49,4 +51,5 @@ class RouteCostCalculator:
             distance_meters=distance_meters,
             travel_time_seconds=travel_time_seconds,
             fuel_cost=fuel_cost,
+            ship=ship,
         )
