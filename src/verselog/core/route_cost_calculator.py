@@ -1,6 +1,7 @@
 import math
 from dataclasses import dataclass
 
+from verselog.core.fuel_override_store import FuelOverrideStore
 from verselog.core.location_reference_store import LocationReferenceStore
 from verselog.core.ship_reference import ShipReference
 from verselog.core.ship_reference_store import ShipReferenceStore
@@ -17,9 +18,15 @@ class RouteCost:
 class RouteCostCalculator:
     """Computes real point-to-point route cost from location coordinates + ship quantum stats."""
 
-    def __init__(self, location_store: LocationReferenceStore, ship_store: ShipReferenceStore) -> None:
+    def __init__(
+        self,
+        location_store: LocationReferenceStore,
+        ship_store: ShipReferenceStore,
+        fuel_override_store: FuelOverrideStore | None = None,
+    ) -> None:
         self._location_store = location_store
         self._ship_store = ship_store
+        self._fuel_override_store = fuel_override_store
 
     def calculate(self, departure: str, arrival: str, ship_name: str) -> RouteCost:
         departure_location = self._location_store.get_location(departure)
@@ -45,7 +52,10 @@ class RouteCostCalculator:
             (arrival_location.x, arrival_location.y, arrival_location.z),
         )
         travel_time_seconds = ship.quantum_spool_time + (distance_meters / ship.quantum_speed)
-        fuel_cost = distance_meters * (ship.quantum_fuel_capacity / ship.quantum_range)
+
+        override_rate = self._fuel_override_store.get_override(ship_name) if self._fuel_override_store else None
+        fuel_rate = override_rate if override_rate is not None else (ship.quantum_fuel_capacity / ship.quantum_range)
+        fuel_cost = distance_meters * fuel_rate
 
         return RouteCost(
             distance_meters=distance_meters,

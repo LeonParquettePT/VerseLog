@@ -63,7 +63,7 @@ development_status:
   2-2-point-to-point-route-cost-calculation: done
   2-3-loading-plan-derived-from-single-missions-route: done
   2-4-combined-route-and-loading-plan-for-multiple-missions: done
-  2-5-fuel-value-override-and-reset: backlog
+  2-5-fuel-value-override-and-reset: review
   epic-2-retrospective: optional
 
   epic-3: backlog
