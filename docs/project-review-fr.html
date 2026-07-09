@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VerseLog — Revue de projet</title>
+<style>
+  :root {
+    --bg: #0F1720;
+    --surface: #16212C;
+    --surface-2: #1C2933;
+    --surface-3: #223140;
+    --border: #2A3B49;
+    --text: #E8EDF2;
+    --text-dim: #8C9BAB;
+    --text-faint: #5E7085;
+    --accent: #D9A441;
+    --accent-soft: #D9A44122;
+    --accent-text: #F0C878;
+    --done: #4FA68A;
+    --done-soft: #4FA68A1A;
+    --gap: #D97748;
+    --gap-soft: #D977481A;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+    --sans: -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+    --radius: 3px;
+  }
+  :root[data-theme="light"] {
+    --bg: #F2F4F6;
+    --surface: #FFFFFF;
+    --surface-2: #EBEEF1;
+    --surface-3: #E0E5E9;
+    --border: #D4DBE1;
+    --text: #172026;
+    --text-dim: #52626F;
+    --text-faint: #8494A1;
+    --accent: #A6741F;
+    --accent-soft: #A6741F16;
+    --accent-text: #8A5E14;
+    --done: #227A5E;
+    --done-soft: #227A5E14;
+    --gap: #B5502A;
+    --gap-soft: #B5502A14;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #F2F4F6;
+      --surface: #FFFFFF;
+      --surface-2: #EBEEF1;
+      --surface-3: #E0E5E9;
+      --border: #D4DBE1;
+      --text: #172026;
+      --text-dim: #52626F;
+      --text-faint: #8494A1;
+      --accent: #A6741F;
+      --accent-soft: #A6741F16;
+      --accent-text: #8A5E14;
+      --done: #227A5E;
+      --done-soft: #227A5E14;
+      --gap: #B5502A;
+      --gap-soft: #B5502A14;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); color: var(--accent-text); }
+
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  code, .mono { font-family: var(--mono); }
+  .tabnum { font-variant-numeric: tabular-nums; }
+
+  h1, h2, h3, h4 { text-wrap: balance; font-family: var(--mono); font-weight: 600; margin: 0; }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* ---------- Barre laterale ---------- */
+  nav.side {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 18px 28px 0;
+    border-right: 1px solid var(--border);
+    scrollbar-width: thin;
+  }
+  .side-brand {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    padding-left: 14px;
+  }
+  .side-brand strong { color: var(--accent-text); }
+  .side-group { margin-bottom: 18px; }
+  .side-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0 14px;
+    margin-bottom: 6px;
+  }
+  .side-link {
+    display: block;
+    padding: 6px 14px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+  }
+  .side-link:hover { color: var(--text); text-decoration: none; background: var(--surface-2); }
+  .side-link.epic { color: var(--text); font-weight: 500; }
+
+  /* ---------- Contenu principal ---------- */
+  main { padding: 40px 36px 100px; min-width: 0; }
+
+  header.hero {
+    padding-bottom: 28px;
+    margin-bottom: 34px;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin-bottom: 10px;
+  }
+  h1.title { font-size: 32px; line-height: 1.15; letter-spacing: -0.01em; }
+  .subtitle {
+    font-family: var(--sans);
+    font-size: 15.5px;
+    color: var(--text-dim);
+    max-width: 62ch;
+    margin-top: 12px;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .stat {
+    background: var(--surface);
+    padding: 14px 16px;
+  }
+  .stat .n {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent-text);
+  }
+  .stat .l {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-top: 3px;
+  }
+
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  section > h2 {
+    font-size: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  section > h2 .tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+  section > p.lede {
+    color: var(--text-dim);
+    max-width: 68ch;
+    margin: 10px 0 22px;
+    font-size: 15px;
+  }
+
+  /* ---------- Blocs de prose ---------- */
+  .prose { max-width: 68ch; color: var(--text-dim); font-size: 15px; }
+  .prose strong { color: var(--text); font-weight: 600; }
+  blockquote {
+    margin: 18px 0;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 14.5px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  /* ---------- Diagramme d'architecture ---------- */
+  .arch-diagram {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 22px 0 26px;
+  }
+  .arch-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .arch-box.core {
+    grid-column: 1 / -1;
+    background: var(--surface-3);
+    border-color: var(--accent);
+    color: var(--text);
+    text-align: center;
+    padding: 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .arch-box .k { color: var(--text-faint); display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  .ad-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+  .ad-table th {
+    text-align: left; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-faint); padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  .ad-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-dim); }
+  .ad-table td:first-child { font-family: var(--mono); color: var(--accent-text); white-space: nowrap; font-weight: 600; }
+  .ad-table tr:last-child td { border-bottom: none; }
+
+  /* ---------- Cartes de story ---------- */
+  .story-grid { display: flex; flex-direction: column; gap: 12px; }
+  .story {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 16px 18px;
+  }
+  .story-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .story-id { font-family: var(--mono); font-size: 12px; color: var(--text-faint); }
+  .story-title { font-weight: 600; font-size: 14.5px; }
+  .pill {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 10px; margin-left: auto;
+  }
+  .pill.done { background: var(--done-soft); color: var(--done); }
+  .story-body { color: var(--text-dim); font-size: 13.5px; margin-top: 8px; max-width: 74ch; }
+  .story-body code { background: var(--surface-2); padding: 1px 5px; border-radius: 2px; font-size: 12.5px; color: var(--text); }
+  .story-note {
+    margin-top: 10px; padding: 9px 12px; background: var(--surface-2); border-radius: var(--radius);
+    font-size: 12.5px; color: var(--text-dim); border-left: 2px solid var(--border);
+  }
+  .story-note.fix { border-left-color: var(--gap); }
+  .story-note .lbl { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gap); display: block; margin-bottom: 3px; }
+
+  /* ---------- Journal de terrain (verification reelle) ---------- */
+  .fieldlog { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .entry { display: grid; grid-template-columns: 130px 1fr; gap: 18px; padding: 16px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .entry:last-child { border-bottom: none; }
+  .entry:nth-child(even) { background: var(--surface-2); }
+  .entry-tag { font-family: var(--mono); font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+  .entry-body h4 { font-size: 14px; margin-bottom: 6px; }
+  .entry-body p { font-size: 13.5px; color: var(--text-dim); margin: 0 0 6px; max-width: 72ch; }
+  .verdict { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; margin-top: 6px; }
+  .verdict.bad::before { content: "✕"; color: var(--gap); }
+  .verdict.good::before { content: "✓"; color: var(--done); }
+  .verdict .who { color: var(--text-faint); }
+
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
+  .model-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 13px; background: var(--surface-3); }
+  .model-card .m-name { font-family: var(--mono); font-size: 12.5px; font-weight: 600; }
+  .model-card .m-result { font-size: 12px; color: var(--text-dim); margin-top: 5px; }
+  .model-card.fail { border-left: 3px solid var(--gap); }
+  .model-card.ok { border-left: 3px solid var(--done); }
+
+  /* ---------- Manques ---------- */
+  .gap-list { display: flex; flex-direction: column; gap: 10px; }
+  .gap-item { display: flex; gap: 12px; padding: 12px 14px; background: var(--gap-soft); border-radius: var(--radius); border: 1px solid var(--border); }
+  .gap-item .g-mark { color: var(--gap); font-family: var(--mono); font-size: 13px; padding-top: 1px; }
+  .gap-item .g-body { font-size: 13.5px; color: var(--text-dim); }
+  .gap-item .g-body strong { color: var(--text); }
+
+  /* ---------- Arborescence ---------- */
+  .tree {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--text-dim);
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 20px; overflow-x: auto; white-space: pre;
+  }
+  .tree .dir { color: var(--accent-text); }
+  .tree .new { color: var(--done); }
+
+  footer {
+    margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  .mobile-nav-toggle { display: none; }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.side {
+      position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border);
+      padding: 16px; overflow: visible;
+    }
+    .side-group { display: none; }
+    #navtoggle:checked ~ .side-group { display: block; }
+    .mobile-nav-toggle {
+      display: block; width: 100%; text-align: left; background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+    }
+    main { padding: 28px 20px 60px; }
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .arch-diagram { grid-template-columns: repeat(2, 1fr); }
+    .entry { grid-template-columns: 1fr; gap: 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="side">
+    <div class="side-brand"><strong>VerseLog</strong> — revue</div>
+    <input type="checkbox" id="navtoggle" style="display:none;">
+    <label class="mobile-nav-toggle" for="navtoggle">Menu ▾</label>
+    <div class="side-group">
+      <div class="side-label">Vue d'ensemble</div>
+      <a class="side-link" href="#why">Pourquoi ce projet</a>
+      <a class="side-link" href="#architecture">Architecture</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 1</div>
+      <a class="side-link epic" href="#epic1">Scan de contrats fiable</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Verification terrain</div>
+      <a class="side-link epic" href="#fieldlog">Journal des tests reels</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 2</div>
+      <a class="side-link epic" href="#epic2">Route &amp; optimisation cargo</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 3</div>
+      <a class="side-link epic" href="#epic3">Legalite &amp; reputation</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Etat actuel</div>
+      <a class="side-link" href="#gaps">Ce qui n'est pas encore construit</a>
+      <a class="side-link" href="#tree">Plan des modules</a>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Revue de projet · 2026-07-07 → 2026-07-09</div>
+      <h1 class="title">VerseLog, de zero a trois epics clos</h1>
+      <p class="subtitle">Un assistant logistique gratuit et open-source pour Star Citizen. Construit en binome dev-et-agent via la methode BMad — brainstorm → spec → architecture → epics → implementation story par story, chacune derriere sa propre branche, sa PR et sa revue de code. Cette page retrace toute la construction, dans l'ordre.</p>
+      <div class="stat-strip">
+        <div class="stat"><div class="n tabnum">3</div><div class="l">Epics clos</div></div>
+        <div class="stat"><div class="n tabnum">14</div><div class="l">Stories livrees</div></div>
+        <div class="stat"><div class="n tabnum">16</div><div class="l">PR mergees</div></div>
+        <div class="stat"><div class="n tabnum">92</div><div class="l">Tests qui passent</div></div>
+        <div class="stat"><div class="n tabnum">25</div><div class="l">Modules source</div></div>
+      </div>
+    </header>
+
+    <section id="why">
+      <h2>Pourquoi ce projet existe <span class="tag">Spec — Why</span></h2>
+      <div class="prose">
+        <p>Un joueur de Star Citizen, solo et autodidacte, perdait plus de temps a calculer ses trajets de cargo a la main — quels contrats prendre, comment les enchainer, comment charger le vaisseau — qu'a vraiment jouer, et y perdait aussi en autonomie. <strong>VerseLog</strong> lit le tableau des contrats, valide ce qu'il lit, et renvoie une route et un plan de chargement qui maximisent les aUEC gagnes par minute.</p>
+        <p>Deux contraintes ont guide chaque decision qui a suivi : le jeu est encore en alpha, sans flux de donnees officiel, avec une interface qui peut changer a chaque patch ; et les joueurs vises jouent sur du materiel modeste, incapable d'absorber une application compagnon lourde en plus d'un jeu deja gourmand en CPU.</p>
+        <blockquote>Jamais d'API / Cloud payant. Aucune lecture de l'etat du jeu ni de sa memoire — uniquement de la capture d'ecran passive. Jamais d'acceptation ou de refus automatique dans le jeu. Open-source et sous licence MIT depuis le tout premier commit.</blockquote>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>Architecture <span class="tag">Ports &amp; Adapters</span></h2>
+      <p class="lede">Un cœur applicatif unique qui n'importe jamais un adaptateur concret. Chaque methode de capture, source de donnees, declencheur et interface est une implementation interchangeable d'une interface definie par le cœur.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-box"><span class="k">capture/</span>OCRProvider · VisionProvider</div>
+        <div class="arch-box"><span class="k">datasource/</span>CommunityAPIProvider · LocationDataProvider</div>
+        <div class="arch-box"><span class="k">trigger/</span>ManualTrigger · VoiceTrigger</div>
+        <div class="arch-box"><span class="k">ui/</span>UIPort — pas encore d'adaptateur</div>
+        <div class="arch-box core">core/ — TrustLayer · RouteCostCalculator · LoadingPlanCalculator · CombinedRoutePlanner · ReputationStore · LegalityChecker · SettingsStore</div>
+      </div>
+
+      <table class="ad-table">
+        <tr><th>Decision</th><th>Regle</th></tr>
+        <tr><td>AD-1</td><td>Le cœur n'importe jamais un adaptateur concret. Les adaptateurs dependent des ports definis par le cœur, jamais l'inverse.</td></tr>
+        <tr><td>AD-2</td><td>Python 3.12+ minimum — les ecosystemes OCR/vision ont du retard sur la derniere version.</td></tr>
+        <tr><td>AD-3</td><td>Chaque extraction brute d'un fournisseur passe par <strong>un seul</strong> service de confiance avant d'etre vue par la suite.</td></tr>
+        <tr><td>AD-4</td><td>Les donnees de reference importees en masse depuis la communaute vivent dans un seul fichier SQLite local — pas de copies eparpillees.</td></tr>
+        <tr><td>AD-5</td><td>Un seul processus desktop de longue duree ; les modeles se chargent a la demande au moment du scan, puis se dechargent.</td></tr>
+        <tr><td>AD-6</td><td>La capture tourne sur 1..N workers ; chaque resultat est mis en file vers la couche de confiance <strong>en serie</strong>.</td></tr>
+        <tr><td>AD-7</td><td>Un seul magasin de parametres local (budget temps, reputation, surcharges de carburant, resultats de benchmark) — les adaptateurs ne l'ecrivent jamais directement.</td></tr>
+        <tr><td>AD-8</td><td>Le benchmark produit le palier de modele <strong>et</strong> le nombre de workers surs ensemble, en une seule passe.</td></tr>
+      </table>
+    </section>
+
+    <section id="epic1">
+      <h2>Epic 1 — Scan de contrats fiable <span class="tag">7 stories · PR #1–7</span></h2>
+      <p class="lede">Declencher un scan, recuperer des donnees de contrat validees et fiables — un seul contrat ou plusieurs dizaines — dans un budget de temps donne.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.1</span><span class="story-title">Squelette du projet</span><span class="pill done">termine</span></div>
+          <div class="story-body">L'arborescence Ports &amp; Adapters — <code>core/</code>, <code>adapters/{capture,datasource,trigger,ui}/</code> — avec des interfaces de ports vides et un test "hello world" qui passe. Tout le reste se construit sur cette forme.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.2</span><span class="story-title">Capture manuelle par OCR classique</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>OCRProvider</code> capture l'ecran, lance Tesseract, et un parseur regex ecrit a la main (<code>parse_contract_text</code>) extrait depart / arrivee / SCU / recompense / temps restant. Limite aux contrats de type Hauling — le seul exemple reel dont on disposait.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.3</span><span class="story-title">Couche de confiance — validation &amp; quarantaine</span><span class="pill done">termine</span></div>
+          <div class="story-body">Le service unique par lequel passe chaque <code>CaptureResult</code>. Un champ suspect (nom de station qui ne ressemble a rien de connu, SCU ou recompense non positive) met le resultat en quarantaine et garde l'image source, au lieu de l'afficher comme fiable.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.4</span><span class="story-title">Declenchement vocal (VoiceAttack, Windows)</span><span class="pill done">termine</span></div>
+          <div class="story-body">Le meme patron de composition declencheur/capture que le declenchement manuel — un adaptateur de declenchement est construit avec une dependance vers un port de capture et lui delegue le travail. Windows uniquement ; Linux garde le chemin manuel, sans erreur pour le vocal absent.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.5</span><span class="story-title">Fournisseur vision local (Ollama)</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>VisionProvider</code> demande a un modele de vision Ollama local un JSON structure correspondant a la forme de <code>Contract</code> — meme port, meme type de retour que l'OCR, interchangeable derriere <code>CapturePort</code> sans que rien en aval n'ait besoin de savoir lequel a tourne.</div>
+          <div class="story-note fix"><span class="lbl">Revisite apres des tests reels — voir le journal de terrain</span>Le modele suppose n'existait pas et ses remplacants hallucinaient ; corrige une fois Ollama reellement installe et teste.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.6</span><span class="story-title">Benchmark materiel</span><span class="pill done">termine</span></div>
+          <div class="story-body">Benchmark de la machine <strong>pendant que le jeu tourne</strong> — une mesure a vide flatterait une machine incapable de suivre en pleine session. Choisit un palier de modele et un nombre de workers surs ensemble, sans jamais laisser aucun fournisseur choisi.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.7</span><span class="story-title">Scan par lots (workers paralleles)</span><span class="pill done">termine</span></div>
+          <div class="story-body">Un pool de 1 a N workers capture en parallele, mais chaque resultat est remis a la couche de confiance <strong>en serie</strong> via une boucle <code>as_completed()</code> sur le thread appelant — aucun worker n'ecrit jamais l'etat de quarantaine directement.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="fieldlog">
+      <h2>Verification terrain <span class="tag">Vraies captures d'ecran, vrai Ollama, vrais bugs</span></h2>
+      <p class="lede">Les tests unitaires utilisent des fixtures. Ces entrees racontent ce qui s'est passe quand le pipeline a rencontre deux vraies captures d'ecran de Star Citizen et un Ollama reellement installe — le moment ou toute la discipline "ne jamais inventer de donnees non verifiees" de ce projet a paye.</p>
+
+      <div class="fieldlog">
+        <div class="entry">
+          <div class="entry-tag">OCR · champ recompense</div>
+          <div class="entry-body">
+            <h4>Le glyphe monetaire ¤ ne survit pas a Tesseract</h4>
+            <p>Sur la vraie capture du contrat de Hauling, Tesseract a purement supprime le symbole ¤ sur une image et l'a mal lu comme <code>&amp;</code> sur une autre — la regex ancree sur le glyphe litteral ne matchait jamais.</p>
+            <div class="verdict bad">Extraction de la recompense en echec <span class="who">— decouvert via une vraie image</span></div>
+            <p style="margin-top:8px;">Corrige en ancrant sur le mot "Reward" plutot que sur le symbole : <code>Reward\D*?([\d,]+)</code>.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">OCR · champ lieu</div>
+          <div class="entry-body">
+            <h4>Un nom de lieu coupe sur deux lignes emporte son retour a la ligne dans la donnee</h4>
+            <p>"Greycat Stanton IV Production Complex-A" se coupe sur deux lignes dans la vraie interface — l'OCR renvoyait un <code>\n</code> brut dans la chaine d'arrivee, ce qui aurait silencieusement casse les recherches par nom exact dans le magasin de lieux construit deux epics plus tard.</p>
+            <div class="verdict bad">Le champ arrivee contenait un retour a la ligne integre</div>
+            <p style="margin-top:8px;">Corrige avec un utilitaire <code>_clean_location_name()</code> qui aplatit les espaces, applique au depart comme a l'arrivee.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Vision · choix du modele</div>
+          <div class="entry-body">
+            <h4>Quatre modeles de vision Ollama, testes sur les deux memes captures</h4>
+            <p>Le modele suppose par defaut (<code>phi3-vision</code>) s'est revele n'etre meme pas un vrai tag Ollama. Ollama installe pour de vrai, les quatre candidats testes a la fois avec un prompt libre "decris cette image" et avec le vrai chemin de capture en JSON structure.</p>
+            <div class="model-grid">
+              <div class="model-card fail">
+                <div class="m-name">llava-phi3</div>
+                <div class="m-result">Hallucination complete — a decrit un tableau de bord de voiture pour une capture de contrat.</div>
+              </div>
+              <div class="model-card fail">
+                <div class="m-name">moondream</div>
+                <div class="m-result">Hallucination aussi — texte repetitif sans rapport, JSON quasi-placeholder.</div>
+              </div>
+              <div class="model-card fail">
+                <div class="m-name">llama3.2-vision</div>
+                <div class="m-result">Echec pur et simple : <code>unknown model architecture: 'mllama'</code> sur la version d'Ollama installee.</div>
+              </div>
+              <div class="model-card ok">
+                <div class="m-name">qwen2.5vl:3b</div>
+                <div class="m-result">A correctement lu le vrai contenu — bonne recompense, bons lieux. Adopte comme nouveau modele par defaut.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Vision · SCU &amp; fenetre de contexte</div>
+          <div class="entry-body">
+            <h4>Deux bugs de plus reveles par le meme test reel</h4>
+            <p>Le modele retenu renvoyait la quantite <em>actuelle</em> de SCU au lieu de la <em>capacite</em> ("0" au lieu de "6" pour "0/6 SCU"), alors que le schema disait deja "le total" — corrige avec un exemple concret dans le prompt plutot qu'une description abstraite. Une capture de contrat plus chargee a ensuite depasse purement et simplement la fenetre de contexte par defaut d'Ollama (4096 tokens).</p>
+            <div class="verdict good">Les deux corriges — prompt reformule, <code>num_ctx</code> porte a 8192</div>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Planificateur de route combinee · egalite de distance</div>
+          <div class="entry-body">
+            <h4>Un agent de verification independant a retrace un bug de rejet a tort, a la main</h4>
+            <p>Quand un ramassage et une livraison etaient a egalite de distance, le planificateur glouton preferait toujours ramasser plus de cargo — ce qui pouvait empiler des missions inutilement et rejeter comme "capacite depassee" une route pourtant equivalente en cout et faisable en capacite.</p>
+            <div class="verdict bad">Confirme avec une entree concrete : deux missions, capacite du vaisseau correspondant exactement au SCU d'une seule mission</div>
+            <p style="margin-top:8px;">Corrige en listant le candidat "decharger" en premier, pour que les egalites favorisent la livraison avant de charger davantage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="epic2">
+      <h2>Epic 2 — Route &amp; optimisation cargo <span class="tag">5 stories · PR #8–14</span></h2>
+      <p class="lede">Transformer les contrats valides de l'Epic 1 en une vraie route et un vrai plan de chargement, adaptes au vaisseau qui la vole reellement.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.1</span><span class="story-title">Import des donnees de reference (SQLite local)</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>CommunityAPIProvider</code> pagine la liste des vaisseaux de <code>api.star-citizen.wiki</code> dans <code>ShipReferenceStore</code> — capacite de cargo, carburant/portee/vitesse/temps de spool quantique, mis a jour a chaque rafraichissement.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.2</span><span class="story-title">Calcul du cout d'une route point-a-point</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>RouteCostCalculator</code> calcule distance/temps/carburant reels a partir des coordonnees des lieux et des stats quantiques du vaisseau — distance euclidienne en 3D, temps de spool + distance/vitesse, carburant au metre depuis la portee pleine du vaisseau.</div>
+          <div class="story-note fix"><span class="lbl">Decouverte en cours de story</span><code>api.star-citizen.wiki</code> n'a aucune coordonnee du tout. Vraie source trouvee a la place : <code>starmap_positions.json</code> de <code>scunpacked-data</code>, verifie pour inclure les lieux exacts du contrat deja capture par ce projet. La revue de code a ensuite trouve un vrai <code>ZeroDivisionError</code> pour les vaisseaux sans moteur quantique (vehicules terrestres comme le Nox).</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.3</span><span class="story-title">Plan de chargement — mission unique</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>LoadingPlanCalculator</code> compose <code>RouteCostCalculator</code> plutot que de revalider lieux/vaisseau lui-meme — l'appeler sans route fonctionnelle est structurellement impossible. Ajoute le premier controle SCU-vs-capacite-de-cargo du code.</div>
+          <div class="story-note fix"><span class="lbl">Trouve en revue de code</span>Le meme vaisseau etait recupere deux fois depuis SQLite. Corrige en ajoutant un champ <code>ship</code> a <code>RouteCost</code> lui-meme, pour que le vaisseau deja recupere revienne gratuitement.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.4</span><span class="story-title">Route &amp; chargement combines — missions multiples</span><span class="pill done">termine</span></div>
+          <div class="story-body">Construction gloutonne du plus proche voisin dont l'ensemble de candidats, a chaque etape, se limite a "un ramassage pas encore visite" ou "la livraison du sommet actuel de la pile" — rend l'ordre de chargement LIFO structurellement impossible a violer, derive de la meme passe qui construit la route. Un solveur TSP/ILP exact a ete deliberement ecarte comme un exces NP-difficile pour une poignee realiste de missions simultanees.</div>
+          <div class="story-note fix"><span class="lbl">Verifie numeriquement</span>L'ordre intelligent coute 30 unites de distance contre 40 pour l'approche naive "finir la mission A, puis B" qui fait marche arriere. Voir le journal de terrain pour le bug d'egalite de distance trouve par la propre revue de code de cette story.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.5</span><span class="story-title">Surcharge et reinitialisation du carburant</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>FuelOverrideStore</code> enveloppe le magasin de parametres avec des surcharges de carburant au metre par vaisseau. Branche dans <code>RouteCostCalculator</code> comme parametre de constructeur <strong>optionnel</strong> — aucun des appels existants de 2.2 a 2.4 n'a eu besoin de changer.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="epic3">
+      <h2>Epic 3 — Legalite &amp; reputation <span class="tag">2 stories · PR #15–16</span></h2>
+      <p class="lede">Avertir avant un contrat potentiellement illegal, base sur une reputation tenue a jour — sans jamais toucher au jeu lui-meme.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">3.1</span><span class="story-title">Synchronisation de la reputation</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>ReputationStore</code> garde la reputation par faction dans le magasin de parametres, en reprenant exactement la forme de <code>FuelOverrideStore</code>. <code>sync()</code> met a jour en masse a partir de lectures detectees et ne fait rien sur une liste vide, pour que "rien detecte cette fois" n'efface jamais ce qui est deja connu.</div>
+          <div class="story-note"><span class="lbl">Volontairement reporte</span>Aucune vraie capture d'ecran de l'onglet REP en jeu n'existe encore, donc aucun format OCR/vision n'a ete invente pour lui. <code>sync()</code> est le point d'integration qu'un futur adaptateur de capture viendra brancher.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">3.2</span><span class="story-title">Confirmation de legalite avant un contrat risque</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>LegalityChecker</code> signale un contrat quand la reputation synchronisee d'une faction est a ou en dessous d'un seuil explicite — une donnee manquante (lieu non cartographie, faction non synchronisee) n'est jamais traitee comme risquee. <code>UIPort</code> gagne <code>confirm_risky_contract()</code> : l'outil ne fait que demander et rapporter le choix du joueur, jamais agir sur le contrat lui-meme.</div>
+          <div class="story-note"><span class="lbl">Volontairement reporte</span>Aucun jeu de donnees lieu→faction verifie n'existe, donc le mapping est un dictionnaire simplement injecte plutot que des donnees persistees inventees.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="gaps">
+      <h2>Ce qui n'est pas encore construit <span class="tag">Assume, pas cache</span></h2>
+      <p class="lede">Chaque story jusqu'ici releve de <code>core/</code> et des adaptateurs de capture/source de donnees. Deux choses ont ete systematiquement reportees plutot que devinees :</p>
+      <div class="gap-list">
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>Aucun point d'entree applicatif.</strong> Rien ne relie encore declencheur → capture → couche de confiance → interface en une application qui tourne — chaque piece est construite et testee isolement.</div>
+        </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>Aucun adaptateur d'interface concret.</strong> <code>UIPort</code> (fenetre de resultats, popup de contrat risque) n'a encore aucune implementation — le seed Tkinter reste sur la liste des elements reportes.</div>
+        </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>Aucun adaptateur de capture pour l'ecran de reputation.</strong> <code>ReputationStore.sync()</code> est pret a recevoir des lectures ; rien ne les produit encore.</div>
+        </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>Aucun jeu de donnees lieu→faction verifie.</strong> Le mapping territorial de <code>LegalityChecker</code> est un dictionnaire injecte, en attendant qu'une vraie source soit trouvee.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tree">
+      <h2>Plan des modules <span class="tag">src/verselog/</span></h2>
+      <div class="tree">core/
+  <span class="new">contract.py            capture_result.py       settings_store.py</span>
+  <span class="new">trust_layer.py          batch_scanner.py</span>
+  <span class="new">ship_reference.py       ship_reference_store.py</span>
+  <span class="new">location_reference.py   location_reference_store.py</span>
+  <span class="new">route_cost_calculator.py</span>
+  <span class="new">loading_plan_calculator.py</span>
+  <span class="new">combined_route_planner.py</span>
+  <span class="new">fuel_override_store.py</span>
+  <span class="new">reputation_store.py     legality_checker.py</span>
+  ports/
+    capture_port.py  datasource_port.py  trigger_port.py  ui_port.py
+adapters/
+  capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  screenshot.py  benchmark.py
+  datasource/ community_api_provider.py  location_data_provider.py
+  trigger/    manual_trigger.py  voice_trigger.py
+  ui/         <span class="tree" style="color:var(--gap);">— vide, reporte —</span></div>
+    </section>
+
+    <footer>
+      <span>VerseLog — sous licence MIT, open-source depuis le premier commit.</span>
+      <span class="mono tabnum">75 commits · 16 PR · 92 tests au vert</span>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VerseLog — Project Review</title>
+<style>
+  :root {
+    --bg: #0F1720;
+    --surface: #16212C;
+    --surface-2: #1C2933;
+    --surface-3: #223140;
+    --border: #2A3B49;
+    --text: #E8EDF2;
+    --text-dim: #8C9BAB;
+    --text-faint: #5E7085;
+    --accent: #D9A441;
+    --accent-soft: #D9A44122;
+    --accent-text: #F0C878;
+    --done: #4FA68A;
+    --done-soft: #4FA68A1A;
+    --gap: #D97748;
+    --gap-soft: #D977481A;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+    --sans: -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+    --radius: 3px;
+  }
+  :root[data-theme="light"] {
+    --bg: #F2F4F6;
+    --surface: #FFFFFF;
+    --surface-2: #EBEEF1;
+    --surface-3: #E0E5E9;
+    --border: #D4DBE1;
+    --text: #172026;
+    --text-dim: #52626F;
+    --text-faint: #8494A1;
+    --accent: #A6741F;
+    --accent-soft: #A6741F16;
+    --accent-text: #8A5E14;
+    --done: #227A5E;
+    --done-soft: #227A5E14;
+    --gap: #B5502A;
+    --gap-soft: #B5502A14;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #F2F4F6;
+      --surface: #FFFFFF;
+      --surface-2: #EBEEF1;
+      --surface-3: #E0E5E9;
+      --border: #D4DBE1;
+      --text: #172026;
+      --text-dim: #52626F;
+      --text-faint: #8494A1;
+      --accent: #A6741F;
+      --accent-soft: #A6741F16;
+      --accent-text: #8A5E14;
+      --done: #227A5E;
+      --done-soft: #227A5E14;
+      --gap: #B5502A;
+      --gap-soft: #B5502A14;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); color: var(--accent-text); }
+
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  code, .mono { font-family: var(--mono); }
+  .tabnum { font-variant-numeric: tabular-nums; }
+
+  h1, h2, h3, h4 { text-wrap: balance; font-family: var(--mono); font-weight: 600; margin: 0; }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* ---------- Sidebar ---------- */
+  nav.side {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 18px 28px 0;
+    border-right: 1px solid var(--border);
+    scrollbar-width: thin;
+  }
+  .side-brand {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    padding-left: 14px;
+  }
+  .side-brand strong { color: var(--accent-text); }
+  .side-group { margin-bottom: 18px; }
+  .side-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0 14px;
+    margin-bottom: 6px;
+  }
+  .side-link {
+    display: block;
+    padding: 6px 14px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+  }
+  .side-link:hover { color: var(--text); text-decoration: none; background: var(--surface-2); }
+  .side-link.epic { color: var(--text); font-weight: 500; }
+
+  /* ---------- Main ---------- */
+  main { padding: 40px 36px 100px; min-width: 0; }
+
+  header.hero {
+    padding-bottom: 28px;
+    margin-bottom: 34px;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin-bottom: 10px;
+  }
+  h1.title { font-size: 32px; line-height: 1.15; letter-spacing: -0.01em; }
+  .subtitle {
+    font-family: var(--sans);
+    font-size: 15.5px;
+    color: var(--text-dim);
+    max-width: 62ch;
+    margin-top: 12px;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .stat {
+    background: var(--surface);
+    padding: 14px 16px;
+  }
+  .stat .n {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent-text);
+  }
+  .stat .l {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-top: 3px;
+  }
+
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  section > h2 {
+    font-size: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  section > h2 .tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+  section > p.lede {
+    color: var(--text-dim);
+    max-width: 68ch;
+    margin: 10px 0 22px;
+    font-size: 15px;
+  }
+
+  /* ---------- Why / prose blocks ---------- */
+  .prose { max-width: 68ch; color: var(--text-dim); font-size: 15px; }
+  .prose strong { color: var(--text); font-weight: 600; }
+  blockquote {
+    margin: 18px 0;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 14.5px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  /* ---------- Architecture diagram ---------- */
+  .arch-diagram {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 22px 0 26px;
+  }
+  .arch-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .arch-box.core {
+    grid-column: 1 / -1;
+    background: var(--surface-3);
+    border-color: var(--accent);
+    color: var(--text);
+    text-align: center;
+    padding: 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .arch-box .k { color: var(--text-faint); display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  .ad-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+  .ad-table th {
+    text-align: left; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-faint); padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  .ad-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-dim); }
+  .ad-table td:first-child { font-family: var(--mono); color: var(--accent-text); white-space: nowrap; font-weight: 600; }
+  .ad-table tr:last-child td { border-bottom: none; }
+
+  /* ---------- Story cards ---------- */
+  .story-grid { display: flex; flex-direction: column; gap: 12px; }
+  .story {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 16px 18px;
+  }
+  .story-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .story-id { font-family: var(--mono); font-size: 12px; color: var(--text-faint); }
+  .story-title { font-weight: 600; font-size: 14.5px; }
+  .pill {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 10px; margin-left: auto;
+  }
+  .pill.done { background: var(--done-soft); color: var(--done); }
+  .story-body { color: var(--text-dim); font-size: 13.5px; margin-top: 8px; max-width: 74ch; }
+  .story-body code { background: var(--surface-2); padding: 1px 5px; border-radius: 2px; font-size: 12.5px; color: var(--text); }
+  .story-note {
+    margin-top: 10px; padding: 9px 12px; background: var(--surface-2); border-radius: var(--radius);
+    font-size: 12.5px; color: var(--text-dim); border-left: 2px solid var(--border);
+  }
+  .story-note.fix { border-left-color: var(--gap); }
+  .story-note .lbl { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gap); display: block; margin-bottom: 3px; }
+
+  /* ---------- Field log (real-world verification) ---------- */
+  .fieldlog { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .entry { display: grid; grid-template-columns: 130px 1fr; gap: 18px; padding: 16px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .entry:last-child { border-bottom: none; }
+  .entry:nth-child(even) { background: var(--surface-2); }
+  .entry-tag { font-family: var(--mono); font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+  .entry-body h4 { font-size: 14px; margin-bottom: 6px; }
+  .entry-body p { font-size: 13.5px; color: var(--text-dim); margin: 0 0 6px; max-width: 72ch; }
+  .verdict { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; margin-top: 6px; }
+  .verdict.bad::before { content: "✕"; color: var(--gap); }
+  .verdict.good::before { content: "✓"; color: var(--done); }
+  .verdict .who { color: var(--text-faint); }
+
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
+  .model-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 13px; background: var(--surface-3); }
+  .model-card .m-name { font-family: var(--mono); font-size: 12.5px; font-weight: 600; }
+  .model-card .m-result { font-size: 12px; color: var(--text-dim); margin-top: 5px; }
+  .model-card.fail { border-left: 3px solid var(--gap); }
+  .model-card.ok { border-left: 3px solid var(--done); }
+
+  /* ---------- Gaps ---------- */
+  .gap-list { display: flex; flex-direction: column; gap: 10px; }
+  .gap-item { display: flex; gap: 12px; padding: 12px 14px; background: var(--gap-soft); border-radius: var(--radius); border: 1px solid var(--border); }
+  .gap-item .g-mark { color: var(--gap); font-family: var(--mono); font-size: 13px; padding-top: 1px; }
+  .gap-item .g-body { font-size: 13.5px; color: var(--text-dim); }
+  .gap-item .g-body strong { color: var(--text); }
+
+  /* ---------- Tree ---------- */
+  .tree {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--text-dim);
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 20px; overflow-x: auto; white-space: pre;
+  }
+  .tree .dir { color: var(--accent-text); }
+  .tree .new { color: var(--done); }
+
+  footer {
+    margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  .mobile-nav-toggle { display: none; }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.side {
+      position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border);
+      padding: 16px; overflow: visible;
+    }
+    .side-group { display: none; }
+    #navtoggle:checked ~ .side-group { display: block; }
+    .mobile-nav-toggle {
+      display: block; width: 100%; text-align: left; background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+    }
+    main { padding: 28px 20px 60px; }
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .arch-diagram { grid-template-columns: repeat(2, 1fr); }
+    .entry { grid-template-columns: 1fr; gap: 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="side">
+    <div class="side-brand"><strong>VerseLog</strong> — review</div>
+    <input type="checkbox" id="navtoggle" style="display:none;">
+    <label class="mobile-nav-toggle" for="navtoggle">Menu ▾</label>
+    <div class="side-group">
+      <div class="side-label">Overview</div>
+      <a class="side-link" href="#why">Why this exists</a>
+      <a class="side-link" href="#architecture">Architecture</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 1</div>
+      <a class="side-link epic" href="#epic1">Reliable Contract Scanning</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Field verification</div>
+      <a class="side-link epic" href="#fieldlog">Real-world testing log</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 2</div>
+      <a class="side-link epic" href="#epic2">Route &amp; Cargo Optimization</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 3</div>
+      <a class="side-link epic" href="#epic3">Legality &amp; Reputation Safety</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">State</div>
+      <a class="side-link" href="#gaps">What's not built yet</a>
+      <a class="side-link" href="#tree">Module map</a>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Project review · 2026-07-07 → 2026-07-09</div>
+      <h1 class="title">VerseLog, from zero to three closed epics</h1>
+      <p class="subtitle">A free, open-source logistics assistant for Star Citizen. Built solo-dev-and-agent through the BMad method — brainstorm → spec → architecture → epics → story-by-story implementation, each behind its own branch, PR and code review. This page retraces the whole build in order.</p>
+      <div class="stat-strip">
+        <div class="stat"><div class="n tabnum">3</div><div class="l">Epics closed</div></div>
+        <div class="stat"><div class="n tabnum">14</div><div class="l">Stories shipped</div></div>
+        <div class="stat"><div class="n tabnum">16</div><div class="l">PRs merged</div></div>
+        <div class="stat"><div class="n tabnum">92</div><div class="l">Tests passing</div></div>
+        <div class="stat"><div class="n tabnum">25</div><div class="l">Source modules</div></div>
+      </div>
+    </header>
+
+    <section id="why">
+      <h2>Why this exists <span class="tag">Spec — Why</span></h2>
+      <div class="prose">
+        <p>A solo, self-taught Star Citizen player was losing more time hand-calculating cargo runs — which contracts to take, how to route them, how to load the ship — than actually playing. <strong>VerseLog</strong> reads the contract board, validates what it reads, and hands back a route and cargo plan maximizing aUEC earned per minute.</p>
+        <p>Two constraints shaped every decision that followed: the game is still in alpha with no official data feed and a UI that can change under any patch, and the intended audience runs on modest hardware that can't absorb a heavy companion app on top of an already CPU-bound game.</p>
+        <blockquote>No paid cloud API, ever. No game-state or memory reading — passive screen capture only. Never auto-accepts or auto-declines anything in-game. Open-source and MIT-licensed from the first commit.</blockquote>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>Architecture <span class="tag">Ports &amp; Adapters</span></h2>
+      <p class="lede">One domain core that never imports a concrete adapter. Every capture method, data source, trigger, and UI is a swappable implementation of a core-defined interface.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-box"><span class="k">capture/</span>OCRProvider · VisionProvider</div>
+        <div class="arch-box"><span class="k">datasource/</span>CommunityAPIProvider · LocationDataProvider</div>
+        <div class="arch-box"><span class="k">trigger/</span>ManualTrigger · VoiceTrigger</div>
+        <div class="arch-box"><span class="k">ui/</span>UIPort — no adapter yet</div>
+        <div class="arch-box core">core/ — TrustLayer · RouteCostCalculator · LoadingPlanCalculator · CombinedRoutePlanner · ReputationStore · LegalityChecker · SettingsStore</div>
+      </div>
+
+      <table class="ad-table">
+        <tr><th>Decision</th><th>Rule</th></tr>
+        <tr><td>AD-1</td><td>Core never imports a concrete adapter. Adapters depend on core-defined ports, never the reverse.</td></tr>
+        <tr><td>AD-2</td><td>Python 3.12+ floor — OCR/vision library ecosystems lag the newest release.</td></tr>
+        <tr><td>AD-3</td><td>Every provider's raw extraction passes through <strong>one</strong> trust-layer service before anything downstream sees it.</td></tr>
+        <tr><td>AD-4</td><td>Bulk-imported community reference data lives in one local SQLite file — no scattered copies.</td></tr>
+        <tr><td>AD-5</td><td>Single long-running desktop process; models load lazily at scan time, unload after.</td></tr>
+        <tr><td>AD-6</td><td>Capture runs on 1..N workers; every result is queued into the trust layer <strong>serially</strong>.</td></tr>
+        <tr><td>AD-7</td><td>One local settings store (time budget, reputation, fuel overrides, benchmark results) — adapters never write it directly.</td></tr>
+        <tr><td>AD-8</td><td>The benchmark outputs model tier <strong>and</strong> safe worker count together, in one pass.</td></tr>
+      </table>
+    </section>
+
+    <section id="epic1">
+      <h2>Epic 1 — Reliable Contract Scanning <span class="tag">7 stories · PR #1–7</span></h2>
+      <p class="lede">Trigger a scan, get back validated, trustworthy contract data — one contract or a few dozen — within a time budget.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.1</span><span class="story-title">Project Scaffold</span><span class="pill done">done</span></div>
+          <div class="story-body">The Ports &amp; Adapters tree — <code>core/</code>, <code>adapters/{capture,datasource,trigger,ui}/</code> — with empty port interfaces and a passing hello-world test. Everything else builds on this shape.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.2</span><span class="story-title">Manual Capture via Classic OCR</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>OCRProvider</code> screenshots the screen, runs Tesseract, and a hand-written regex parser (<code>parse_contract_text</code>) extracts departure / arrival / SCU / reward / remaining time. Scoped to Hauling-type contracts — the one real example on file.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.3</span><span class="story-title">Trust Layer — Validation &amp; Quarantine</span><span class="pill done">done</span></div>
+          <div class="story-body">The single service every <code>CaptureResult</code> funnels through. A suspect field (unknown-looking station name, non-positive SCU or reward) quarantines the result and keeps the source image instead of showing it as trustworthy.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.4</span><span class="story-title">Voice Trigger (VoiceAttack, Windows)</span><span class="pill done">done</span></div>
+          <div class="story-body">Same trigger/capture composition pattern as manual triggering — a trigger adapter is built with a capture-port dependency and delegates to it. Windows-only; Linux keeps the manual path with no error for the missing voice one.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.5</span><span class="story-title">Local Vision Provider (Ollama)</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>VisionProvider</code> asks a local Ollama vision model for structured JSON matching <code>Contract</code>'s shape — same port, same return type as OCR, swappable behind <code>CapturePort</code> with nothing downstream needing to know which one ran.</div>
+          <div class="story-note fix"><span class="lbl">Revisited after real testing — see field log</span>The assumed model didn't exist and its stand-ins hallucinated; fixed once Ollama was actually installed and run.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.6</span><span class="story-title">Hardware Benchmark</span><span class="pill done">done</span></div>
+          <div class="story-body">Benchmarks the host <strong>while the game is running</strong> — an idle-PC reading would flatter a machine that can't keep up mid-session. Picks a model tier and a safe worker count together, never leaving no provider chosen.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">1.7</span><span class="story-title">Batch Scanning (Parallel Workers)</span><span class="pill done">done</span></div>
+          <div class="story-body">A pool of 1..N workers captures in parallel, but every result is handed to the trust layer <strong>serially</strong> via a calling-thread <code>as_completed()</code> loop — no worker ever writes quarantine state directly.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="fieldlog">
+      <h2>Field verification <span class="tag">Real screenshots, real Ollama, real bugs</span></h2>
+      <p class="lede">Unit tests use fixtures. These entries are what happened when the pipeline met two real Star Citizen screenshots and an actually-installed Ollama — the moment this project's whole "don't invent unverified data" discipline paid for itself.</p>
+
+      <div class="fieldlog">
+        <div class="entry">
+          <div class="entry-tag">OCR · reward field</div>
+          <div class="entry-body">
+            <h4>The ¤ currency glyph doesn't survive Tesseract</h4>
+            <p>Against the real Hauling-contract screenshot, Tesseract dropped the ¤ symbol entirely on one image and misread it as <code>&amp;</code> on another — the regex anchored on the literal glyph never matched.</p>
+            <div class="verdict bad">Reward extraction failed <span class="who">— found via real image</span></div>
+            <p style="margin-top:8px;">Fixed by anchoring on the word "Reward" instead of the symbol: <code>Reward\D*?([\d,]+)</code>.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">OCR · location field</div>
+          <div class="entry-body">
+            <h4>A wrapped location name carries its line break into the data</h4>
+            <p>"Greycat Stanton IV Production Complex-A" wraps across two lines in the real UI — OCR handed back a raw <code>\n</code> inside the arrival string, which would silently break exact-name lookups against the location store built two epics later.</p>
+            <div class="verdict bad">Arrival field had an embedded newline</div>
+            <p style="margin-top:8px;">Fixed with a <code>_clean_location_name()</code> whitespace-collapse helper, applied to both departure and arrival.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Vision · model selection</div>
+          <div class="entry-body">
+            <h4>Four Ollama vision models, tested against the same two screenshots</h4>
+            <p>The assumed default (<code>phi3-vision</code>) turned out not to be a real Ollama tag at all. Installed Ollama for real and ran all four candidates through both a free-form "describe this image" prompt and the actual structured-JSON capture path.</p>
+            <div class="model-grid">
+              <div class="model-card fail">
+                <div class="m-name">llava-phi3</div>
+                <div class="m-result">Hallucinated completely — described a car dashboard console for a contract screenshot.</div>
+              </div>
+              <div class="model-card fail">
+                <div class="m-name">moondream</div>
+                <div class="m-result">Hallucinated too — repetitive unrelated text, near-placeholder JSON output.</div>
+              </div>
+              <div class="model-card fail">
+                <div class="m-name">llama3.2-vision</div>
+                <div class="m-result">Failed outright: <code>unknown model architecture: 'mllama'</code> on the installed Ollama build.</div>
+              </div>
+              <div class="model-card ok">
+                <div class="m-name">qwen2.5vl:3b</div>
+                <div class="m-result">Read the real content correctly — correct reward, correct locations. Adopted as the new default.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Vision · SCU &amp; context window</div>
+          <div class="entry-body">
+            <h4>Two more bugs surfaced by the same real run</h4>
+            <p>The winning model returned the <em>current</em> SCU amount instead of the <em>capacity</em> ("0" instead of "6" from "0/6 SCU") despite the schema already saying "the total" — fixed with a worked example in the prompt instead of an abstract description. A busier contract screenshot then exceeded Ollama's 4096-token default context window outright.</p>
+            <div class="verdict good">Both fixed — prompt reworded, <code>num_ctx</code> raised to 8192</div>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Combined route planner · tie-break</div>
+          <div class="entry-body">
+            <h4>An independent verification agent traced a false-rejection bug by hand</h4>
+            <p>When a pickup and a delivery tied on distance, the greedy planner always preferred picking up more cargo — which could stack missions unnecessarily and reject an equal-cost, capacity-feasible route as "exceeds capacity."</p>
+            <div class="verdict bad">Confirmed with a concrete input: two missions, ship capacity exactly matching one mission's SCU</div>
+            <p style="margin-top:8px;">Fixed by listing the unload candidate first, so ties favor delivering before loading more.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="epic2">
+      <h2>Epic 2 — Route &amp; Cargo Optimization <span class="tag">5 stories · PR #8–14</span></h2>
+      <p class="lede">Turn Epic 1's validated contracts into a real route and loading plan, adapted to the ship actually flying it.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.1</span><span class="story-title">Reference Data Import (Local SQLite)</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>CommunityAPIProvider</code> paginates <code>api.star-citizen.wiki</code>'s vehicle list into <code>ShipReferenceStore</code> — cargo capacity, quantum fuel/range/speed/spool-time, upserted on refresh.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.2</span><span class="story-title">Point-to-Point Route Cost Calculation</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>RouteCostCalculator</code> computes real distance/time/fuel from location coordinates and a ship's quantum stats — 3D Euclidean distance, spool time + distance/speed, fuel-per-meter from the ship's own full-tank range.</div>
+          <div class="story-note fix"><span class="lbl">Discovery mid-story</span><code>api.star-citizen.wiki</code> has no coordinates at all. Found the real source instead: <code>scunpacked-data</code>'s <code>starmap_positions.json</code>, verified to include this project's own captured contract's exact locations. Code review then caught a real <code>ZeroDivisionError</code> for ships with no quantum drive (ground vehicles like the Nox).</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.3</span><span class="story-title">Loading Plan — Single Mission</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>LoadingPlanCalculator</code> composes <code>RouteCostCalculator</code> rather than re-validating locations/ship itself — calling it without a working route is structurally impossible. Adds the first SCU-vs-cargo-capacity check in the codebase.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>Fetched the same ship twice from SQLite. Fixed by adding a <code>ship</code> field to <code>RouteCost</code> itself, so the already-fetched ship comes back for free.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.4</span><span class="story-title">Combined Route &amp; Loading — Multiple Missions</span><span class="pill done">done</span></div>
+          <div class="story-body">Greedy nearest-neighbor construction whose candidate set at every step is only "an unvisited pickup" or "the current top-of-stack's delivery" — makes the LIFO loading order structurally impossible to violate, derived from the same pass that builds the route. An exact TSP/ILP solver was deliberately rejected as NP-hard overkill for a realistic handful of simultaneous missions.</div>
+          <div class="story-note fix"><span class="lbl">Verified numerically</span>Smart ordering costs 30 distance units vs. 40 for the naive "finish mission A, then B" approach that backtracks. See the field log for the tie-break bug this story's own code review turned up.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">2.5</span><span class="story-title">Fuel Value Override &amp; Reset</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>FuelOverrideStore</code> wraps the settings store with per-ship fuel-per-meter overrides. Wired into <code>RouteCostCalculator</code> as an <strong>optional</strong> constructor parameter — every existing call site from 2.2–2.4 needed zero changes.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="epic3">
+      <h2>Epic 3 — Legality &amp; Reputation Safety <span class="tag">2 stories · PR #15–16</span></h2>
+      <p class="lede">Warn before a potentially illegal contract, based on reputation kept in sync — without ever touching the game itself.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">3.1</span><span class="story-title">Reputation Sync</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>ReputationStore</code> holds per-faction standing in the settings store, mirroring <code>FuelOverrideStore</code>'s shape exactly. <code>sync()</code> bulk-updates from detected readings and is a no-op on an empty list, so "nothing detected this pass" never wipes what's already known.</div>
+          <div class="story-note"><span class="lbl">Deliberately deferred</span>No real screenshot of the in-game REP screen exists yet, so no OCR/vision pattern was invented against it. <code>sync()</code> is the seam a future capture adapter plugs into.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">3.2</span><span class="story-title">Legality Confirmation Before a Risky Contract</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>LegalityChecker</code> flags a contract when a faction's synced standing is at or below an explicit threshold — missing data (unmapped location, unsynced faction) is never treated as risky. <code>UIPort</code> gains <code>confirm_risky_contract()</code>: it only asks and reports the player's choice back, never acts on the contract itself.</div>
+          <div class="story-note"><span class="lbl">Deliberately deferred</span>No verified location→faction dataset exists, so the mapping is a plain injected dict rather than invented persisted data.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="gaps">
+      <h2>What's not built yet <span class="tag">Stated, not hidden</span></h2>
+      <p class="lede">Every story so far is <code>core/</code> and capture/data-source adapters. Two things were consistently deferred rather than guessed at:</p>
+      <div class="gap-list">
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>No application entrypoint.</strong> Nothing yet wires trigger → capture → trust layer → UI together into a running app — each piece is built and tested in isolation.</div>
+        </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>No concrete UI adapter.</strong> <code>UIPort</code> (results window, risky-contract popup) has no implementation yet — the Tkinter seed UI is still on the deferred list.</div>
+        </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>No reputation-screen capture adapter.</strong> <code>ReputationStore.sync()</code> is ready to receive readings; nothing produces them yet.</div>
+        </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>No verified location→faction dataset.</strong> <code>LegalityChecker</code>'s territory mapping is an injected dict until a real source is found.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tree">
+      <h2>Module map <span class="tag">src/verselog/</span></h2>
+      <div class="tree">core/
+  <span class="new">contract.py            capture_result.py       settings_store.py</span>
+  <span class="new">trust_layer.py          batch_scanner.py</span>
+  <span class="new">ship_reference.py       ship_reference_store.py</span>
+  <span class="new">location_reference.py   location_reference_store.py</span>
+  <span class="new">route_cost_calculator.py</span>
+  <span class="new">loading_plan_calculator.py</span>
+  <span class="new">combined_route_planner.py</span>
+  <span class="new">fuel_override_store.py</span>
+  <span class="new">reputation_store.py     legality_checker.py</span>
+  ports/
+    capture_port.py  datasource_port.py  trigger_port.py  ui_port.py
+adapters/
+  capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  screenshot.py  benchmark.py
+  datasource/ community_api_provider.py  location_data_provider.py
+  trigger/    manual_trigger.py  voice_trigger.py
+  ui/         <span class="tree" style="color:var(--gap);">— empty, deferred —</span></div>
+    </section>
+
+    <footer>
+      <span>VerseLog — MIT licensed, open-source from the first commit.</span>
+      <span class="mono tabnum">75 commits · 16 PRs · 92 tests green</span>
+    </footer>
+  </main>
+</div>
+</body>
+</html>
