@@ -4,7 +4,7 @@ baseline_commit: 4a776c29b11c897ded084a529e9d314d9a0217bd
 
 # Story 4.3: Risky-Contract Confirmation Popup
 
-Status: review
+Status: done
 
 ## Story
 

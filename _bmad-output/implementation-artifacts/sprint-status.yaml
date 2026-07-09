@@ -71,8 +71,8 @@ development_status:
   3-2-legality-confirmation-before-risky-contract: done
   epic-3-retrospective: optional
 
-  epic-4: in-progress
+  epic-4: done
   4-1-application-entrypoint-wiring: done
   4-2-results-window-tkinter-ui-adapter: done
-  4-3-risky-contract-confirmation-popup: review
+  4-3-risky-contract-confirmation-popup: done
   epic-4-retrospective: optional
