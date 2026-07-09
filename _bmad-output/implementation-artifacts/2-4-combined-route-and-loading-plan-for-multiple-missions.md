@@ -4,7 +4,7 @@ baseline_commit: 058d829fb3f9d224cdf7d726053bebe8df980757
 
 # Story 2.4: Combined Route and Loading Plan for Multiple Missions
 
-Status: review
+Status: done
 
 ## Story
 
