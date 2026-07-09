@@ -38,11 +38,15 @@ class CombinedRoutePlanner:
         total_distance = total_time = total_fuel = 0.0
 
         while remaining_pickups or stack:
-            candidates: list[tuple[Contract, str, str]] = [
-                (contract, contract.departure, "load") for contract in remaining_pickups
-            ]
+            # Unload candidate listed first: on a distance tie, `min()` below
+            # keeps the first-seen candidate, and delivering before picking
+            # up more (when it costs the same either way) never increases
+            # onboard cargo unnecessarily - preferring "load" on a tie could
+            # reject an otherwise-feasible plan for exceeding capacity.
+            candidates: list[tuple[Contract, str, str]] = []
             if stack:
                 candidates.append((stack[-1], stack[-1].arrival, "unload"))
+            candidates.extend((contract, contract.departure, "load") for contract in remaining_pickups)
 
             if current_location is None:
                 contract, location, action = candidates[0]

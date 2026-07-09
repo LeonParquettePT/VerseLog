@@ -114,7 +114,7 @@ claude-sonnet-5
 - During implementation, avoided a duplicate-`calculate()`-call bug analogous to the one Story 2.3's code review caught: computed each candidate's leg once during the nearest-neighbor comparison and reused that same result for the chosen candidate's totals/ship, rather than calling `calculate()` again after selection.
 - Added the cross-mission cargo-capacity check (walks the final `steps` tracking running onboard SCU) — confirmed with a test where two missions each individually fit the ship but overflow it when carried simultaneously.
 - Verified the "avoids zig-zagging" claim numerically: a synthetic 3-stop scenario where the smart order costs 30 (distance units) vs. 40 for the naive "finish mission A, then B" ordering that backtracks.
-- All acceptance criteria satisfied; 68/68 tests passing (60 pre-existing + 8 new).
+- All acceptance criteria satisfied; 69/69 tests passing (60 pre-existing + 9 new, including the tie-break regression test added during code review).
 
 ### File List
 
@@ -124,3 +124,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-09: Story implemented — `CombinedPlan`/`CombinedRoutePlanner` added, deriving a multi-mission route and LIFO loading order from a single greedy-construction pass, all tasks complete, 68/68 tests passing, status moved to review.
+- 2026-07-09: Code review (independent verification agent) found a real correctness bug: on a distance tie between "pick up the next mission here" and "deliver the mission on top of the stack here," candidate ordering always favored the pickup, which could stack multiple missions' cargo unnecessarily and cause a spurious "capacity exceeded" rejection for an input that actually has an equally-cheap, capacity-feasible route. Fixed by listing the unload candidate first, so ties favor delivering before picking up more. Added a regression test reproducing the exact scenario (two missions, ship capacity exactly matching one mission's SCU). 69/69 tests passing.

@@ -94,6 +94,36 @@ def test_lifo_stack_is_never_violated(tmp_path):
             onboard.pop()
 
 
+def test_prefers_delivering_over_loading_on_a_distance_tie(tmp_path):
+    # X=0, Y=10, Z=20. Mission A: X -> Y (scu=2). Mission B: Y -> Z (scu=2).
+    # Ship capacity is exactly 2. After loading A at X and arriving at Y,
+    # "pick up B here" and "deliver A here" both cost 0 (a genuine tie).
+    # Preferring the pickup would stack both (4 SCU) and wrongly reject an
+    # otherwise-feasible plan for exceeding a 2 SCU capacity; delivering A
+    # first keeps onboard cargo at 2 SCU throughout, which is feasible.
+    planner, location_store, ship_store = _planner(tmp_path)
+    location_store.save_locations(
+        [
+            LocationReference(name="X", system="stanton", x=0.0, y=0.0, z=0.0),
+            LocationReference(name="Y", system="stanton", x=10.0, y=0.0, z=0.0),
+            LocationReference(name="Z", system="stanton", x=20.0, y=0.0, z=0.0),
+        ]
+    )
+    _line_ship(ship_store, cargo_capacity_scu=2)
+    contract_a = Contract(departure="X", arrival="Y", scu=2, reward=100.0)
+    contract_b = Contract(departure="Y", arrival="Z", scu=2, reward=100.0)
+
+    plan = planner.plan([contract_a, contract_b], "Test Ship")
+
+    assert plan.loading_plan.steps == [
+        LoadingStep(location="X", action="load", scu=2),
+        LoadingStep(location="Y", action="unload", scu=2),
+        LoadingStep(location="Y", action="load", scu=2),
+        LoadingStep(location="Z", action="unload", scu=2),
+    ]
+    assert plan.total_distance_meters == 20.0
+
+
 def test_raises_when_combined_onboard_scu_exceeds_capacity_even_if_each_fits_alone(tmp_path):
     planner, location_store, ship_store = _planner(tmp_path)
     location_store.save_locations(
