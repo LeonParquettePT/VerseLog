@@ -4,7 +4,7 @@ baseline_commit: d9a1b00e118b8622cb022c700f27a7685fc3905c
 
 # Story 4.1: Application Entrypoint (Wiring)
 
-Status: review
+Status: done
 
 ## Story
 
