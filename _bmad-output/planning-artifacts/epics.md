@@ -62,6 +62,7 @@ FR6: Epic 1 - voice/manual trigger
 FR4: Epic 2 - route/cargo optimization
 FR7: Epic 2 - per-ship fuel-consumption config
 FR5: Epic 3 - reputation/legality confirmation
+NFR9 + Success Signal: Epic 4 - application entrypoint & results UI (added 2026-07-09: every other epic's capability was built and tested in isolation, but nothing wires them into one running application yet — this closes that gap. No new FR/CAP; NFR9 already specifies the UI's required properties and SPEC.md's Success Signal already describes the end-to-end experience this epic makes achievable.)
 
 ## Epic List
 
@@ -79,6 +80,11 @@ Using the contract data Epic 1 already validated, the player gets a computed rou
 
 Using the contract data Epic 1 already validated, the player is warned and asked to explicitly confirm before proceeding on a contract that may be illegal (e.g. a trespassing zone), based on their reputation level staying in sync automatically.
 **FRs covered:** FR5
+
+### Epic 4: Application Entrypoint & Results UI
+
+Every capability from Epics 1–3 (capture, trust layer, route/cargo optimization, legality/reputation) exists and is tested in isolation, but nothing runs them together as one application yet, and no UI adapter exists to show a player anything. This epic wires trigger → capture → trust layer → optimization into a single running app, and gives `UIPort` its first real implementation (a results window and the risky-contract confirmation popup Story 3.2 left as an interface).
+**Traces to:** NFR9 (UI must be simple, functional, its own separate window), SPEC.md's Success Signal (the end-to-end experience this epic makes achievable for the first time)
 
 ## Epic 1: Reliable Contract Scanning
 
@@ -270,3 +276,47 @@ So that I can decide knowingly instead of stumbling into trouble.
 **Then** a popup names the specific risk and requires an explicit accept/decline
 **And** the tool honors whichever choice is made rather than silently filtering the contract
 **And** the tool never accepts or declines the contract itself — the player always takes the in-game action manually (no input injection, see SPEC.md non-goals)
+
+## Epic 4: Application Entrypoint & Results UI
+
+Every capability from Epics 1–3 exists and is tested in isolation, but nothing runs them together as one application yet, and no UI adapter exists to show a player anything.
+
+### Story 4.1: Application Entrypoint (Wiring)
+
+As a player,
+I want to launch VerseLog as one application,
+So that triggering a scan runs the whole pipeline instead of me wiring the pieces together myself.
+
+**Acceptance Criteria:**
+
+**Given** the application is launched
+**When** a trigger fires (manual or voice)
+**Then** capture runs through the benchmarked provider and worker pool, every result passes through the trust layer, and a validated contract's route/loading plan is computed and handed to the UI
+**And** none of these steps requires the player to invoke it manually or run any code themselves
+
+### Story 4.2: Results Window (Tkinter UI Adapter)
+
+As a player,
+I want to see my scan results and recommendations in VerseLog's own window,
+So that I don't have to read logs or code to know what the tool found.
+
+**Acceptance Criteria:**
+
+**Given** one or more validated contracts with a computed route and loading plan
+**When** the results are shown
+**Then** a Tkinter window displays each contract's departure, arrival, reward, route cost, and loading steps in large, readable text
+**And** the window is VerseLog's own, separate from the game — never a live overlay tracking the in-game list (see SPEC.md non-goals)
+
+### Story 4.3: Risky-Contract Confirmation Popup
+
+As a player,
+I want to be shown a clear popup when a contract is flagged as risky,
+So that I can decide knowingly before proceeding.
+
+**Acceptance Criteria:**
+
+**Given** a contract `LegalityChecker` has flagged
+**When** `UIPort.confirm_risky_contract` is called
+**Then** a popup names the specific risk (faction, standing, reason) and requires an explicit accept/decline click
+**And** the tool proceeds or withholds that contract from further processing based on the player's choice, exactly as Story 3.2 specified
+**And** the tool never performs the accept/decline as an in-game action itself (no input injection, see SPEC.md non-goals)
