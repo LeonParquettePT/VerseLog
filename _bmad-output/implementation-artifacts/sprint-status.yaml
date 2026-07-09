@@ -70,3 +70,9 @@ development_status:
   3-1-reputation-sync: done
   3-2-legality-confirmation-before-risky-contract: done
   epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-application-entrypoint-wiring: backlog
+  4-2-results-window-tkinter-ui-adapter: backlog
+  4-3-risky-contract-confirmation-popup: backlog
+  epic-4-retrospective: optional
