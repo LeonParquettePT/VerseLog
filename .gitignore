@@ -16,3 +16,12 @@ __pycache__/
 .venv/
 venv/
 .env
+
+# PyInstaller build output - published via GitHub Releases, never committed
+build/
+dist/
+*.spec
+
+# Runtime state (local SQLite DB, quarantine images, settings) - never committed
+data/*
+!data/.gitkeep

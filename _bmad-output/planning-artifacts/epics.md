@@ -347,6 +347,21 @@ So that I don't need Python or any dependencies installed to try it.
 **And** the executable is published as a GitHub Release asset with a stable download link, not committed into the repository itself
 **And** Tesseract and Ollama remain separate, user-installed prerequisites — documented, not bundled (see Dev Notes on why)
 
+### Story 5.3: Prerequisite Check for Tesseract/Ollama (Deferred — Tracked, Not Forgotten)
+
+As a player installing VerseLog for the first time,
+I want to know clearly if Tesseract or Ollama are missing,
+So that I'm not left guessing why a scan silently fails.
+
+**Acceptance Criteria:**
+
+**Given** VerseLog launches
+**When** Tesseract and/or Ollama are not detected on the system
+**Then** the player is told plainly which prerequisite is missing, with a link/button to install it
+**And** nothing is installed automatically without the player's explicit action — consistent with this project's existing "never act without explicit confirmation" posture (see Story 3.2/4.3's legality-confirmation precedent)
+
+Added 2026-07-10: idea raised while discussing Story 5.1's packaging — installing these third-party prerequisites silently was considered and explicitly rejected, since it would carry the same elevation/reliability risk this session's own WSL install just demonstrated firsthand, just hidden a level deeper inside VerseLog's own installer.
+
 ### Story 5.2: Linux Packaging (Deferred — Tracked, Not Forgotten)
 
 As a Linux player,
