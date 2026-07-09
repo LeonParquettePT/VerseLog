@@ -77,12 +77,17 @@ def run(
         )
     else:
         contract = trust_result.contract
+        route_cost = None
+        loading_plan = None
         try:
             route_cost = route_cost_calculator.calculate(contract.departure, contract.arrival, ship_name)
+            # loading_plan_calculator.derive() re-validates the same route
+            # internally and additionally checks cargo capacity - if only
+            # this second call fails, route_cost (pre-assigned above) must
+            # stay set rather than being wiped out by the except below.
             loading_plan = loading_plan_calculator.derive(contract, ship_name)
         except ValueError:
-            route_cost = None
-            loading_plan = None
+            pass
         scan_result = ScanResult(contract=contract, route_cost=route_cost, loading_plan=loading_plan)
 
     ui.show_results([scan_result])

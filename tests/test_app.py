@@ -137,6 +137,52 @@ def test_run_shows_the_contract_even_when_route_cost_calculation_fails(tmp_path)
     assert result.loading_plan is None
 
 
+def test_run_keeps_the_computed_route_cost_even_when_loading_plan_derivation_fails(tmp_path):
+    # A ship whose cargo capacity is smaller than the contract's SCU: the
+    # route itself is perfectly valid (route_cost_calculator.calculate()
+    # succeeds), but loading_plan_calculator.derive() raises on the capacity
+    # check it does *in addition* to re-validating the same route. The
+    # already-computed route_cost must survive that later, unrelated failure.
+    ship_store, location_store = _stores(tmp_path)
+    ship_store.save_ships(
+        [
+            ShipReference(
+                name="Tiny Ship",
+                cargo_capacity_scu=2,
+                quantum_fuel_capacity=3.6,
+                quantum_range=660550458716.0,
+                fuel_usage_main=331.25,
+                quantum_speed=171000000.0,
+                quantum_spool_time=6.0,
+            )
+        ]
+    )
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI()
+
+    run(
+        ship_name="Tiny Ship",
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+    )
+
+    result = ui.shown[0]
+    assert result.contract == contract
+    assert result.route_cost is not None
+    assert result.route_cost.distance_meters > 0
+    assert result.loading_plan is None
+
+
 def test_select_capture_port_uses_the_persisted_tier_without_rerunning_the_benchmark(tmp_path):
     settings_store = SettingsStore(path=tmp_path / "settings.json")
     settings_store.set("benchmark_tier_name", "ocr")
