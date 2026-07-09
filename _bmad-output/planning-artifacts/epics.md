@@ -63,6 +63,7 @@ FR4: Epic 2 - route/cargo optimization
 FR7: Epic 2 - per-ship fuel-consumption config
 FR5: Epic 3 - reputation/legality confirmation
 NFR9 + Success Signal: Epic 4 - application entrypoint & results UI (added 2026-07-09: every other epic's capability was built and tested in isolation, but nothing wires them into one running application yet — this closes that gap. No new FR/CAP; NFR9 already specifies the UI's required properties and SPEC.md's Success Signal already describes the end-to-end experience this epic makes achievable.)
+NFR7 (target platforms): Epic 5 - packaging & distribution (added 2026-07-10: ARCHITECTURE-SPINE.md's Deferred list named "packaging/distribution format" as revisit-once-there's-a-first-working-build — Epic 4 just made that true. No new FR/CAP; this makes NFR7's Windows+Linux target actually installable rather than source-only.)
 
 ## Epic List
 
@@ -85,6 +86,11 @@ Using the contract data Epic 1 already validated, the player is warned and asked
 
 Every capability from Epics 1–3 (capture, trust layer, route/cargo optimization, legality/reputation) exists and is tested in isolation, but nothing runs them together as one application yet, and no UI adapter exists to show a player anything. This epic wires trigger → capture → trust layer → optimization into a single running app, and gives `UIPort` its first real implementation (a results window and the risky-contract confirmation popup Story 3.2 left as an interface).
 **Traces to:** NFR9 (UI must be simple, functional, its own separate window), SPEC.md's Success Signal (the end-to-end experience this epic makes achievable for the first time)
+
+### Epic 5: Packaging & Distribution
+
+VerseLog runs end-to-end (Epic 4) but only from source — no packaged build exists for either target platform. This epic produces a real, installable artifact for Windows now, and tracks Linux packaging as explicit, not-forgotten backlog for when a suitable build environment is available (today's session found local WSL/Docker impractical on this machine; a disposable CI environment, e.g. GitHub Actions, is the likely path).
+**Traces to:** NFR7 (target platforms Windows and Linux)
 
 ## Epic 1: Reliable Contract Scanning
 
@@ -322,3 +328,34 @@ So that I can decide knowingly before proceeding.
 **Then** a popup names the specific risk (faction, standing, reason) and requires an explicit accept/decline click
 **And** the tool proceeds or withholds that contract from further processing based on the player's choice, exactly as Story 3.2 specified
 **And** the tool never performs the accept/decline as an in-game action itself (no input injection, see SPEC.md non-goals)
+
+## Epic 5: Packaging & Distribution
+
+VerseLog runs end-to-end but only from source. This epic produces a real, installable artifact.
+
+### Story 5.1: Windows Packaging (PyInstaller)
+
+As a player,
+I want a single downloadable file that runs VerseLog on Windows,
+So that I don't need Python or any dependencies installed to try it.
+
+**Acceptance Criteria:**
+
+**Given** the current source tree
+**When** the packaging build runs
+**Then** it produces a single Windows executable that launches the app (Tkinter results window and console entrypoint both reachable) without a separately-installed Python
+**And** the executable is published as a GitHub Release asset with a stable download link, not committed into the repository itself
+**And** Tesseract and Ollama remain separate, user-installed prerequisites — documented, not bundled (see Dev Notes on why)
+
+### Story 5.2: Linux Packaging (Deferred — Tracked, Not Forgotten)
+
+As a Linux player,
+I want an installable VerseLog build for my platform too,
+So that I'm not a second-class target despite NFR7 naming Linux explicitly.
+
+**Acceptance Criteria:**
+
+**Given** no Linux build environment was available locally when Epic 5 started (WSL install proved impractically slow on this machine; Docker Desktop on Windows has the same underlying dependency)
+**When** a suitable disposable build environment is set up (a GitHub Actions Linux runner is the likely candidate — it needs no local install and leaves no footprint on the developer's machine)
+**Then** an equivalent Linux artifact (e.g. an AppImage) is produced and published as a GitHub Release asset alongside the Windows one
+**And** until this story is picked up, Linux users are told plainly (README, docs site) that only source installation is available for their platform — not silently left to discover this themselves
