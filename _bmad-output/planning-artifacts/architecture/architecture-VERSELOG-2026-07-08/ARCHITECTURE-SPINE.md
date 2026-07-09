@@ -144,3 +144,7 @@ graph TB
 - **VoiceAttack plugin integration mechanics** — implementation detail inside `adapters/trigger/`.
 - **Mirrored community-API server hosting** — separate optional infra (see AD's operational note); not required to ship v1.
 - **Official CIG API adapter** — non-goal for now per SPEC.md; the port exists (`OfficialAPIProvider`) but stays unimplemented.
+- **Tablet/second-device access** — flagged 2026-07-09, explicitly not designed yet, two open directions with a real tradeoff neither picked:
+  - *Remote display*: the PC engine runs exactly as built; a future `UIPort` adapter additionally serves results over the local network (self-hosted, no cloud, no cost) so a tablet/phone/second PC can view them. Small, low-risk addition once the first `UIPort` adapter exists — doesn't touch AD-2 or AD-5.
+  - *Compute offload*: the PC sends a captured screenshot to a second device and that device runs the OCR/vision extraction instead, freeing the gaming PC's CPU/GPU during a scan (directly serves the CPU-load constraint above). A materially bigger bet: breaks AD-5's single-process model (needs a real PC↔device protocol), Tesseract is plausibly portable but Ollama's vision models are not (no iOS support, effectively no Android support today — would need a different mobile inference stack), and a weaker second device could make scans slower, not faster.
+  - Neither is scheduled. Revisit with a dedicated architecture session before committing to either — don't let a future `UIPort` adapter silently assume one over the other.
