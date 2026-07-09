@@ -290,9 +290,11 @@ So that triggering a scan runs the whole pipeline instead of me wiring the piece
 **Acceptance Criteria:**
 
 **Given** the application is launched
-**When** a trigger fires (manual or voice)
-**Then** capture runs through the benchmarked provider and worker pool, every result passes through the trust layer, and a validated contract's route/loading plan is computed and handed to the UI
+**When** a manual trigger fires
+**Then** capture runs through the model tier Story 1.6's benchmark selected, the result passes through the trust layer, and a validated contract's route/loading plan is computed and handed to the UI
 **And** none of these steps requires the player to invoke it manually or run any code themselves
+
+*(Scope note, added 2026-07-09: true parallel batch scanning across `BatchScanner`'s worker pool is not wired here — Story 1.7 already flagged that sourcing multiple region-scoped captures (e.g. scrolling the contract list) was left unsolved and out of scope, so there is nothing yet that produces the list of per-contract `CapturePort`s `BatchScanner` needs. This story wires the single-scan flow only; voice triggering is deferred too, since it needs a real VoiceAttack integration this story doesn't build — manual triggering already satisfies NFR4 as the required baseline.)*
 
 ### Story 4.2: Results Window (Tkinter UI Adapter)
 
