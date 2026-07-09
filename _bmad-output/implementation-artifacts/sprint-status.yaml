@@ -66,7 +66,7 @@ development_status:
   2-5-fuel-value-override-and-reset: done
   epic-2-retrospective: optional
 
-  epic-3: in-progress
+  epic-3: done
   3-1-reputation-sync: done
-  3-2-legality-confirmation-before-risky-contract: review
+  3-2-legality-confirmation-before-risky-contract: done
   epic-3-retrospective: optional

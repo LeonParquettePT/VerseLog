@@ -4,7 +4,7 @@ baseline_commit: a017b5f837eb1582e86811bb57317bd525ff121b
 
 # Story 3.2: Legality Confirmation Before a Risky Contract
 
-Status: review
+Status: done
 
 ## Story
 
