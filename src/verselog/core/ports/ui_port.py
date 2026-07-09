@@ -2,13 +2,14 @@ from abc import ABC, abstractmethod
 
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
+from verselog.core.scan_result import ScanResult
 
 
 class UIPort(ABC):
     """Implemented by adapters/ui/* (the results window). Concrete needs arrive in later stories."""
 
     @abstractmethod
-    def show_results(self, contracts: list[Contract]) -> None: ...
+    def show_results(self, results: list[ScanResult]) -> None: ...
 
     @abstractmethod
     def confirm_risky_contract(self, contract: Contract, risk: LegalityRisk) -> bool:
