@@ -4,7 +4,7 @@ baseline_commit: aca3fe463be3360027f6f3594e62396bd2f1822f
 
 # Story 3.1: Reputation Sync
 
-Status: review
+Status: done
 
 ## Story
 
