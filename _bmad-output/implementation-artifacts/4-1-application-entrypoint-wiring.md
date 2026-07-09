@@ -89,7 +89,7 @@ claude-sonnet-5
 - Found and fixed my own bug during implementation before it ever hit a test: `LoadingPlanCalculator.derive()` returns a `LoadingPlan` directly, not a wrapper with a `.loading_plan` attribute (that shape belongs to `CombinedRoutePlanner.plan()`'s `CombinedPlan` instead) — corrected before writing the test that would have caught it anyway.
 - Implemented `__main__.py`: `--ship` (required unless `--import-reference-data` is passed) and `--import-reference-data` (runs both bulk-import providers' `.refresh()`, then exits) — the one-time bootstrap Story 2.1 assumed but nothing before this story actually triggered.
 - Real smoke-tested the CLI directly (not just unit tests): `python -m verselog --help` and the missing-`--ship` error path both produce clean, correct output.
-- All acceptance criteria satisfied; 99/99 tests passing (92 pre-existing + 7 new).
+- All acceptance criteria satisfied; 100/100 tests passing (92 pre-existing + 8 new, including the partial-success regression test added during code review).
 
 ### File List
 
@@ -104,3 +104,4 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-09: Story implemented — `ScanResult`, updated `UIPort`, `ConsoleUIProvider`, and the `app.run()`/`__main__.py` entrypoint added, wiring manual trigger → capture → trust layer → route/loading calculation → UI for the first time. All tasks complete, 99/99 tests passing, status moved to review.
+- 2026-07-09: Code review (self-caught while reading the diff, confirmed by an independent verification agent) found a real bug: if `route_cost_calculator.calculate()` succeeded but the subsequent `loading_plan_calculator.derive()` failed (e.g. cargo capacity exceeded — a check `derive()` does in addition to re-validating the route), the shared `except ValueError` block reset the already-computed `route_cost` back to `None`, discarding a legitimately available result. Fixed by pre-initializing both to `None` before the `try` instead of resetting them in the `except`. Added a regression test. 100/100 tests passing.
