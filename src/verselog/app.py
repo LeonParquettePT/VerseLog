@@ -3,6 +3,7 @@ from verselog.adapters.capture.ocr_provider import OCRProvider
 from verselog.adapters.capture.vision_provider import VisionProvider
 from verselog.adapters.trigger.manual_trigger import ManualTriggerAdapter
 from verselog.adapters.ui.console_ui_provider import ConsoleUIProvider
+from verselog.core.legality_checker import LegalityChecker
 from verselog.core.loading_plan_calculator import LoadingPlanCalculator
 from verselog.core.location_reference_store import LocationReferenceStore
 from verselog.core.ports.capture_port import CapturePort
@@ -49,6 +50,7 @@ def run(
     location_store: LocationReferenceStore | None = None,
     trust_layer: TrustLayer | None = None,
     ui: UIPort | None = None,
+    legality_checker: LegalityChecker | None = None,
 ) -> None:
     settings_store = settings_store if settings_store is not None else SettingsStore()
     ship_store = ship_store if ship_store is not None else ShipReferenceStore()
@@ -69,25 +71,38 @@ def run(
     trust_result = trust_layer.process(capture_result)
 
     if trust_result.contract is None:
-        scan_result = ScanResult(
-            contract=None,
-            route_cost=None,
-            loading_plan=None,
-            quarantine_reasons=trust_result.reasons,
+        ui.show_results(
+            [ScanResult(contract=None, route_cost=None, loading_plan=None, quarantine_reasons=trust_result.reasons)]
         )
-    else:
-        contract = trust_result.contract
-        route_cost = None
-        loading_plan = None
-        try:
-            route_cost = route_cost_calculator.calculate(contract.departure, contract.arrival, ship_name)
-            # loading_plan_calculator.derive() re-validates the same route
-            # internally and additionally checks cargo capacity - if only
-            # this second call fails, route_cost (pre-assigned above) must
-            # stay set rather than being wiped out by the except below.
-            loading_plan = loading_plan_calculator.derive(contract, ship_name)
-        except ValueError:
-            pass
-        scan_result = ScanResult(contract=contract, route_cost=route_cost, loading_plan=loading_plan)
+        return
 
-    ui.show_results([scan_result])
+    contract = trust_result.contract
+
+    if legality_checker is not None:
+        risk = legality_checker.check(contract)
+        if risk is not None:
+            try:
+                accepted = ui.confirm_risky_contract(contract, risk)
+            except Exception:
+                # The tool must fail closed on a risky contract - a broken
+                # confirmation dialog is never implicit consent to proceed.
+                accepted = False
+            if not accepted:
+                ui.show_results(
+                    [ScanResult(contract=contract, route_cost=None, loading_plan=None, declined_reason=risk.reason)]
+                )
+                return
+
+    route_cost = None
+    loading_plan = None
+    try:
+        route_cost = route_cost_calculator.calculate(contract.departure, contract.arrival, ship_name)
+        # loading_plan_calculator.derive() re-validates the same route
+        # internally and additionally checks cargo capacity - if only
+        # this second call fails, route_cost (pre-assigned above) must
+        # stay set rather than being wiped out by the except below.
+        loading_plan = loading_plan_calculator.derive(contract, ship_name)
+    except ValueError:
+        pass
+
+    ui.show_results([ScanResult(contract=contract, route_cost=route_cost, loading_plan=loading_plan)])
