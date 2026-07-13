@@ -53,6 +53,7 @@ def run(
     ui: UIPort | None = None,
     legality_checker: LegalityChecker | None = None,
     prerequisite_checker: PrerequisiteChecker | None = None,
+    monitor_index: int | None = None,
 ) -> None:
     settings_store = settings_store if settings_store is not None else SettingsStore()
     ship_store = ship_store if ship_store is not None else ShipReferenceStore()
@@ -72,7 +73,13 @@ def run(
     loading_plan_calculator = LoadingPlanCalculator(route_cost_calculator)
 
     if capture_port is None:
-        candidates: list[tuple[str, CapturePort]] = [("vision", VisionProvider()), ("ocr", OCRProvider())]
+        if monitor_index is not None:
+            settings_store.set("capture_monitor_index", monitor_index)
+        resolved_monitor_index = settings_store.get("capture_monitor_index", 0)
+        candidates: list[tuple[str, CapturePort]] = [
+            ("vision", VisionProvider(monitor_index=resolved_monitor_index)),
+            ("ocr", OCRProvider(monitor_index=resolved_monitor_index)),
+        ]
         capture_port = _select_capture_port(settings_store, candidates)
 
     trigger = ManualTriggerAdapter(capture_port)

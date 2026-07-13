@@ -8,7 +8,7 @@ from verselog.adapters.capture.vision_provider import VisionProvider, _contract_
 
 
 def _patch_screenshot(monkeypatch):
-    monkeypatch.setattr(vision_provider_module, "take_screenshot", lambda: b"fake-png-bytes")
+    monkeypatch.setattr(vision_provider_module, "take_screenshot", lambda monitor_index=0: b"fake-png-bytes")
 
 
 def test_parses_a_well_formed_json_response():
@@ -83,3 +83,13 @@ def test_capture_returns_a_contract_on_a_well_formed_response(monkeypatch):
 
     assert result.parse_error is None
     assert result.contract.departure == "A"
+
+
+def test_capture_passes_the_configured_monitor_index_to_take_screenshot(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(vision_provider_module, "take_screenshot", lambda monitor_index=0: seen.setdefault("index", monitor_index) or b"fake-png-bytes")
+    monkeypatch.setattr(vision_provider_module.ollama, "chat", lambda **kwargs: SimpleNamespace(message=SimpleNamespace(content="not valid json")))
+
+    VisionProvider(monitor_index=2).capture()
+
+    assert seen["index"] == 2

@@ -83,6 +83,6 @@ development_status:
   5-3-prerequisite-check-tesseract-ollama: done
   5-4-code-signing-windows-build: backlog
   5-5-ship-selection-via-results-ui: done
-  5-6-monitor-selection-for-capture: backlog
+  5-6-monitor-selection-for-capture: review
   5-7-ram-aware-benchmark-tier-selection: backlog
   epic-5-retrospective: optional

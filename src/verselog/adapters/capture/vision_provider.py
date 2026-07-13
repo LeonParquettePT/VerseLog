@@ -55,11 +55,12 @@ DEFAULT_VISION_MODEL = "qwen2.5vl:3b"
 class VisionProvider(CapturePort):
     """Vision-model capture via Ollama: screenshot, ask a local vision model for structured JSON."""
 
-    def __init__(self, model: str = DEFAULT_VISION_MODEL) -> None:
+    def __init__(self, model: str = DEFAULT_VISION_MODEL, monitor_index: int = 0) -> None:
         self._model = model
+        self._monitor_index = monitor_index
 
     def capture(self) -> CaptureResult:
-        source_image = take_screenshot()
+        source_image = take_screenshot(self._monitor_index)
 
         try:
             response = ollama.chat(

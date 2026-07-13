@@ -12,8 +12,11 @@ from verselog.core.ports.capture_port import CapturePort
 class OCRProvider(CapturePort):
     """Classic-OCR capture: screenshot the current screen, run Tesseract, parse the result."""
 
+    def __init__(self, monitor_index: int = 0) -> None:
+        self._monitor_index = monitor_index
+
     def capture(self) -> CaptureResult:
-        source_image = take_screenshot()
+        source_image = take_screenshot(self._monitor_index)
         image = Image.open(io.BytesIO(source_image))
 
         try:

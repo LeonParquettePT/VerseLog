@@ -55,3 +55,45 @@ def test_default_tkinter_ui_without_ship_lets_the_ui_pick_the_ship(monkeypatch):
     assert len(spy.calls) == 1
     assert isinstance(spy.calls[0]["ui"], TkinterUIProvider)
     assert spy.calls[0]["ship_name"] is None
+
+
+class _FakeSct:
+    monitors = ["all", "monitor-1", "monitor-2"]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+
+def test_monitor_flag_is_passed_through_when_within_range(monkeypatch):
+    spy = _SpyRun()
+    monkeypatch.setattr(verselog_main, "run", spy)
+    monkeypatch.setattr(verselog_main.mss, "mss", lambda: _FakeSct())
+    monkeypatch.setattr("sys.argv", ["verselog", "--ship", "MISC Starlancer MAX", "--monitor", "1"])
+
+    verselog_main.main()
+
+    assert spy.calls[0]["monitor_index"] == 1
+
+
+def test_monitor_flag_out_of_range_errors_clearly(monkeypatch, capsys):
+    monkeypatch.setattr(verselog_main, "run", _SpyRun())
+    monkeypatch.setattr(verselog_main.mss, "mss", lambda: _FakeSct())
+    monkeypatch.setattr("sys.argv", ["verselog", "--ship", "MISC Starlancer MAX", "--monitor", "5"])
+
+    with pytest.raises(SystemExit):
+        verselog_main.main()
+
+    assert "--monitor" in capsys.readouterr().err
+
+
+def test_monitor_flag_omitted_passes_none(monkeypatch):
+    spy = _SpyRun()
+    monkeypatch.setattr(verselog_main, "run", spy)
+    monkeypatch.setattr("sys.argv", ["verselog", "--ship", "MISC Starlancer MAX"])
+
+    verselog_main.main()
+
+    assert spy.calls[0]["monitor_index"] is None
