@@ -4,10 +4,14 @@ import mss
 from PIL import Image
 
 
-def take_screenshot() -> bytes:
-    """Grab the primary screen as PNG bytes. Shared by every capture provider."""
+def take_screenshot(monitor_index: int = 0) -> bytes:
+    """Grab a screen as PNG bytes. Shared by every capture provider.
+
+    monitor_index 0 (default) is mss's synthetic "all monitors combined"
+    bounding box; 1..N are individual physical monitors.
+    """
     with mss.mss() as sct:
-        shot = sct.grab(sct.monitors[0])
+        shot = sct.grab(sct.monitors[monitor_index])
         image = Image.frombytes("RGB", shot.size, shot.rgb)
 
     buffer = io.BytesIO()

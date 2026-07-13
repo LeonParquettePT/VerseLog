@@ -1,3 +1,4 @@
+from verselog import app as app_module
 from verselog.app import _select_capture_port, run
 from verselog.core.capture_result import CaptureResult
 from verselog.core.contract import Contract
@@ -401,3 +402,142 @@ def test_run_still_calls_warn_missing_prerequisites_with_an_empty_list(tmp_path)
     )
 
     assert ui.warn_missing_prerequisites_calls == [[]]
+
+
+class _FakeVisionProvider:
+    def __init__(self, monitor_index: int = 0) -> None:
+        self.monitor_index = monitor_index
+
+    def capture(self) -> CaptureResult:
+        return CaptureResult(contract=None, source_image=b"", parse_error="unused in this test")
+
+
+class _FakeOCRProvider:
+    def __init__(self, monitor_index: int = 0) -> None:
+        self.monitor_index = monitor_index
+
+    def capture(self) -> CaptureResult:
+        return CaptureResult(contract=None, source_image=b"", parse_error="unused in this test")
+
+
+def test_run_constructs_capture_providers_with_the_given_monitor_index_and_persists_it(tmp_path, monkeypatch):
+    ship_store, location_store = _stores(tmp_path)
+    settings_store = SettingsStore(path=tmp_path / "settings.json")
+    ui = _SpyUI(ship_to_select="MISC Starlancer MAX")
+    constructed: dict[str, int] = {}
+
+    def _capturing_vision(monitor_index: int = 0):
+        constructed["vision"] = monitor_index
+        return _FakeVisionProvider(monitor_index)
+
+    def _capturing_ocr(monitor_index: int = 0):
+        constructed["ocr"] = monitor_index
+        return _FakeOCRProvider(monitor_index)
+
+    monkeypatch.setattr(app_module, "VisionProvider", _capturing_vision)
+    monkeypatch.setattr(app_module, "OCRProvider", _capturing_ocr)
+
+    run(
+        ship_name=None,
+        settings_store=settings_store,
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
+        monitor_index=2,
+    )
+
+    assert constructed == {"vision": 2, "ocr": 2}
+    assert settings_store.get("capture_monitor_index") == 2
+
+
+def test_run_reuses_the_persisted_monitor_index_when_none_is_given(tmp_path, monkeypatch):
+    ship_store, location_store = _stores(tmp_path)
+    settings_store = SettingsStore(path=tmp_path / "settings.json")
+    settings_store.set("capture_monitor_index", 3)
+    ui = _SpyUI(ship_to_select="MISC Starlancer MAX")
+    constructed: dict[str, int] = {}
+
+    def _capturing_vision(monitor_index: int = 0):
+        constructed["vision"] = monitor_index
+        return _FakeVisionProvider(monitor_index)
+
+    def _capturing_ocr(monitor_index: int = 0):
+        constructed["ocr"] = monitor_index
+        return _FakeOCRProvider(monitor_index)
+
+    monkeypatch.setattr(app_module, "VisionProvider", _capturing_vision)
+    monkeypatch.setattr(app_module, "OCRProvider", _capturing_ocr)
+
+    run(
+        ship_name=None,
+        settings_store=settings_store,
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
+    )
+
+    assert constructed == {"vision": 3, "ocr": 3}
+
+
+def test_run_defaults_the_monitor_index_to_zero_when_nothing_was_ever_persisted(tmp_path, monkeypatch):
+    ship_store, location_store = _stores(tmp_path)
+    settings_store = SettingsStore(path=tmp_path / "settings.json")
+    ui = _SpyUI(ship_to_select="MISC Starlancer MAX")
+    constructed: dict[str, int] = {}
+
+    def _capturing_vision(monitor_index: int = 0):
+        constructed["vision"] = monitor_index
+        return _FakeVisionProvider(monitor_index)
+
+    def _capturing_ocr(monitor_index: int = 0):
+        constructed["ocr"] = monitor_index
+        return _FakeOCRProvider(monitor_index)
+
+    monkeypatch.setattr(app_module, "VisionProvider", _capturing_vision)
+    monkeypatch.setattr(app_module, "OCRProvider", _capturing_ocr)
+
+    run(
+        ship_name=None,
+        settings_store=settings_store,
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
+    )
+
+    assert constructed == {"vision": 0, "ocr": 0}
+
+
+def test_run_persists_monitor_index_even_when_a_capture_port_is_injected(tmp_path):
+    # Code-review finding: persistence must not silently depend on whether
+    # a capture_port happens to be injected (e.g. by a test or future
+    # caller) -- the player's monitor choice should always be saved.
+    ship_store, location_store = _stores(tmp_path)
+    settings_store = SettingsStore(path=tmp_path / "settings.json")
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI()
+
+    run(
+        ship_name="MISC Starlancer MAX",
+        capture_port=capture_port,
+        settings_store=settings_store,
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
+        monitor_index=2,
+    )
+
+    assert settings_store.get("capture_monitor_index") == 2
