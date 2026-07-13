@@ -434,6 +434,21 @@ So that VerseLog doesn't destabilize my system by loading a memory-hungry model 
 
 Added 2026-07-13: raised directly by a real finding during Story 5.2's manual Linux verification — running the vision model for actual inference (not just launching the binary) exhausted a 4 GB test VM's memory and crashed other running applications. Explicitly deferred: the current time-based benchmark (Story 1.6) already provides a real, working fallback mechanism; adding RAM-awareness is a refinement to an already-functional safety net, not a blocker for anything currently planned.
 
+### Story 5.8: Type-Ahead Filtering for Ship Selection (Deferred — Tracked, Not Forgotten)
+
+As a player picking my ship from the results UI,
+I want to type part of my ship's name and see the list narrow down to matches, like a search box,
+So that I don't have to scroll through Star Citizen's entire (100+) ship roster to find mine.
+
+**Acceptance Criteria:**
+
+**Given** Story 5.5's `ttk.Combobox` (`state="readonly"`) already prevents mistyped/invalid input by only allowing a selection from the pre-filled list, but shows the full, unfiltered ship roster with no way to narrow it by typing
+**When** the player starts typing in the ship-selection screen
+**Then** the visible list narrows to only the ships whose name contains what's been typed so far (case-insensitive), updating live as more is typed, with the player still only able to *select* from the narrowed list — never accepting arbitrary free text as a valid ship name
+**And** clearing the typed text (or selecting an item) restores/keeps the list behavior consistent with today's read-only guarantee — a typo must never silently "select" a wrong or nonexistent ship
+
+Added 2026-07-13: raised directly by the project's own author after confirming Story 5.5 built a plain `ttk.Combobox` dropdown, not a filtered search box — with 100+ real Star Citizen ships, scrolling/typing-to-jump through the full list is real friction the author wants addressed. Explicitly deferred: Story 5.5's read-only combobox is a complete, correct, and currently-shipped solution (no risk of mistyped ship names); this is a UX refinement on top of already-working functionality, not a blocker or a bug.
+
 ## Epic 6: Guided Installer
 
 A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer (Python's own installer, VMware Workstation), not a bare `.exe` a player has to already know how to run from a terminal. Runs the existing benchmark first, lets the player choose which prerequisites to install via explicit checkboxes (pre-checked with a sensible recommendation, never silently decided for them), and finishes with an optional shortcut — all in a **separate executable** from `verselog.exe` itself, so a bug in the installer can never affect the app it installs, and vice versa.
