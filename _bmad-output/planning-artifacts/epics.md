@@ -388,6 +388,8 @@ So that Windows Smart App Control and SmartScreen don't block or scare me away f
 **Then** the published GitHub Release asset is signed, and Smart App Control/SmartScreen treat it as a verified-publisher app rather than an unknown binary
 **And** the Windows build process moves to a GitHub Actions CI pipeline (required for SignPath's signing integration — not a local, manual `pyinstaller` invocation as done in Story 5.1)
 
+Added 2026-07-10: raised after the project's own author hit a real Smart App Control block running the packaged exe locally, confirming this isn't a hypothetical concern. Explicitly deferred: SignPath Foundation's application/review process takes days to weeks and is out of this session's control, and migrating the build to CI is real engineering work — not a five-minute fix. User's explicit call: finish Linux packaging (Story 5.2) first, since NFR7's cross-platform target is a bigger gap than the Windows-only signing friction.
+
 ### Story 5.5: Ship Selection via the Results UI (Deferred — Tracked, Not Forgotten)
 
 As a player who doesn't use VoiceAttack or the command line,
@@ -418,4 +420,16 @@ So that captures aren't taken across every monitor by default, reducing noise an
 
 Added 2026-07-13: raised by the project's own author after noticing their own multi-monitor Windows test screenshot captured both screens at once — a real precision/noise concern for anyone with more than one monitor, not a hypothetical. Explicitly deferred: not a blocker for the current single-screen-friendly default behavior, just a precision improvement.
 
-Added 2026-07-10: raised after the project's own author hit a real Smart App Control block running the packaged exe locally, confirming this isn't a hypothetical concern. Explicitly deferred: SignPath Foundation's application/review process takes days to weeks and is out of this session's control, and migrating the build to CI is real engineering work — not a five-minute fix. User's explicit call: finish Linux packaging (Story 5.2) first, since NFR7's cross-platform target is a bigger gap than the Windows-only signing friction.
+### Story 5.7: RAM-Aware Benchmark Tier Selection (Deferred — Tracked, Not Forgotten)
+
+As a player running VerseLog alongside Star Citizen on modest hardware,
+I want the benchmark to avoid picking the vision tier when there isn't enough free RAM for it,
+So that VerseLog doesn't destabilize my system by loading a memory-hungry model the machine can't actually afford.
+
+**Acceptance Criteria:**
+
+**Given** the benchmark (Story 1.6) today selects between the "vision" (Ollama) and "ocr" (Tesseract) capture tiers purely by measured capture *time*, with no awareness of available RAM
+**When** free system memory is too low to safely load the vision model (confirmed directly: real inference on a 4 GB test VM triggered the OS's out-of-memory killer, crashing the browser alongside it — not merely slow, actually destabilizing)
+**Then** the benchmark also considers available RAM and prefers the lighter "ocr" tier when the vision tier's memory requirement isn't safely met, consistent with this project's own stated goal of running "alongside the game on modest hardware, not to fight it for resources"
+
+Added 2026-07-13: raised directly by a real finding during Story 5.2's manual Linux verification — running the vision model for actual inference (not just launching the binary) exhausted a 4 GB test VM's memory and crashed other running applications. Explicitly deferred: the current time-based benchmark (Story 1.6) already provides a real, working fallback mechanism; adding RAM-awareness is a refinement to an already-functional safety net, not a blocker for anything currently planned.
