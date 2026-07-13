@@ -1,6 +1,7 @@
 from verselog_installer import __main__ as installer_main
 from verselog_installer.steps.benchmark_step import BenchmarkStep
 from verselog_installer.steps.component_selection_step import ComponentSelectionStep
+from verselog_installer.steps.finish_step import FinishStep
 from verselog_installer.steps.welcome_step import WelcomeStep
 
 
@@ -16,7 +17,7 @@ class _SpyWizard:
         self.ran = True
 
 
-def test_main_builds_the_wizard_with_all_three_steps_in_order_and_runs_it(monkeypatch):
+def test_main_builds_the_wizard_with_all_four_steps_in_order_and_runs_it(monkeypatch):
     _SpyWizard.instances.clear()
     monkeypatch.setattr(installer_main, "InstallerWizard", _SpyWizard)
 
@@ -28,6 +29,7 @@ def test_main_builds_the_wizard_with_all_three_steps_in_order_and_runs_it(monkey
     assert isinstance(wizard.steps[0], WelcomeStep)
     assert isinstance(wizard.steps[1], BenchmarkStep)
     assert isinstance(wizard.steps[2], ComponentSelectionStep)
+    assert isinstance(wizard.steps[3], FinishStep)
 
 
 def test_component_selection_step_shares_the_same_benchmark_step_instance(monkeypatch):

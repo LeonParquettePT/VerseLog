@@ -51,6 +51,9 @@ class InstallerWizard:
         if self.current_index < len(self.steps) - 1:
             self._show_step(self.current_index + 1)
         else:
+            on_finish = getattr(self.steps[self.current_index], "on_finish", None)
+            if on_finish is not None:
+                on_finish()
             self.root.destroy()
 
     def go_back(self) -> None:

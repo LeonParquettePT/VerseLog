@@ -20,6 +20,15 @@ class _FakeStep:
         self.shown_count += 1
 
 
+class _FakeStepWithFinishHook(_FakeStep):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.finish_count = 0
+
+    def on_finish(self) -> None:
+        self.finish_count += 1
+
+
 def _labels_text(frame: tk.Frame) -> list[str]:
     return [
         grandchild.cget("text")
@@ -99,5 +108,28 @@ def test_go_next_on_the_last_step_closes_the_wizard():
 
     # Once root.destroy() has torn down the whole interpreter, any further
     # Tcl call against it raises - that's the observable proof it's gone.
+    with pytest.raises(tk.TclError):
+        wizard.root.winfo_exists()
+
+
+def test_go_next_on_the_last_step_calls_on_finish_before_closing():
+    steps = [_FakeStep("Welcome"), _FakeStepWithFinishHook("Benchmark")]
+    wizard = InstallerWizard(steps)
+    wizard.go_next()
+
+    wizard.go_next()
+
+    assert steps[1].finish_count == 1
+
+
+def test_go_next_on_the_last_step_works_fine_when_the_step_has_no_on_finish_hook():
+    # _FakeStep (used elsewhere) deliberately has no on_finish - the wizard
+    # must not require every step to define one.
+    steps = [_FakeStep("Welcome"), _FakeStep("Benchmark")]
+    wizard = InstallerWizard(steps)
+    wizard.go_next()
+
+    wizard.go_next()  # must not raise
+
     with pytest.raises(tk.TclError):
         wizard.root.winfo_exists()
