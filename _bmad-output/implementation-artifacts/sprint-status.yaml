@@ -93,5 +93,5 @@ development_status:
   6-3-finish-screen-shortcut: done
   6-4-shared-tkinter-test-root: backlog
   6-5-package-guided-installer-pyinstaller: done
-  6-6-lightweight-hardware-recommendation: review
+  6-6-lightweight-hardware-recommendation: done
   epic-6-retrospective: optional

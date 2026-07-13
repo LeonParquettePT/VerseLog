@@ -4,7 +4,7 @@ baseline_commit: f3fcf16
 
 # Story 6.6: Lightweight, Prerequisite-Independent Hardware Recommendation for the Installer
 
-Status: review
+Status: done
 
 ## Story
 
@@ -35,8 +35,8 @@ so that the recommendation isn't accidentally corrupted by measuring how fast a 
   - [x] `src/verselog/core/vision_model.py` (new): `DEFAULT_VISION_MODEL` moved here from `vision_provider.py` (which now imports it from this new shared, dependency-free location) so `PrerequisiteChecker` doesn't need to import the whole `vision_provider` module (and its `ollama`/screenshot/`mss` chain) just for one string constant.
   - [x] `src/verselog/adapters/system/prerequisite_checker.py`: rewritten to check Tesseract via a direct `subprocess.run(["tesseract", "--version"], ...)` call instead of importing `pytesseract`, and Ollama via a raw `urllib.request` GET against `/api/tags` instead of importing the `ollama` client — both confirmed to answer the exact same question the original code asked (verified the real Ollama API's JSON shape directly against this machine's own running Ollama instance: `{"models": [{"name": ..., "model": ..., ...}]}`). Deliberately plain HTTP, not HTTPS: Ollama's local API has no TLS listener (`http://localhost:11434`), and the request never leaves the machine.
   - [x] `tests/test_prerequisite_checker.py`: rewritten to monkeypatch `subprocess.run`/`urllib.request.urlopen` instead of the (now-removed) `pytesseract`/`ollama` module attributes; same test coverage (both available, Tesseract missing two ways, Ollama unreachable, both missing, vision model not yet pulled).
-- [ ] Task 6: Re-publish the updated installer (AC: #1)
-  - [ ] Re-publish the updated `verselog-installer.exe` to the existing `v0.1.0-windows` GitHub Release (replacing Story 6.5's asset), done after this PR merges to main (same "tag the merged state" precedent as Stories 5.1/6.5).
+- [x] Task 6: Re-publish the updated installer (AC: #1)
+  - [x] Rebuilt fresh from merged `main` (15,111,163 bytes) and re-uploaded to the existing `v0.1.0-windows` GitHub Release via `gh release upload --clobber`, replacing Story 6.5's 27.8 MB asset. Confirmed via `gh release view` that both `verselog-installer.exe` (15.1 MB) and `verselog.exe` (29.3 MB, unchanged) are attached.
 
 ## Dev Notes
 
@@ -100,3 +100,4 @@ claude-sonnet-5
 - 2026-07-13: Story created — directly from the project's own author noticing `verselog-installer.exe`'s file size was suspiciously close to `verselog.exe`'s, tracing that to both a real size problem and a previously-unnoticed correctness bug (benchmarking uninstalled prerequisites measures failure speed, not performance).
 - 2026-07-13: Tasks 1-4 done — lightweight hardware-based recommendation replaces the real timing-based benchmark in the installer. First rebuild showed almost no size change, tracing that to `PrerequisiteChecker`'s own separate heavy imports (Task 5, added mid-story after confirming with the user). After Task 5: `verselog-installer.exe` 27.8 MB → 11.76 MB. 183/183 tests passing, status moved to review.
 - 2026-07-13: Code review (high effort) found 7 real issues (Ollama response parsing robustness, `OLLAMA_HOST` scheme handling, HTTP-call convention consistency, missing subprocess timeout, a dead `cpu_count` parameter, and `DEFAULT_VISION_MODEL` misplaced in `core/` instead of `adapters/`) — all fixed, regression tests added. Final size: `verselog-installer.exe` 27.8 MB → 15.1 MB (46% smaller, trading a little size for using the codebase's established `requests`-based HTTP convention instead of raw `urllib`). 187/187 tests passing.
+- 2026-07-13: Merged to `main`, rebuilt fresh, and re-uploaded to the `v0.1.0-windows` GitHub Release (replacing Story 6.5's 27.8 MB asset with the final 15.1 MB build). Status moved to done.
