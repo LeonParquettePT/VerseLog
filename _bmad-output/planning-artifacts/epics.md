@@ -388,4 +388,19 @@ So that Windows Smart App Control and SmartScreen don't block or scare me away f
 **Then** the published GitHub Release asset is signed, and Smart App Control/SmartScreen treat it as a verified-publisher app rather than an unknown binary
 **And** the Windows build process moves to a GitHub Actions CI pipeline (required for SignPath's signing integration — not a local, manual `pyinstaller` invocation as done in Story 5.1)
 
+### Story 5.5: Ship Selection via the Results UI (Deferred — Tracked, Not Forgotten)
+
+As a player who doesn't use VoiceAttack or the command line,
+I want to pick my ship from the graphical interface,
+So that I don't have to launch VerseLog with a `--ship` command-line argument every time.
+
+**Acceptance Criteria:**
+
+**Given** `--ship` is required on the command line today (confirmed working via manual testing in Story 5.1/5.4 verification — real players confirmed the CLI flow itself is functional)
+**When** a player launches VerseLog without a `--ship` argument
+**Then** the Tkinter UI presents a ship-selection screen (populated from `ShipReferenceStore`'s already-imported data) before the scan begins, instead of `argparse` erroring out
+**And** `--ship` remains available as a command-line shortcut for players who prefer it (VoiceAttack users, scripted/console workflows) — this doesn't replace the CLI path, it adds a GUI path for everyone else
+
+Added 2026-07-13: raised during real end-to-end manual testing of the packaged Windows exe — confirmed the app works correctly (quarantine path validated when tested outside the actual game), but requiring a CLI argument for ship selection is a real UX gap for players who expect a pure point-and-click experience. Explicitly deferred: Linux packaging (5.2) remains the priority; this is UX polish on an already-functional flow, not a blocker.
+
 Added 2026-07-10: raised after the project's own author hit a real Smart App Control block running the packaged exe locally, confirming this isn't a hypothetical concern. Explicitly deferred: SignPath Foundation's application/review process takes days to weeks and is out of this session's control, and migrating the build to CI is real engineering work — not a five-minute fix. User's explicit call: finish Linux packaging (Story 5.2) first, since NFR7's cross-platform target is a bigger gap than the Windows-only signing friction.
