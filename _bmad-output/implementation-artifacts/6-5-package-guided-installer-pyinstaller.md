@@ -4,7 +4,7 @@ baseline_commit: 8a2ec9b
 
 # Story 6.5: Package the Guided Installer (PyInstaller)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -21,9 +21,10 @@ so that I don't need Python installed to run the installer any more than I need 
 - [x] Task 1: Produce a working single-file Windows executable for the installer (AC: #1)
   - [x] Build command: `pyinstaller --onefile --windowed --name verselog-installer --paths src src/verselog_installer/__main__.py` (`--windowed`, not `--console`: unlike Story 5.1's `verselog.exe`, `__main__.py` here takes no CLI arguments at all — a pure Tkinter GUI flow, so a dangling console window behind the wizard would be pure noise, not a safety net). Build succeeded cleanly: `dist/verselog-installer.exe`, ~27.8 MB, PyInstaller's own `hook-_tkinter.py` processed with no errors or warnings beyond the pre-existing, harmless `tzdata` hidden-import notice already seen on Story 5.1's build.
   - [x] Verify the built `dist/verselog-installer.exe` actually runs: **blocked by Windows Smart App Control** on this machine — every launch attempt (direct `subprocess.Popen`, `Start-Process`) was refused with "Une stratégie de contrôle d'application a bloqué ce fichier", confirmed via `Get-WinEvent` (Code Integrity Policy ID `{0283ac0f-fff1-49ae-ada1-8a933130cad6}`, "did not meet the Enterprise signing level requirements"). This is the exact same known limitation Story 5.1 already documented for `verselog.exe` (unsigned PyInstaller binaries) — confirmed with the user, who declined to toggle Smart App Control off for this verification. Direct launch+screenshot evidence is not available for this story as a result; see Debug Log for the indirect verification relied on instead.
-- [ ] Task 2: Publish via GitHub Release, not committed to the repo (AC: #1) — done AFTER this PR merges to main, not on the feature branch (mirrors Story 5.1's Task 3 precedent: a Release should tag the actual merged state).
-  - [ ] Create/update the GitHub Release with `dist/verselog-installer.exe` attached as a release asset, alongside the existing `verselog.exe`/`verselog-linux` assets so a player finds both from the same place.
-  - [ ] Update `docs/index.html` (and both READMEs if they link the Windows download) to mention the guided installer as the recommended first-time download, keeping the direct `verselog.exe` link available for anyone who wants to skip the wizard.
+- [x] Task 2: Publish via GitHub Release, not committed to the repo (AC: #1) — done AFTER this PR merged to main, not on the feature branch (mirrors Story 5.1's Task 3 precedent: a Release should tag the actual merged state).
+  - [x] Uploaded `dist/verselog-installer.exe` to the existing `v0.1.0-windows` GitHub Release, alongside `verselog.exe`. Rewrote the release notes to lead with the installer as the recommended download, with `verselog.exe` kept as the direct/no-wizard option; also corrected a stale line claiming Linux packaging was "tracked for later" (Story 5.2 shipped it separately, `v0.1.0-linux` already exists).
+  - [x] Updated `docs/index.html` (installer listed first, marked "recommended", direct `verselog.exe` kept as a second row) and both `README.md`/`README.fr.md` (same ordering, plus refreshed stale project stats — 4 epics/25 stories/176 tests — that hadn't been touched since an earlier story).
+  - Note: rebuilding `verselog.exe` itself (its current Release asset predates Stories 5.3/5.5/5.6, already flagged in `SESSION-STATUS.md`) is explicitly out of scope here — confirmed with the user this is a separate, later action, not bundled into this story.
 - [x] Task 3: Tests (AC: #1)
   - [x] No new unit tests for the PyInstaller build step itself — same reasoning as Story 5.1: it's a packaging/build-tooling step, not application logic, nothing meaningful to unit-test beyond actually running the binary. Full existing suite re-confirmed green (`176 passed`) to make sure the build process touched nothing application-facing.
 
@@ -67,10 +68,13 @@ claude-sonnet-5
 ### File List
 
 - No application source files added or modified.
-- `dist/verselog-installer.exe` (gitignored build output — not committed, published as a GitHub Release asset post-merge)
+- `dist/verselog-installer.exe` (gitignored build output — not committed, published as a GitHub Release asset)
 - `verselog-installer.spec` (gitignored, PyInstaller-generated, matches the existing `*.spec` wildcard)
+- `docs/index.html` (modified, post-merge — installer listed first/recommended, direct `verselog.exe` link kept)
+- `README.md` / `README.fr.md` (modified, post-merge — same download ordering, refreshed stale project stats)
 
 ## Change Log
 
 - 2026-07-13: Story created — packaging the guided installer wizard itself as `verselog-installer.exe`, the piece every prior Epic 6 story deliberately deferred until now.
 - 2026-07-13: Task 1 done — built `verselog-installer.exe` via PyInstaller `--onefile --windowed`. Direct launch verification blocked by Windows Smart App Control (same known limitation as Story 5.1); user confirmed not to disable it for this check. 176/176 tests passing (no application code changed). Status moved to review; Task 2 (Release publishing) deliberately deferred to a post-merge follow-up.
+- 2026-07-13: Task 2 completed post-merge — `verselog-installer.exe` uploaded to the existing `v0.1.0-windows` Release, notes rewritten to recommend it first; `docs/index.html` and both READMEs updated the same way, per the user's explicit request to make the installer the prioritized download. Rebuilding the stale `verselog.exe` asset itself confirmed out of scope for this story. Status moved to done.

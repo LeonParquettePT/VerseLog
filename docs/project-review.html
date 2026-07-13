@@ -403,7 +403,7 @@
     </div>
     <div class="side-group">
       <div class="side-label">Epic 6</div>
-      <a class="side-link epic" href="#epic6">Guided Installer <span style="opacity:.6;">(stories done, not yet packaged)</span></a>
+      <a class="side-link epic" href="#epic6">Guided Installer <span style="opacity:.6;">(shipped; test-infra story remains)</span></a>
     </div>
     <div class="side-group">
       <div class="side-label">State</div>
@@ -419,8 +419,8 @@
       <p class="subtitle">A free, open-source logistics assistant for Star Citizen. Built solo-dev-and-agent through the BMad method — brainstorm → spec → architecture → epics → story-by-story implementation, each behind its own branch, PR and code review. This page retraces the whole build in order.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics closed</div></div>
-        <div class="stat"><div class="n tabnum">25</div><div class="l">Stories shipped</div></div>
-        <div class="stat"><div class="n tabnum">32</div><div class="l">PRs merged</div></div>
+        <div class="stat"><div class="n tabnum">26</div><div class="l">Stories shipped</div></div>
+        <div class="stat"><div class="n tabnum">33</div><div class="l">PRs merged</div></div>
         <div class="stat"><div class="n tabnum">176</div><div class="l">Tests passing</div></div>
         <div class="stat"><div class="n tabnum">52</div><div class="l">Source modules</div></div>
       </div>
@@ -765,7 +765,7 @@
     </section>
 
     <section id="epic6">
-      <h2>Epic 6 — Guided Installer <span class="tag">3 of 3 stories done · PR #30–32</span></h2>
+      <h2>Epic 6 — Guided Installer <span class="tag">4 of 5 stories done · PR #30–33</span></h2>
       <p class="lede">A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer, not a bare executable a player has to already know how to run. Modeled explicitly on Python's own installer and VMware Workstation's. The wizard itself is now functionally complete.</p>
       <div class="story-grid">
 
@@ -789,8 +789,14 @@
           <div class="story-note fix"><span class="lbl">Code review finding</span>Shortcut and target paths were interpolated unescaped into a double-quoted PowerShell string — a path containing <code>$</code> or a backtick (both valid in NTFS filenames) would be reinterpreted as PowerShell variable/subexpression syntax instead of literal text. Fixed by single-quoting the values instead (PowerShell single-quoted strings never expand variables or subexpressions).</div>
         </div>
 
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.5</span><span class="story-title">Package the Guided Installer (PyInstaller)</span><span class="pill done">done</span></div>
+          <div class="story-body">Built <code>verselog-installer.exe</code> via <code>pyinstaller --onefile --windowed</code> (windowed, not console — unlike <code>verselog.exe</code>, this entrypoint takes no CLI arguments at all, so a console window behind the wizard would be pure noise). Published to the existing <code>v0.1.0-windows</code> GitHub Release alongside <code>verselog.exe</code>, and made the recommended, first-listed download in the docs site and both READMEs, per the project's own author's request to prioritize it for players.</div>
+          <div class="story-note fix"><span class="lbl">Verification gap, stated plainly</span>Direct launch + screenshot verification of the frozen exe wasn't possible on this machine — Windows Smart App Control blocks the freshly-built, unsigned binary outright (confirmed via Windows Code Integrity event logs), the same known limitation already documented for <code>verselog.exe</code> in Story 5.1. The project's author declined to temporarily disable Smart App Control for this check. Confidence in the build instead rests on: a clean PyInstaller build log (its own <code>_tkinter</code> hook processed without error), and the same underlying step code already having real, source-run screenshot verification across Stories 6.1–6.3.</div>
+        </div>
+
       </div>
-      <p class="lede" style="margin-top:20px;"><strong>Next:</strong> PyInstaller packaging of <code>verselog-installer.exe</code> itself, deliberately deferred until the wizard's own three stories were done — no Release asset for a functionally incomplete installer.</p>
+      <p class="lede" style="margin-top:20px;"><strong>Remaining:</strong> Story 6.4 (a project-wide fix for the known, pre-existing Tk()-creation test flake) — deferred infra work, not blocking any player-facing outcome.</p>
     </section>
 
     <section id="gaps">
@@ -815,7 +821,7 @@
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Installer not yet packaged as an .exe (Epic 6 stays in progress).</strong> All three wizard stories (6.1–6.3) are done and functionally complete; only PyInstaller packaging of <code>verselog-installer.exe</code> and Story 6.4 (a project-wide fix for a known, pre-existing Tk()-creation test flake) remain.</div>
+          <div class="g-body"><strong>Tk() test-suite flakiness not yet fixed project-wide (Story 6.4, Epic 6 stays in progress).</strong> The guided installer itself (Stories 6.1–6.3, 6.5) is done, packaged, and published — the only thing keeping Epic 6 open is a known, pre-existing environment flake in the Tkinter tests, not a player-facing gap.</div>
         </div>
       </div>
     </section>
@@ -851,7 +857,7 @@ verselog_installer/  <span style="opacity:.6;">— separate package, Epic 6, imp
 
     <footer>
       <span>VerseLog — MIT licensed, open-source from the first commit.</span>
-      <span class="mono tabnum">133 commits · 32 PRs · 176 tests green</span>
+      <span class="mono tabnum">136 commits · 33 PRs · 176 tests green</span>
     </footer>
   </main>
 </div>

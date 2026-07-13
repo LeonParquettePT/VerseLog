@@ -87,19 +87,27 @@
     <a class="card" href="project-review.html">
       <div class="flag">🇬🇧</div>
       <div class="t">Project Review — English</div>
-      <div class="d">Architecture, all 25 stories across 4 closed epics (+ Epic 6's guided installer functionally complete), real-world bugs found and fixed.</div>
+      <div class="d">Architecture, all 26 stories across 4 closed epics (+ Epic 6's guided installer, shipped and packaged), real-world bugs found and fixed.</div>
     </a>
     <a class="card" href="project-review-fr.html">
       <div class="flag">🇫🇷</div>
       <div class="t">Revue de projet — Français</div>
-      <div class="d">Architecture, les 25 stories des 4 epics clos (+ l'installeur guide de l'Epic 6 fonctionnellement complet), le journal de vérification réelle.</div>
+      <div class="d">Architecture, les 26 stories des 4 epics clos (+ l'installeur guide de l'Epic 6, livré et empaqueté), le journal de vérification réelle.</div>
     </a>
   </div>
 
   <div class="row">
     <div>
-      <div class="t">Download — Windows</div>
-      <div class="d">Single .exe, no Python required. Tesseract and Ollama still needed separately.</div>
+      <div class="t">Download — Windows <span style="opacity:.6;font-weight:400;">(guided installer, recommended)</span></div>
+      <div class="d">Runs a hardware benchmark, lets you pick which prerequisites to install (nothing installed without your confirmation), and offers to set up a shortcut at the end. No Python required.</div>
+    </div>
+    <a href="https://github.com/LeonParquettePT/VerseLog/releases/tag/v0.1.0-windows">Get verselog-installer.exe →</a>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="t">Download — Windows <span style="opacity:.6;font-weight:400;">(direct, no installer)</span></div>
+      <div class="d">Skip the wizard and run the app itself directly. Single .exe, no Python required. Tesseract and Ollama still needed separately.</div>
     </div>
     <a href="https://github.com/LeonParquettePT/VerseLog/releases/tag/v0.1.0-windows">Get verselog.exe →</a>
   </div>
@@ -121,7 +129,7 @@
   </div>
 
   <div class="note">
-    <strong>Windows Smart App Control may block the .exe outright</strong> ("we've blocked an app that could put your device at risk... we couldn't verify its publisher"). This is a real limitation, not malware: the app isn't code-signed yet, and Smart App Control has no per-app "Run anyway" override — it's allow or block, re-evaluated on every launch. To run VerseLog: temporarily disable Smart App Control (Windows Security → App &amp; Browser Control → Smart App Control settings), then run the .exe. Re-enabling Smart App Control afterward will likely block it again on the next launch, since the file is still unsigned — either keep it disabled while you use VerseLog, or toggle it off each time you launch. Since an early-2026 Windows update this toggle no longer requires reinstalling Windows. If you instead see an older-style SmartScreen warning ("an app control policy has blocked this file"), that one does have "More info → Run anyway". See the Release page for details.
+    <strong>Windows Smart App Control may block either .exe outright</strong> ("we've blocked an app that could put your device at risk... we couldn't verify its publisher") — this applies to both <code>verselog-installer.exe</code> and <code>verselog.exe</code>. This is a real limitation, not malware: neither file is code-signed yet, and Smart App Control has no per-app "Run anyway" override — it's allow or block, re-evaluated on every launch. To run VerseLog: temporarily disable Smart App Control (Windows Security → App &amp; Browser Control → Smart App Control settings), then run the .exe. Re-enabling Smart App Control afterward will likely block it again on the next launch, since the file is still unsigned — either keep it disabled while you use VerseLog, or toggle it off each time you launch. Since an early-2026 Windows update this toggle no longer requires reinstalling Windows. If you instead see an older-style SmartScreen warning ("an app control policy has blocked this file"), that one does have "More info → Run anyway". See the Release page for details.
   </div>
   <div class="note">
     <strong>Linux build:</strong> run <code>chmod +x verselog-linux</code> after downloading — verified working end-to-end on a real Ubuntu Desktop, graphical window included. See the Release page for a copy-pasteable prerequisite install block.

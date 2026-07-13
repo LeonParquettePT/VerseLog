@@ -403,7 +403,7 @@
     </div>
     <div class="side-group">
       <div class="side-label">Epic 6</div>
-      <a class="side-link epic" href="#epic6">Installeur guide <span style="opacity:.6;">(stories terminees, pas encore empaquete)</span></a>
+      <a class="side-link epic" href="#epic6">Installeur guide <span style="opacity:.6;">(livre ; reste une story d'infra de test)</span></a>
     </div>
     <div class="side-group">
       <div class="side-label">Etat actuel</div>
@@ -419,8 +419,8 @@
       <p class="subtitle">Un assistant logistique gratuit et open-source pour Star Citizen. Construit en binome dev-et-agent via la methode BMad — brainstorm → spec → architecture → epics → implementation story par story, chacune derriere sa propre branche, sa PR et sa revue de code. Cette page retrace toute la construction, dans l'ordre.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics clos</div></div>
-        <div class="stat"><div class="n tabnum">25</div><div class="l">Stories livrees</div></div>
-        <div class="stat"><div class="n tabnum">32</div><div class="l">PR mergees</div></div>
+        <div class="stat"><div class="n tabnum">26</div><div class="l">Stories livrees</div></div>
+        <div class="stat"><div class="n tabnum">33</div><div class="l">PR mergees</div></div>
         <div class="stat"><div class="n tabnum">176</div><div class="l">Tests qui passent</div></div>
         <div class="stat"><div class="n tabnum">52</div><div class="l">Modules source</div></div>
       </div>
@@ -765,7 +765,7 @@
     </section>
 
     <section id="epic6">
-      <h2>Epic 6 — Installeur guide <span class="tag">3 stories sur 3 terminees · PR #30–32</span></h2>
+      <h2>Epic 6 — Installeur guide <span class="tag">4 stories sur 5 terminees · PR #30–33</span></h2>
       <p class="lede">Un assistant d'installation guide separe pour Windows — l'experience "Suivant, Suivant, Terminer" d'un installeur natif familier, pas un executable brut que le joueur doit deja savoir lancer. Modele explicitement sur l'installeur de Python et celui de VMware Workstation. L'assistant lui-meme est maintenant fonctionnellement complet.</p>
       <div class="story-grid">
 
@@ -789,8 +789,14 @@
           <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Les chemins du raccourci et de la cible etaient interpoles sans echappement dans une chaine PowerShell a guillemets doubles — un chemin contenant un <code>$</code> ou une apostrophe inversee (tous deux valides dans les noms de fichiers NTFS) aurait ete reinterprete comme de la syntaxe de variable/sous-expression PowerShell plutot que du texte litteral. Corrige en utilisant des guillemets simples a la place (les chaines PowerShell a guillemets simples n'expansent jamais de variables ni de sous-expressions).</div>
         </div>
 
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.5</span><span class="story-title">Empaqueter l'installeur guide (PyInstaller)</span><span class="pill done">termine</span></div>
+          <div class="story-body">Construit <code>verselog-installer.exe</code> via <code>pyinstaller --onefile --windowed</code> (fenetre, pas de console — contrairement a <code>verselog.exe</code>, ce point d'entree ne prend aucun argument en ligne de commande, une console derriere l'assistant ne serait que du bruit). Publie sur la Release GitHub <code>v0.1.0-windows</code> existante aux cotes de <code>verselog.exe</code>, et mis en avant comme telechargement recommande en premier sur le site de doc et les deux README, a la demande explicite de l'auteur du projet pour aider les joueurs.</div>
+          <div class="story-note fix"><span class="lbl">Limite de verification, assumee</span>La verification directe par lancement + capture d'ecran de l'exe compile n'a pas ete possible sur cette machine — Windows Smart App Control bloque le binaire fraichement construit et non signe (confirme via les journaux d'evenements Code Integrity de Windows), la meme limitation connue deja documentee pour <code>verselog.exe</code> en Story 5.1. L'auteur du projet a decline de desactiver temporairement Smart App Control pour ce test. La confiance dans le build repose plutot sur : un journal de build PyInstaller propre (son propre hook <code>_tkinter</code> traite sans erreur), et le meme code des etapes deja verifie par capture d'ecran reelle (en tournant depuis le code source) durant les Stories 6.1 a 6.3.</div>
+        </div>
+
       </div>
-      <p class="lede" style="margin-top:20px;"><strong>Suite :</strong> le packaging PyInstaller de <code>verselog-installer.exe</code> lui-meme, deliberement reporte jusqu'a ce que les trois stories de l'assistant soient terminees — pas d'asset de Release pour un installeur fonctionnellement incomplet.</p>
+      <p class="lede" style="margin-top:20px;"><strong>Restant :</strong> la Story 6.4 (un correctif projet-entier pour l'instabilite connue et preexistante des tests a la creation de <code>Tk()</code>) — travail d'infra reporte, ne bloque aucun resultat visible pour un joueur.</p>
     </section>
 
     <section id="gaps">
@@ -815,7 +821,7 @@
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Installeur pas encore empaquete en .exe (Epic 6 reste en cours).</strong> Les trois stories de l'assistant (6.1-6.3) sont terminees et fonctionnellement completes ; il reste le packaging PyInstaller de <code>verselog-installer.exe</code> et la Story 6.4 (un correctif projet-entier pour une instabilite connue et preexistante des tests a la creation de <code>Tk()</code>).</div>
+          <div class="g-body"><strong>Instabilite des tests Tk() pas encore corrigee projet-entier (Story 6.4, Epic 6 reste en cours).</strong> L'installeur guide lui-meme (Stories 6.1-6.3, 6.5) est termine, empaquete et publie — seule une instabilite connue et preexistante des tests Tkinter garde l'Epic 6 ouvert, pas un manque visible pour un joueur.</div>
         </div>
       </div>
     </section>
@@ -851,7 +857,7 @@ verselog_installer/  <span style="opacity:.6;">— package separe, Epic 6, impor
 
     <footer>
       <span>VerseLog — sous licence MIT, open-source depuis le premier commit.</span>
-      <span class="mono tabnum">133 commits · 32 PR · 176 tests au vert</span>
+      <span class="mono tabnum">136 commits · 33 PR · 176 tests au vert</span>
     </footer>
   </main>
 </div>
