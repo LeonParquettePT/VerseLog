@@ -18,20 +18,21 @@ https://github.com/LeonParquettePT/VerseLog/blob/main/_bmad-output/implementatio
   - Story 5.7 (benchmark sensible à la RAM disponible) : **backlog**.
 - Epic 6 (Installeur graphique) : **in-progress**. Nouvel epic, package Python `verselog_installer` séparé de `verselog` (aucune dépendance inverse).
   - Story 6.1 (coquille de l'assistant + étape benchmark) : **done**. Étapes Welcome + Benchmark fonctionnelles, réutilise `Benchmark`/`SettingsStore` de l'app principale. Packaging PyInstaller de `verselog-installer.exe` volontairement reporté à la fin de l'epic (Story 6.3).
-  - Story 6.2 (sélection des composants + installation guidée) : **backlog**, prochaine étape naturelle.
-  - Story 6.3 (écran de fin + raccourci) : **backlog**.
-- Pages de revue de projet (`docs/project-review.html`/`-fr.html`) mises à jour le 2026-07-13 pour couvrir Epics 4 et 5 (étaient restées figées à "3 epics" depuis avant le début de cette session).
+  - Story 6.2 (sélection des composants + installation guidée) : **done**. Cases à cocher pré-remplies selon le tier de benchmark recommandé, bouton "Install Selected" qui ouvre les installeurs/téléchargements officiels (jamais d'install silencieuse scriptée).
+  - Story 6.3 (écran de fin + raccourci) : **backlog**, prochaine étape naturelle — dernière story avant de pouvoir enfin packager `verselog-installer.exe`.
+  - Story 6.4 (fixer la flakiness Tk() des tests, projet entier) : **backlog**, amélioration d'infra de test, pas bloquante.
+- Pages de revue de projet (`docs/project-review.html`/`-fr.html`) mises à jour le 2026-07-13 pour couvrir Epics 4, 5 et 6 (étaient restées figées à "3 epics" depuis avant le début de cette session) — plus polish UX (scrollbar, section active en surbrillance, retour à la doc).
 
 ## Découvertes/limitations connues (non bloquantes)
 
 - **Windows Smart App Control** peut bloquer `verselog.exe` (non signé) — pas de bouton "exécuter quand même", il faut le désactiver temporairement dans Sécurité Windows. Documenté dans les notes de Release et le README.
 - **Tier vision (Ollama) gourmand en RAM** une fois réellement utilisé pour l'inférence — confirmé : fonctionne sur une VM à 4 Go tant que le modèle n'est pas chargé, plus du tout une fois utilisé. D'où Story 5.7.
 - **Release Windows obsolète** (voir Story 5.1 ci-dessus) — à reconstruire avant toute nouvelle communication publique du lien de téléchargement Windows.
-- **Flakiness d'environnement connue (non liée au code) :** créer beaucoup de fenêtres `tk.Tk()` réelles dans une même exécution de la suite de tests complète déclenche parfois une `TclError` transitoire à la construction — confirmé que ça touche des tests pré-existants sans rapport, pas un bug introduit récemment. Se résout en relançant les tests.
+- **Flakiness d'environnement connue (non liée au code) :** créer beaucoup de fenêtres `tk.Tk()` réelles dans une même exécution de la suite de tests complète déclenche parfois une `TclError` transitoire à la construction — confirmé que ça touche plusieurs fichiers de tests pré-existants sans rapport entre eux (jamais le même deux fois de suite), pas un bug de code. Se résout en relançant les tests. Fix propre suivi en Story 6.4.
 
 ## Prochaine étape suggérée
 
-Trois pistes possibles, aucune priorité imposée : (1) reconstruire/republier la release Windows pour inclure Stories 5.3/5.5/5.6, (2) continuer l'epic installeur avec Story 6.2, ou (3) stories backlog restantes : 5.4, 5.7.
+Trois pistes possibles, aucune priorité imposée : (1) reconstruire/republier la release Windows pour inclure Stories 5.3/5.5/5.6, (2) continuer l'epic installeur avec Story 6.3 (dernière story avant de packager l'installeur), ou (3) stories backlog restantes : 5.4, 5.7, 6.4.
 
 ## Où retrouver le contexte complet
 
