@@ -4,7 +4,7 @@ baseline_commit: df71f37
 
 # Story 5.5: Ship Selection via the Results UI
 
-Status: review
+Status: done
 
 ## Story
 

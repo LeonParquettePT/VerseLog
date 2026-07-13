@@ -82,6 +82,6 @@ development_status:
   5-2-linux-packaging-deferred: review
   5-3-prerequisite-check-tesseract-ollama: backlog
   5-4-code-signing-windows-build: backlog
-  5-5-ship-selection-via-results-ui: review
+  5-5-ship-selection-via-results-ui: done
   5-6-monitor-selection-for-capture: backlog
   epic-5-retrospective: optional
