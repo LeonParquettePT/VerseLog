@@ -2,11 +2,6 @@ name: Build Linux executable
 
 on:
   workflow_dispatch:
-  # TEMPORARY: lets this workflow run on its own feature branch for
-  # verification, since workflow_dispatch alone can't be triggered until
-  # the file exists on the default branch. Removed before merge.
-  push:
-    branches: [story-5.2-linux-packaging]
 
 jobs:
   build:
