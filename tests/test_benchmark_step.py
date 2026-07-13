@@ -44,5 +44,14 @@ def test_on_shown_runs_the_benchmark_once_updates_the_label_and_never_reruns(tmp
         step.on_shown()
 
         assert step.result is first_result
+
+        # Code-review finding: re-entering this step (Back then Next again)
+        # calls build() fresh, producing a brand-new label defaulting to the
+        # "checking" message. on_shown() must still refresh it to the cached
+        # result, not just skip re-benchmarking and leave it stale.
+        second_frame = step.build(root)
+        step.on_shown()
+
+        assert step.result.tier_name in _label_text(second_frame)
     finally:
         root.destroy()

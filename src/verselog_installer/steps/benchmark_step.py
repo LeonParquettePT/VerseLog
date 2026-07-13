@@ -36,6 +36,10 @@ class BenchmarkStep:
 
     def on_shown(self) -> None:
         if self.result is not None:
+            # Already ran once (e.g. Back then Next again) - build() made a
+            # fresh label defaulting to the "checking" message, so it still
+            # needs the cached result even though we won't re-benchmark.
+            self._status_label.config(text=f"Recommended capture method: {self.result.tier_name}")
             return
 
         self._status_label.update()

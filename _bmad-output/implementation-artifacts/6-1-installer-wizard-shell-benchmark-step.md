@@ -63,7 +63,8 @@ claude-sonnet-5
 ### Debug Log References
 
 - `uv sync --extra dev --link-mode=copy` → new `verselog_installer` package installs and imports cleanly.
-- `uv run --extra dev pytest -q` → `159 passed` (151 from Story 5.6's baseline + 8 new).
+- `uv run --extra dev pytest -q` → `158 passed` (151 from Story 5.6's baseline + 7 new).
+- Code review fix re-verified: `uv run --extra dev pytest -q` → `158 passed` again after the fix (test count unchanged, assertions extended in place).
 - Real bug found and fixed during first test run: `tk.Frame(self.root, padx=20, pady=(0, 20))` raised `_tkinter.TclError: bad screen distance "0 20"` — a tuple `pady` is only valid on `.pack()`, not on a widget's own constructor. Fixed by moving the padding to `nav.pack(..., pady=(0, 20))` instead.
 - Real, pre-existing environment flakiness discovered (not introduced by this story): creating many `tk.Tk()` roots across a ~150+ test full-suite run intermittently raises a `TclError` at `Tk()` construction (different underlying Tcl messages each time — missing library file, invalid command name). Confirmed via repeated full-suite runs that this also hits a completely unrelated, pre-existing test file (`test_tkinter_ui_provider.py`), proving it's a general environment/resource fragility (likely aggravated by OneDrive file-locking on the Tcl library files), not a defect in this story's code. Mitigated locally by merging `test_benchmark_step.py`'s two tests into one shared `tk.Tk()` root rather than two, reducing this story's own contribution to total Tk() churn — the underlying environment fragility itself is out of this story's scope to fix.
 - Visual-verification false alarm, resolved: the first screenshot attempt of the benchmark step showed the result text cut off and the Finish button clipped. Investigated directly (`winfo_width()`/`geometry()` after `update()`) and confirmed the wizard's actual internal state was already correct (369px window, 329px required label width) — the truncation was a timing artifact in the verification script itself (the OS-level window frame hadn't finished resizing before `mss` grabbed the screenshot). Re-captured with a short settle delay before the second screenshot; both steps render correctly. Documented so this isn't mistaken for a real product bug later.
@@ -74,7 +75,8 @@ claude-sonnet-5
 - Two real bugs found and fixed during this story's own development (not pre-existing): the `pady` tuple-on-constructor `TclError`, and none in the actual step/wizard business logic — both fixes were mechanical/Tkinter-API-shape issues caught immediately by running tests, not design flaws.
 - One pre-existing environment fragility discovered and documented (intermittent Tk() creation flakiness under a large test suite) — confirmed not specific to this story, left as a known observation rather than a scope-creeping fix.
 - PyInstaller packaging of `verselog-installer.exe` deliberately deferred to the end of Epic 6 (Story 6.3), not part of this story — see Dev Notes.
-- 159/159 tests passing.
+- 158/158 tests passing (one pair of tests was merged into one during development to reduce Tk()-instance churn — see Debug Log).
+- **Code review fix:** navigating Back then Next to the Benchmark step a second time called `build()` fresh (a brand-new label defaulting to the "checking" message) followed by `on_shown()` — which returned immediately since `self.result` was already set, skipping the label update entirely. The label was left stuck on "Checking your hardware..." forever even though the result was already known. Fixed so `on_shown()` always refreshes the label from the cached result on repeat visits, only skipping the actual re-benchmark. Regression test added (extends the existing test rather than adding a new one, to avoid an extra `tk.Tk()`).
 
 ### File List
 
@@ -90,4 +92,4 @@ claude-sonnet-5
 
 ## Change Log
 
-- 2026-07-13: Story implemented — new `verselog_installer` package (separate from `verselog`), wizard shell with Back/Next/Finish navigation, Welcome and Benchmark steps (the latter reusing `Benchmark`/`SettingsStore` exactly as `app.py` does). Two real Tkinter API bugs found and fixed via tests/manual verification; one pre-existing environment flake discovered and documented (not fixed, out of scope). 159/159 tests passing, status moved to review.
+- 2026-07-13: Story implemented — new `verselog_installer` package (separate from `verselog`), wizard shell with Back/Next/Finish navigation, Welcome and Benchmark steps (the latter reusing `Benchmark`/`SettingsStore` exactly as `app.py` does). Real Tkinter API bug found and fixed (`pady` tuple on a constructor); one pre-existing environment flake discovered and documented (not fixed, out of scope). Code review found and fixed a real re-entry bug: the Benchmark step's label stayed stuck on "Checking..." after Back-then-Next. 158/158 tests passing, status moved to review.
