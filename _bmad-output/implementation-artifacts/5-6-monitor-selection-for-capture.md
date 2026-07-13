@@ -4,7 +4,7 @@ baseline_commit: 0505b84
 
 # Story 5.6: Monitor Selection for Capture
 
-Status: review
+Status: done
 
 ## Story
 
