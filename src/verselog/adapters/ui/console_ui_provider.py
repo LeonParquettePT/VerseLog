@@ -37,4 +37,4 @@ class ConsoleUIProvider(UIPort):
 
     def warn_missing_prerequisites(self, missing: list[MissingPrerequisite]) -> None:
         for item in missing:
-            print(f"Missing prerequisite: {item.name} - install it from {item.install_instructions}")
+            print(f"Missing prerequisite: {item.name} - {item.install_instructions}")

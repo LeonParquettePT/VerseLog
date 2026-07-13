@@ -83,6 +83,7 @@ claude-sonnet-5
 - Extracted `VisionProvider`'s hardcoded model string into a shared `DEFAULT_VISION_MODEL` constant so the checker and the actual capture code can never drift apart on which model name matters.
 - Retrofitted 9 pre-existing `run()` call sites across `test_app.py`/`test_app_legality.py` with a stub `prerequisite_checker` to keep tests fast and deterministic (real I/O against Tesseract/Ollama would otherwise run on every test, differing between this dev machine and CI).
 - 139/139 tests passing.
+- **Code review fix:** `ConsoleUIProvider.warn_missing_prerequisites` phrased every item as "install it from {instructions}", which reads as nonsense/misleading for the vision-model case where instructions is a shell command (`ollama pull ...`), not a source — a player could mistake it for a URL to paste in a browser. Fixed to a neutral "{name} - {instructions}" that reads correctly for both a URL and a command.
 
 ### File List
 
