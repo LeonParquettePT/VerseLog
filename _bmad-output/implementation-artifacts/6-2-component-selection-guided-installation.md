@@ -60,12 +60,14 @@ claude-sonnet-5
 
 - `uv run --extra dev pytest -q` → `166 passed` (158 from Story 6.1's baseline + 8 new).
 - Real gap discovered mid-story: `src/verselog_installer/__main__.py` didn't exist despite Story 6.1 claiming it did. Confirmed via a plain `find`/`ls` check before touching anything else. Created it as part of this story's Task 3.
-- Same pre-existing environment Tk()-flakiness as Story 6.1 (intermittent TclError under a large full-suite run) observed again, on a different, unrelated test — confirmed not caused by this story's changes by re-running immediately after.
+- Code review fix required a regression test that calls `build()` twice on the same step — this reliably triggered the known Tk()-creation flake (7 separate `tk.Tk()` roots in one file). Fixed *for this file* by refactoring to a shared, module-scoped `root` pytest fixture instead of one `tk.Tk()` per test — confirmed clean across 3 consecutive runs afterward. The same flake still occurs at the full-suite level (other, unrelated Tkinter test files each create their own roots too) — tracked as new Story 6.4 rather than fixed project-wide as a drive-by change in this story.
 
 ### Completion Notes List
 
 - Implemented all 4 tasks: a checkbox-driven component-selection step, tier-aware pre-checking, an "Install Selected" action that opens official installers/downloads (never scripts a silent install), and wiring into a `__main__.py` that — as a real, transparently-corrected finding — had to be created from scratch rather than modified, since it never actually existed from Story 6.1.
 - Retroactively corrected Story 6.1's own file to flag this gap honestly rather than leave it silently wrong.
+- **Code review fix:** navigating Back then Next to this step silently discarded the player's own manual checkbox choices, reverting to the tier-based defaults every time `build()` ran. Fixed by preserving `_check_vars` across rebuilds — only a genuinely new missing item gets a fresh default. Regression test added.
+- New Story 6.4 added to the backlog: a proper, project-wide fix for the recurring Tk()-creation test flake (observed independently in Stories 6.1 and 6.2, on different test files each time) — this story only fixed its own new test file locally.
 - 166/166 tests passing.
 
 ### File List

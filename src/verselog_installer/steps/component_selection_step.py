@@ -42,12 +42,17 @@ class ComponentSelectionStep:
 
         recommended_tier = self._benchmark_step.result.tier_name if self._benchmark_step.result else None
 
-        self._check_vars = {}
         for item in self._missing:
-            needed = self._is_needed_for_tier(item.name, recommended_tier)
-            var = tk.BooleanVar(value=needed)
-            self._check_vars[item.name] = var
-            tk.Checkbutton(frame, text=item.name, variable=var, font=_FONT).pack(anchor="w", pady=4)
+            # Preserve the player's own choice across Back-then-Next
+            # re-entries - only a genuinely new item gets a fresh,
+            # tier-based default; an already-seen one keeps whatever the
+            # player last set it to, even if that means unchecking it.
+            if item.name not in self._check_vars:
+                needed = self._is_needed_for_tier(item.name, recommended_tier)
+                self._check_vars[item.name] = tk.BooleanVar(value=needed)
+            tk.Checkbutton(frame, text=item.name, variable=self._check_vars[item.name], font=_FONT).pack(
+                anchor="w", pady=4
+            )
 
         tk.Button(frame, text="Install Selected", command=self._install_selected).pack(pady=(16, 0))
         return frame

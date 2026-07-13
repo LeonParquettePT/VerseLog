@@ -481,3 +481,17 @@ So that launching VerseLog afterward doesn't require remembering a file path.
 **When** the wizard reaches its final step
 **Then** it confirms completion plainly and offers a checkbox to create a desktop and/or Start Menu shortcut to `verselog.exe`
 **And** declining the shortcut is just as valid an ending as accepting it — the wizard never assumes
+
+### Story 6.4: Shared Tkinter Test Root (Deferred — Tracked, Not Forgotten)
+
+As a developer running this project's test suite,
+I want Tkinter tests to share one root window per file instead of each creating and destroying their own,
+So that a full test-suite run doesn't intermittently fail with an unrelated TclError.
+
+**Acceptance Criteria:**
+
+**Given** creating many independent `tk.Tk()` roots within one pytest process has proven flaky on this environment (confirmed directly: repeated full-suite runs intermittently raise a `TclError` at `Tk()` construction, with a different underlying Tcl message each time, hitting whichever Tkinter test file happens to run at that moment — `test_tkinter_ui_provider.py`, `test_installer_wizard.py`, `test_benchmark_step.py`, and `test_component_selection_step.py` have all been observed to trigger it, never the same one twice in a row)
+**When** the Tkinter test files are refactored to use one shared, module- or session-scoped `tk.Tk()` root (the fix already applied locally within `test_component_selection_step.py` during Story 6.2, which eliminated the flake for that file specifically)
+**Then** a full `pytest` run no longer intermittently fails due to this class of error, confirmed by multiple consecutive clean full-suite runs
+
+Added 2026-07-13: raised after this same flake was observed independently in both Story 6.1 and Story 6.2, hitting a different, unrelated test file each time — confirmed not caused by either story's own code, but a real, recurring environment fragility (likely aggravated by OneDrive file-locking on the Tcl library files during rapid `tk.Tk()` churn) worth fixing once properly rather than re-discovering and re-documenting it in every future Tkinter-touching story. Explicitly deferred: not blocking any current story, and fixing it project-wide means touching several existing test files at once — a dedicated, focused piece of work rather than a drive-by fix.
