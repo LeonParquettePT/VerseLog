@@ -511,3 +511,19 @@ So that I don't need Python installed to run the installer any more than I need 
 **And** `verselog.exe` and `verselog-installer.exe` remain two separate downloadable files — the installer's Finish-step shortcut still points at wherever `verselog.exe` is placed alongside it, exactly as Story 6.3 already assumed
 
 Added 2026-07-13: this is the piece every Story 6.1/6.2/6.3 Dev Notes entry explicitly deferred ("PyInstaller packaging of `verselog-installer.exe` itself is deliberately deferred until Story 6.3 completes") — now that all three wizard stories are done and the installer is functionally complete end-to-end, this is the natural next step before the guided installer can actually reach a player.
+
+### Story 6.6: Lightweight, Prerequisite-Independent Hardware Recommendation for the Installer
+
+As a player running the guided installer on a genuinely fresh machine,
+I want the installer's hardware check to recommend a tier without depending on prerequisites that aren't installed yet,
+So that the recommendation isn't accidentally corrupted by measuring how fast a missing program fails, and so the installer itself doesn't need to bundle the app's full capture stack just to make a rough suggestion.
+
+**Acceptance Criteria:**
+
+**Given** the installer's benchmark step (Story 6.1) currently reuses the real, timing-based `Benchmark` class with real `OCRProvider`/`VisionProvider` candidates, but runs *before* the component-selection step (6.2) that actually installs Tesseract/Ollama
+**When** the wizard reaches its hardware-check step on a machine where neither prerequisite is installed yet
+**Then** the recommendation is based on the machine's hardware (CPU core count, total RAM) via a simple, injectable heuristic, not by running the real (currently-uninstalled) OCR/vision pipeline and timing how fast each one fails
+**And** this step no longer persists a `benchmark_*` result into `SettingsStore` — `verselog.exe`'s own real, timing-based `Benchmark` (Story 1.6, already re-run on first launch whenever nothing was ever stored) remains the sole source of truth for the actual runtime tier, so a rough installer-time guess is always superseded by a real measurement once the player's actual machine and installed prerequisites are in play
+**And** the installer's PyInstaller build (Story 6.5) no longer needs to bundle `pytesseract`/`Pillow`/`ollama`/`mss` — this was the reason `verselog-installer.exe` (~27.8 MB) was nearly as large as `verselog.exe` (~29.3 MB) despite being a small Tkinter wizard, confirmed by the project's own author noticing the file-size parity and asking why
+
+Added 2026-07-13: discovered directly from a user question about `verselog-installer.exe`'s file size being suspiciously close to `verselog.exe`'s — tracing why revealed the installer's benchmark step imports the full `OCRProvider`/`VisionProvider` stack (Story 6.1), which is also a real, previously-unnoticed correctness bug: on a fresh machine, timing an uninstalled Ollama/Tesseract measures a fast *failure*, not real performance, risking a wrong tier recommendation. The user's own instinct that "an installer shouldn't be as heavy as the app it installs" led directly to this fix.

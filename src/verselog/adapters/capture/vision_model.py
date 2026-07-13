@@ -1,0 +1,1 @@
+DEFAULT_VISION_MODEL = "qwen2.5vl:3b"
