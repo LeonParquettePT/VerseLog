@@ -419,10 +419,10 @@
       <p class="subtitle">A free, open-source logistics assistant for Star Citizen. Built solo-dev-and-agent through the BMad method — brainstorm → spec → architecture → epics → story-by-story implementation, each behind its own branch, PR and code review. This page retraces the whole build in order.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics closed</div></div>
-        <div class="stat"><div class="n tabnum">26</div><div class="l">Stories shipped</div></div>
-        <div class="stat"><div class="n tabnum">33</div><div class="l">PRs merged</div></div>
-        <div class="stat"><div class="n tabnum">176</div><div class="l">Tests passing</div></div>
-        <div class="stat"><div class="n tabnum">52</div><div class="l">Source modules</div></div>
+        <div class="stat"><div class="n tabnum">27</div><div class="l">Stories shipped</div></div>
+        <div class="stat"><div class="n tabnum">34</div><div class="l">PRs merged</div></div>
+        <div class="stat"><div class="n tabnum">187</div><div class="l">Tests passing</div></div>
+        <div class="stat"><div class="n tabnum">54</div><div class="l">Source modules</div></div>
       </div>
     </header>
 
@@ -765,7 +765,7 @@
     </section>
 
     <section id="epic6">
-      <h2>Epic 6 — Guided Installer <span class="tag">4 of 5 stories done · PR #30–33</span></h2>
+      <h2>Epic 6 — Guided Installer <span class="tag">5 of 6 stories done · PR #30–34</span></h2>
       <p class="lede">A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer, not a bare executable a player has to already know how to run. Modeled explicitly on Python's own installer and VMware Workstation's. The wizard itself is now functionally complete.</p>
       <div class="story-grid">
 
@@ -793,6 +793,13 @@
           <div class="story-head"><span class="story-id">6.5</span><span class="story-title">Package the Guided Installer (PyInstaller)</span><span class="pill done">done</span></div>
           <div class="story-body">Built <code>verselog-installer.exe</code> via <code>pyinstaller --onefile --windowed</code> (windowed, not console — unlike <code>verselog.exe</code>, this entrypoint takes no CLI arguments at all, so a console window behind the wizard would be pure noise). Published to the existing <code>v0.1.0-windows</code> GitHub Release alongside <code>verselog.exe</code>, and made the recommended, first-listed download in the docs site and both READMEs, per the project's own author's request to prioritize it for players.</div>
           <div class="story-note fix"><span class="lbl">Verification gap, stated plainly</span>Direct launch + screenshot verification of the frozen exe wasn't possible on this machine — Windows Smart App Control blocks the freshly-built, unsigned binary outright (confirmed via Windows Code Integrity event logs), the same known limitation already documented for <code>verselog.exe</code> in Story 5.1. The project's author declined to temporarily disable Smart App Control for this check. Confidence in the build instead rests on: a clean PyInstaller build log (its own <code>_tkinter</code> hook processed without error), and the same underlying step code already having real, source-run screenshot verification across Stories 6.1–6.3.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.6</span><span class="story-title">Lightweight, Prerequisite-Independent Hardware Recommendation</span><span class="pill done">done</span></div>
+          <div class="story-body">Prompted by a real question from the project's own author about why <code>verselog-installer.exe</code> (27.8 MB) was nearly as heavy as <code>verselog.exe</code> (29.3 MB). Tracing it surfaced a genuine correctness bug too: the installer's benchmark step ran before Tesseract/Ollama were installed, so timing them measured how fast an <em>uninstalled</em> program fails, not real performance — a fast failure could look like a fast, capable tier and get wrongly recommended. Replaced with a simple, injectable RAM-based heuristic (≥ 8 GiB → vision, reusing Story 5.7's own confirmed RAM finding), no longer persisting anything to <code>SettingsStore</code> — <code>verselog.exe</code>'s own real, timed benchmark stays the sole source of truth on first real launch.</div>
+          <div class="story-note fix"><span class="lbl">Real cause of the size, found mid-story</span>The benchmark fix alone barely moved the size (27.8 → 27.83 MB). The actual cause: <code>PrerequisiteChecker</code> (Story 5.3) separately imported <code>pytesseract</code>/<code>ollama</code> just to detect installed prerequisites, pulling in the same heavy chain (Pillow, pydantic, httpx, anyio) regardless. Rewritten to use a direct <code>subprocess</code> call and <code>requests.get</code> instead — same behavior, verified against this machine's real running Tesseract/Ollama. Final result: <strong>27.8 MB → 15.1 MB (46% smaller)</strong>.</div>
+          <div class="story-note fix"><span class="lbl">Code review findings (7, all fixed)</span>A dict-index KeyError risk on a non-standard Ollama response; an unguarded response shape that could crash on <code>{"models": null}</code>; <code>OLLAMA_HOST</code> set without a URL scheme (a commonly-documented form) raising uncaught; a hand-rolled <code>urllib</code> call inconsistent with this codebase's own established <code>requests</code>+injectable-callable convention; a missing timeout on the Tesseract subprocess call that could hang indefinitely; a <code>cpu_count</code> parameter accepted but never used; and <code>DEFAULT_VISION_MODEL</code> misplaced in <code>core/</code> (a bare technology-specific model tag, not a domain concept) instead of the adapters layer.</div>
         </div>
 
       </div>
@@ -843,21 +850,21 @@ core/
   ports/
     capture_port.py  datasource_port.py  trigger_port.py  ui_port.py
 adapters/
-  capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  screenshot.py  benchmark.py
+  capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  vision_model.py  screenshot.py  benchmark.py
   datasource/ community_api_provider.py  location_data_provider.py
   trigger/    manual_trigger.py  voice_trigger.py
   ui/         console_ui_provider.py  tkinter_ui_provider.py
   system/     prerequisite_checker.py
 
 verselog_installer/  <span style="opacity:.6;">— separate package, Epic 6, imports FROM verselog only —</span>
-  __main__.py   wizard.py
+  __main__.py   wizard.py  hardware_estimate.py
   steps/      welcome_step.py  benchmark_step.py
               component_selection_step.py  finish_step.py</div>
     </section>
 
     <footer>
       <span>VerseLog — MIT licensed, open-source from the first commit.</span>
-      <span class="mono tabnum">136 commits · 33 PRs · 176 tests green</span>
+      <span class="mono tabnum">140 commits · 34 PRs · 187 tests green</span>
     </footer>
   </main>
 </div>

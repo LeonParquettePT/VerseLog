@@ -419,10 +419,10 @@
       <p class="subtitle">Un assistant logistique gratuit et open-source pour Star Citizen. Construit en binome dev-et-agent via la methode BMad — brainstorm → spec → architecture → epics → implementation story par story, chacune derriere sa propre branche, sa PR et sa revue de code. Cette page retrace toute la construction, dans l'ordre.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics clos</div></div>
-        <div class="stat"><div class="n tabnum">26</div><div class="l">Stories livrees</div></div>
-        <div class="stat"><div class="n tabnum">33</div><div class="l">PR mergees</div></div>
-        <div class="stat"><div class="n tabnum">176</div><div class="l">Tests qui passent</div></div>
-        <div class="stat"><div class="n tabnum">52</div><div class="l">Modules source</div></div>
+        <div class="stat"><div class="n tabnum">27</div><div class="l">Stories livrees</div></div>
+        <div class="stat"><div class="n tabnum">34</div><div class="l">PR mergees</div></div>
+        <div class="stat"><div class="n tabnum">187</div><div class="l">Tests qui passent</div></div>
+        <div class="stat"><div class="n tabnum">54</div><div class="l">Modules source</div></div>
       </div>
     </header>
 
@@ -765,7 +765,7 @@
     </section>
 
     <section id="epic6">
-      <h2>Epic 6 — Installeur guide <span class="tag">4 stories sur 5 terminees · PR #30–33</span></h2>
+      <h2>Epic 6 — Installeur guide <span class="tag">5 stories sur 6 terminees · PR #30–34</span></h2>
       <p class="lede">Un assistant d'installation guide separe pour Windows — l'experience "Suivant, Suivant, Terminer" d'un installeur natif familier, pas un executable brut que le joueur doit deja savoir lancer. Modele explicitement sur l'installeur de Python et celui de VMware Workstation. L'assistant lui-meme est maintenant fonctionnellement complet.</p>
       <div class="story-grid">
 
@@ -793,6 +793,13 @@
           <div class="story-head"><span class="story-id">6.5</span><span class="story-title">Empaqueter l'installeur guide (PyInstaller)</span><span class="pill done">termine</span></div>
           <div class="story-body">Construit <code>verselog-installer.exe</code> via <code>pyinstaller --onefile --windowed</code> (fenetre, pas de console — contrairement a <code>verselog.exe</code>, ce point d'entree ne prend aucun argument en ligne de commande, une console derriere l'assistant ne serait que du bruit). Publie sur la Release GitHub <code>v0.1.0-windows</code> existante aux cotes de <code>verselog.exe</code>, et mis en avant comme telechargement recommande en premier sur le site de doc et les deux README, a la demande explicite de l'auteur du projet pour aider les joueurs.</div>
           <div class="story-note fix"><span class="lbl">Limite de verification, assumee</span>La verification directe par lancement + capture d'ecran de l'exe compile n'a pas ete possible sur cette machine — Windows Smart App Control bloque le binaire fraichement construit et non signe (confirme via les journaux d'evenements Code Integrity de Windows), la meme limitation connue deja documentee pour <code>verselog.exe</code> en Story 5.1. L'auteur du projet a decline de desactiver temporairement Smart App Control pour ce test. La confiance dans le build repose plutot sur : un journal de build PyInstaller propre (son propre hook <code>_tkinter</code> traite sans erreur), et le meme code des etapes deja verifie par capture d'ecran reelle (en tournant depuis le code source) durant les Stories 6.1 a 6.3.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.6</span><span class="story-title">Recommandation materielle legere et independante des prerequis</span><span class="pill done">termine</span></div>
+          <div class="story-body">Provoquee par une vraie question de l'auteur du projet : pourquoi <code>verselog-installer.exe</code> (27,8 Mo) etait presque aussi lourd que <code>verselog.exe</code> (29,3 Mo). En creusant, un vrai bug de logique est apparu aussi : l'etape benchmark de l'installeur tournait avant l'installation de Tesseract/Ollama, donc chronometrer ces outils mesurait la vitesse d'un programme <em>non installe</em> qui echoue, pas de vraies performances — un echec rapide pouvait passer pour un tier rapide et capable, et etre recommande a tort. Remplace par une heuristique simple et injectable basee sur la RAM (≥ 8 Go → vision, reutilisant la trouvaille RAM deja confirmee de la Story 5.7), sans plus rien persister dans <code>SettingsStore</code> — le vrai benchmark chronometre de <code>verselog.exe</code> reste la seule source de verite au premier lancement reel.</div>
+          <div class="story-note fix"><span class="lbl">Vraie cause du poids, trouvee en cours de story</span>Le correctif du benchmark seul n'a presque rien change au poids (27,8 → 27,83 Mo). La vraie cause : <code>PrerequisiteChecker</code> (Story 5.3) importait separement <code>pytesseract</code>/<code>ollama</code> juste pour detecter les prerequis installes, trainant la meme chaine lourde (Pillow, pydantic, httpx, anyio) quoi qu'il arrive. Reecrit pour utiliser un appel <code>subprocess</code> direct et <code>requests.get</code> a la place — meme comportement, verifie contre les vrais Tesseract/Ollama installes sur cette machine. Resultat final : <strong>27,8 Mo → 15,1 Mo (46% de moins)</strong>.</div>
+          <div class="story-note fix"><span class="lbl">Trouvailles en revue de code (7, toutes corrigees)</span>Un risque de KeyError sur un index de dictionnaire pour une reponse Ollama non standard ; une forme de reponse non protegee pouvant planter sur <code>{"models": null}</code> ; <code>OLLAMA_HOST</code> defini sans schema d'URL (une forme couramment documentee) levant une exception non geree ; un appel <code>urllib</code> fait maison incoherent avec la convention deja etablie de ce code (<code>requests</code> + callable injectable) ; un timeout manquant sur l'appel subprocess de Tesseract pouvant bloquer indefiniment ; un parametre <code>cpu_count</code> accepte mais jamais utilise ; et <code>DEFAULT_VISION_MODEL</code> mal place dans <code>core/</code> (une simple etiquette de modele specifique a une technologie, pas un concept de domaine) plutot que dans la couche adapters.</div>
         </div>
 
       </div>
@@ -843,21 +850,21 @@ core/
   ports/
     capture_port.py  datasource_port.py  trigger_port.py  ui_port.py
 adapters/
-  capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  screenshot.py  benchmark.py
+  capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  vision_model.py  screenshot.py  benchmark.py
   datasource/ community_api_provider.py  location_data_provider.py
   trigger/    manual_trigger.py  voice_trigger.py
   ui/         console_ui_provider.py  tkinter_ui_provider.py
   system/     prerequisite_checker.py
 
 verselog_installer/  <span style="opacity:.6;">— package separe, Epic 6, importe DEPUIS verselog seulement —</span>
-  __main__.py   wizard.py
+  __main__.py   wizard.py  hardware_estimate.py
   steps/      welcome_step.py  benchmark_step.py
               component_selection_step.py  finish_step.py</div>
     </section>
 
     <footer>
       <span>VerseLog — sous licence MIT, open-source depuis le premier commit.</span>
-      <span class="mono tabnum">136 commits · 33 PR · 176 tests au vert</span>
+      <span class="mono tabnum">140 commits · 34 PR · 187 tests au vert</span>
     </footer>
   </main>
 </div>
