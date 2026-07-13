@@ -3,6 +3,7 @@ from verselog.core.capture_result import CaptureResult
 from verselog.core.contract import Contract
 from verselog.core.location_reference import LocationReference
 from verselog.core.location_reference_store import LocationReferenceStore
+from verselog.core.missing_prerequisite import MissingPrerequisite
 from verselog.core.ports.capture_port import CapturePort
 from verselog.core.scan_result import ScanResult
 from verselog.core.settings_store import SettingsStore
@@ -26,6 +27,7 @@ class _SpyUI:
         self.shown: list[ScanResult] = []
         self._ship_to_select = ship_to_select
         self.select_ship_calls: list[list[str]] = []
+        self.warn_missing_prerequisites_calls: list[list[MissingPrerequisite]] = []
 
     def show_results(self, results: list[ScanResult]) -> None:
         self.shown.extend(results)
@@ -36,6 +38,17 @@ class _SpyUI:
     def select_ship(self, ship_names: list[str]) -> str | None:
         self.select_ship_calls.append(ship_names)
         return self._ship_to_select
+
+    def warn_missing_prerequisites(self, missing: list[MissingPrerequisite]) -> None:
+        self.warn_missing_prerequisites_calls.append(missing)
+
+
+class _StubPrerequisiteChecker:
+    def __init__(self, missing: list[MissingPrerequisite]) -> None:
+        self._missing = missing
+
+    def check_missing(self) -> list[MissingPrerequisite]:
+        return self._missing
 
 
 def _stores(tmp_path):
@@ -88,6 +101,7 @@ def test_run_computes_route_and_loading_plan_for_a_valid_contract(tmp_path):
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     assert len(ui.shown) == 1
@@ -114,6 +128,7 @@ def test_run_reports_quarantine_reasons_for_an_invalid_contract(tmp_path):
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     assert len(ui.shown) == 1
@@ -137,6 +152,7 @@ def test_run_shows_the_contract_even_when_route_cost_calculation_fails(tmp_path)
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     result = ui.shown[0]
@@ -182,6 +198,7 @@ def test_run_keeps_the_computed_route_cost_even_when_loading_plan_derivation_fai
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     result = ui.shown[0]
@@ -240,6 +257,7 @@ def test_run_asks_the_ui_to_select_a_ship_when_none_is_given(tmp_path):
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     assert ui.select_ship_calls == [["MISC Starlancer MAX"]]
@@ -267,6 +285,7 @@ def test_run_stops_without_capturing_when_ship_selection_is_cancelled(tmp_path):
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     assert capture_port.capture_calls == 0
@@ -295,6 +314,7 @@ def test_run_treats_an_empty_ship_name_the_same_as_none(tmp_path):
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     assert ui.select_ship_calls == [["MISC Starlancer MAX"]]
@@ -322,7 +342,62 @@ def test_run_never_calls_select_ship_when_ship_name_is_given_explicitly(tmp_path
         location_store=location_store,
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
     )
 
     assert ui.select_ship_calls == []
     assert capture_port.capture_calls == 1
+
+
+def test_run_warns_about_missing_prerequisites_but_still_completes_the_scan(tmp_path):
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI()
+    missing = [MissingPrerequisite(name="Tesseract OCR", install_instructions="https://example.com/tesseract")]
+
+    run(
+        ship_name="MISC Starlancer MAX",
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker(missing),
+    )
+
+    assert ui.warn_missing_prerequisites_calls == [missing]
+    # A missing prerequisite is a warning, not a gate - the scan still runs.
+    assert len(ui.shown) == 1
+    assert ui.shown[0].route_cost is not None
+
+
+def test_run_still_calls_warn_missing_prerequisites_with_an_empty_list(tmp_path):
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI()
+
+    run(
+        ship_name="MISC Starlancer MAX",
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
+    )
+
+    assert ui.warn_missing_prerequisites_calls == [[]]

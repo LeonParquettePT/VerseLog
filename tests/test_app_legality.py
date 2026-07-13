@@ -45,6 +45,17 @@ class _SpyUI:
             raise self._confirm_result
         return self._confirm_result
 
+    def select_ship(self, ship_names):
+        raise AssertionError("select_ship should never be called when ship_name is given explicitly")
+
+    def warn_missing_prerequisites(self, missing) -> None:
+        pass
+
+
+class _StubPrerequisiteChecker:
+    def check_missing(self):
+        return []
+
 
 def _stores(tmp_path):
     ship_store = ShipReferenceStore(db_path=tmp_path / "verselog.db")
@@ -90,6 +101,7 @@ def _run(tmp_path, contract, legality_checker, ui):
         trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
         ui=ui,
         legality_checker=legality_checker,
+        prerequisite_checker=_StubPrerequisiteChecker(),
     )
 
 
