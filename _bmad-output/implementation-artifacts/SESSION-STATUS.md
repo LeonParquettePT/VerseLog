@@ -19,8 +19,8 @@ https://github.com/LeonParquettePT/VerseLog/blob/main/_bmad-output/implementatio
 - Epic 6 (Installeur graphique) : **in-progress**. Nouvel epic, package Python `verselog_installer` séparé de `verselog` (aucune dépendance inverse).
   - Story 6.1 (coquille de l'assistant + étape benchmark) : **done**. Étapes Welcome + Benchmark fonctionnelles, réutilise `Benchmark`/`SettingsStore` de l'app principale. Packaging PyInstaller de `verselog-installer.exe` volontairement reporté à la fin de l'epic (Story 6.3).
   - Story 6.2 (sélection des composants + installation guidée) : **done**. Cases à cocher pré-remplies selon le tier de benchmark recommandé, bouton "Install Selected" qui ouvre les installeurs/téléchargements officiels (jamais d'install silencieuse scriptée).
-  - Story 6.3 (écran de fin + raccourci) : **backlog**, prochaine étape naturelle — dernière story avant de pouvoir enfin packager `verselog-installer.exe`.
-  - Story 6.4 (fixer la flakiness Tk() des tests, projet entier) : **backlog**, amélioration d'infra de test, pas bloquante.
+  - Story 6.3 (écran de fin + raccourci) : **done**. Écran de fin avec message de complétion + deux cases à cocher (raccourci Bureau / Menu Démarrer), création réelle du `.lnk` via PowerShell/`WScript.Shell` (pas de nouvelle dépendance pip). Revue de code a trouvé et corrigé 2 bugs réels : absence de gestion d'erreur (un PowerShell bloqué par une stratégie de groupe laissait l'assistant bloqué sans retour au joueur) et un risque d'injection/corruption via l'interpolation non échappée des chemins dans la commande PowerShell (corrigé avec des chaînes PowerShell à guillemets simples). L'installeur guidé (Stories 6.1-6.3) est maintenant fonctionnellement complet — reste le packaging PyInstaller de `verselog-installer.exe` lui-même, volontairement pas encore fait.
+  - Story 6.4 (fixer la flakiness Tk() des tests, projet entier) : **backlog**, amélioration d'infra de test, pas bloquante — c'est la seule story qui garde Epic 6 en `in-progress` plutôt que `done`.
 - Pages de revue de projet (`docs/project-review.html`/`-fr.html`) mises à jour le 2026-07-13 pour couvrir Epics 4, 5 et 6 (étaient restées figées à "3 epics" depuis avant le début de cette session) — plus polish UX (scrollbar, section active en surbrillance, retour à la doc).
 
 ## Découvertes/limitations connues (non bloquantes)
@@ -32,7 +32,7 @@ https://github.com/LeonParquettePT/VerseLog/blob/main/_bmad-output/implementatio
 
 ## Prochaine étape suggérée
 
-Trois pistes possibles, aucune priorité imposée : (1) reconstruire/republier la release Windows pour inclure Stories 5.3/5.5/5.6, (2) continuer l'epic installeur avec Story 6.3 (dernière story avant de packager l'installeur), ou (3) stories backlog restantes : 5.4, 5.7, 6.4.
+Trois pistes possibles, aucune priorité imposée : (1) reconstruire/republier la release Windows pour inclure Stories 5.3/5.5/5.6, (2) packager `verselog-installer.exe` avec PyInstaller (l'installeur guidé lui-même est maintenant fonctionnellement complet), ou (3) stories backlog restantes : 5.4, 5.7, 6.4.
 
 ## Où retrouver le contexte complet
 
