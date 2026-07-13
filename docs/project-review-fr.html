@@ -357,6 +357,7 @@
 <div class="shell">
   <nav class="side">
     <div class="side-brand"><strong>VerseLog</strong> — revue</div>
+    <a class="side-link" href="index.html" style="margin-bottom:14px; display:inline-block;">← Retour à la doc</a>
     <input type="checkbox" id="navtoggle" style="display:none;">
     <label class="mobile-nav-toggle" for="navtoggle">Menu ▾</label>
     <div class="side-group">
@@ -390,6 +391,10 @@
       <a class="side-link" href="#fieldlog2">Verification terrain</a>
     </div>
     <div class="side-group">
+      <div class="side-label">Epic 6</div>
+      <a class="side-link epic" href="#epic6">Installeur guide <span style="opacity:.6;">(en cours)</span></a>
+    </div>
+    <div class="side-group">
       <div class="side-label">Etat actuel</div>
       <a class="side-link" href="#gaps">Ce qui n'est pas encore construit</a>
       <a class="side-link" href="#tree">Plan des modules</a>
@@ -403,10 +408,10 @@
       <p class="subtitle">Un assistant logistique gratuit et open-source pour Star Citizen. Construit en binome dev-et-agent via la methode BMad — brainstorm → spec → architecture → epics → implementation story par story, chacune derriere sa propre branche, sa PR et sa revue de code. Cette page retrace toute la construction, dans l'ordre.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics clos</div></div>
-        <div class="stat"><div class="n tabnum">22</div><div class="l">Stories livrees</div></div>
-        <div class="stat"><div class="n tabnum">29</div><div class="l">PR mergees</div></div>
-        <div class="stat"><div class="n tabnum">151</div><div class="l">Tests qui passent</div></div>
-        <div class="stat"><div class="n tabnum">44</div><div class="l">Modules source</div></div>
+        <div class="stat"><div class="n tabnum">23</div><div class="l">Stories livrees</div></div>
+        <div class="stat"><div class="n tabnum">30</div><div class="l">PR mergees</div></div>
+        <div class="stat"><div class="n tabnum">158</div><div class="l">Tests qui passent</div></div>
+        <div class="stat"><div class="n tabnum">49</div><div class="l">Modules source</div></div>
       </div>
     </header>
 
@@ -748,6 +753,21 @@
       </div>
     </section>
 
+    <section id="epic6">
+      <h2>Epic 6 — Installeur guide <span class="tag">1 story sur 3 terminee · PR #30</span></h2>
+      <p class="lede">Un assistant d'installation guide separe pour Windows — l'experience "Suivant, Suivant, Terminer" d'un installeur natif familier, pas un executable brut que le joueur doit deja savoir lancer. Modele explicitement sur l'installeur de Python et celui de VMware Workstation. En cours.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.1</span><span class="story-title">Coquille de l'assistant &amp; etape benchmark</span><span class="pill done">termine</span></div>
+          <div class="story-body">Un package genuinement separe, <code>verselog_installer</code> — il peut importer depuis <code>verselog.core</code>/<code>verselog.adapters</code> (reutilisant <code>Benchmark</code>, <code>SettingsStore</code>, les memes fournisseurs de capture), mais <code>verselog</code> n'importe jamais rien depuis lui. Une coquille d'assistant Tkinter (navigation Precedent/Suivant/Terminer) s'ouvre avec une etape de bienvenue, puis une etape de benchmark qui fait tourner exactement le meme benchmark que celui utilise par <code>app.py</code> et persiste le resultat dans les memes parametres que la vraie application lit.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Naviguer en arriere puis a nouveau vers l'etape benchmark appelait <code>build()</code> a nouveau (une nouvelle etiquette repartant de "Verification de votre materiel...") puis <code>on_shown()</code> — qui revenait immediatement puisque le resultat etait deja mis en cache, sautant la mise a jour de l'etiquette. L'etiquette restait bloquee sur "Verification..." pour toujours meme si le resultat etait deja connu. Corrige pour que revisiter l'etape rafraichisse toujours l'etiquette depuis le resultat mis en cache.</div>
+        </div>
+
+      </div>
+      <p class="lede" style="margin-top:20px;"><strong>Restant, pas encore construit :</strong> Story 6.2 (selection des composants par cases a cocher, pre-cochees selon la recommandation du benchmark, installation guidee qui lance l'installeur officiel de chaque prerequis plutot qu'une installation silencieuse scriptee) et Story 6.3 (ecran de fin avec un raccourci bureau/menu Demarrer optionnel). Le packaging PyInstaller de <code>verselog-installer.exe</code> lui-meme est deliberement reporte jusqu'a ce que la Story 6.3 soit terminee — pas d'asset de Release pour un installeur fonctionnellement incomplet.</p>
+    </section>
+
     <section id="gaps">
       <h2>Ce qui n'est pas encore construit <span class="tag">Assume, pas cache</span></h2>
       <p class="lede">Reporte deliberement, chacun avec une raison documentee plutot que devinee :</p>
@@ -770,7 +790,7 @@
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Pas encore d'installeur graphique.</strong> Un assistant d'installation guide separe (benchmark d'abord, puis selection des composants par cases a cocher, un ecran de fin proposant un raccourci) est propose comme un nouvel epic — pas encore demarre.</div>
+          <div class="g-body"><strong>Installeur guide seulement partiellement construit (Epic 6, en cours).</strong> La coquille de l'assistant et l'etape benchmark existent (Story 6.1) ; la selection des composants, l'installation guidee et l'ecran de fin (Stories 6.2/6.3) sont la suite.</div>
         </div>
       </div>
     </section>
@@ -796,12 +816,16 @@ adapters/
   datasource/ community_api_provider.py  location_data_provider.py
   trigger/    manual_trigger.py  voice_trigger.py
   ui/         console_ui_provider.py  tkinter_ui_provider.py
-  system/     prerequisite_checker.py</div>
+  system/     prerequisite_checker.py
+
+verselog_installer/  <span style="opacity:.6;">— package separe, Epic 6, importe DEPUIS verselog seulement —</span>
+  __main__.py   wizard.py
+  steps/      welcome_step.py  benchmark_step.py</div>
     </section>
 
     <footer>
       <span>VerseLog — sous licence MIT, open-source depuis le premier commit.</span>
-      <span class="mono tabnum">120 commits · 29 PR · 151 tests au vert</span>
+      <span class="mono tabnum">125 commits · 30 PR · 158 tests au vert</span>
     </footer>
   </main>
 </div>

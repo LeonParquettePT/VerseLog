@@ -357,6 +357,7 @@
 <div class="shell">
   <nav class="side">
     <div class="side-brand"><strong>VerseLog</strong> — review</div>
+    <a class="side-link" href="index.html" style="margin-bottom:14px; display:inline-block;">← Back to docs</a>
     <input type="checkbox" id="navtoggle" style="display:none;">
     <label class="mobile-nav-toggle" for="navtoggle">Menu ▾</label>
     <div class="side-group">
@@ -390,6 +391,10 @@
       <a class="side-link" href="#fieldlog2">Real-world testing log</a>
     </div>
     <div class="side-group">
+      <div class="side-label">Epic 6</div>
+      <a class="side-link epic" href="#epic6">Guided Installer <span style="opacity:.6;">(in progress)</span></a>
+    </div>
+    <div class="side-group">
       <div class="side-label">State</div>
       <a class="side-link" href="#gaps">What's not built yet</a>
       <a class="side-link" href="#tree">Module map</a>
@@ -403,10 +408,10 @@
       <p class="subtitle">A free, open-source logistics assistant for Star Citizen. Built solo-dev-and-agent through the BMad method — brainstorm → spec → architecture → epics → story-by-story implementation, each behind its own branch, PR and code review. This page retraces the whole build in order.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics closed</div></div>
-        <div class="stat"><div class="n tabnum">22</div><div class="l">Stories shipped</div></div>
-        <div class="stat"><div class="n tabnum">29</div><div class="l">PRs merged</div></div>
-        <div class="stat"><div class="n tabnum">151</div><div class="l">Tests passing</div></div>
-        <div class="stat"><div class="n tabnum">44</div><div class="l">Source modules</div></div>
+        <div class="stat"><div class="n tabnum">23</div><div class="l">Stories shipped</div></div>
+        <div class="stat"><div class="n tabnum">30</div><div class="l">PRs merged</div></div>
+        <div class="stat"><div class="n tabnum">158</div><div class="l">Tests passing</div></div>
+        <div class="stat"><div class="n tabnum">49</div><div class="l">Source modules</div></div>
       </div>
     </header>
 
@@ -748,6 +753,21 @@
       </div>
     </section>
 
+    <section id="epic6">
+      <h2>Epic 6 — Guided Installer <span class="tag">1 of 3 stories done · PR #30</span></h2>
+      <p class="lede">A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer, not a bare executable a player has to already know how to run. Modeled explicitly on Python's own installer and VMware Workstation's. In progress.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.1</span><span class="story-title">Installer Wizard Shell &amp; Benchmark Step</span><span class="pill done">done</span></div>
+          <div class="story-body">A genuinely separate package, <code>verselog_installer</code> — it may import from <code>verselog.core</code>/<code>verselog.adapters</code> (reusing <code>Benchmark</code>, <code>SettingsStore</code>, the same capture providers), but <code>verselog</code> never imports anything from it. A Tkinter wizard shell (Back/Next/Finish navigation) opens with a Welcome step, then a Benchmark step that runs the exact same benchmark <code>app.py</code> uses and persists the result to the same settings the real app reads.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>Navigating Back then Next to the Benchmark step a second time called <code>build()</code> fresh (a brand-new label defaulting to "Checking your hardware...") and then <code>on_shown()</code> — which returned immediately since the result was already cached, skipping the label update entirely. The label stayed stuck on "Checking..." forever even though the result was known. Fixed so revisiting the step always refreshes the label from the cached result.</div>
+        </div>
+
+      </div>
+      <p class="lede" style="margin-top:20px;"><strong>Remaining, not yet built:</strong> Story 6.2 (component selection via checkboxes, pre-checked from the benchmark's recommendation, guided installation that launches each prerequisite's own official installer rather than a silent scripted install) and Story 6.3 (finish screen with an optional desktop/Start Menu shortcut). PyInstaller packaging of <code>verselog-installer.exe</code> itself is deliberately deferred until Story 6.3 completes — no Release asset for a functionally incomplete installer.</p>
+    </section>
+
     <section id="gaps">
       <h2>What's not built yet <span class="tag">Stated, not hidden</span></h2>
       <p class="lede">Deferred deliberately, each with a reason on file rather than guessed at:</p>
@@ -770,7 +790,7 @@
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>No graphical installer yet.</strong> A separate, guided installer wizard (benchmark first, then checkbox-driven component selection, a finish screen offering a shortcut) is proposed as a new epic — not yet started.</div>
+          <div class="g-body"><strong>Guided installer only partly built (Epic 6, in progress).</strong> The wizard shell and benchmark step exist (Story 6.1); component selection, guided installation, and the finish screen (Stories 6.2/6.3) are next.</div>
         </div>
       </div>
     </section>
@@ -796,12 +816,16 @@ adapters/
   datasource/ community_api_provider.py  location_data_provider.py
   trigger/    manual_trigger.py  voice_trigger.py
   ui/         console_ui_provider.py  tkinter_ui_provider.py
-  system/     prerequisite_checker.py</div>
+  system/     prerequisite_checker.py
+
+verselog_installer/  <span style="opacity:.6;">— separate package, Epic 6, imports FROM verselog only —</span>
+  __main__.py   wizard.py
+  steps/      welcome_step.py  benchmark_step.py</div>
     </section>
 
     <footer>
       <span>VerseLog — MIT licensed, open-source from the first commit.</span>
-      <span class="mono tabnum">120 commits · 29 PRs · 151 tests green</span>
+      <span class="mono tabnum">125 commits · 30 PRs · 158 tests green</span>
     </footer>
   </main>
 </div>
