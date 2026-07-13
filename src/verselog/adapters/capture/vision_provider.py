@@ -6,6 +6,7 @@ from verselog.adapters.capture.screenshot import take_screenshot
 from verselog.core.capture_result import CaptureResult
 from verselog.core.contract import Contract
 from verselog.core.ports.capture_port import CapturePort
+from verselog.core.vision_model import DEFAULT_VISION_MODEL
 
 _PROMPT = (
     "You are looking at a Star Citizen contract screen. Read the Reward, "
@@ -47,9 +48,6 @@ def _contract_from_json(raw_json: str) -> Contract:
         reward=float(data["reward"]),
         remaining_time=data.get("remaining_time"),
     )
-
-
-DEFAULT_VISION_MODEL = "qwen2.5vl:3b"
 
 
 class VisionProvider(CapturePort):
