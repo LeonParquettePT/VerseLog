@@ -4,7 +4,7 @@ baseline_commit: 0c4ead1
 
 # Story 6.1: Installer Wizard Shell & Benchmark Step
 
-Status: review
+Status: done
 
 ## Story
 
