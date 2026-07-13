@@ -433,3 +433,51 @@ So that VerseLog doesn't destabilize my system by loading a memory-hungry model 
 **Then** the benchmark also considers available RAM and prefers the lighter "ocr" tier when the vision tier's memory requirement isn't safely met, consistent with this project's own stated goal of running "alongside the game on modest hardware, not to fight it for resources"
 
 Added 2026-07-13: raised directly by a real finding during Story 5.2's manual Linux verification — running the vision model for actual inference (not just launching the binary) exhausted a 4 GB test VM's memory and crashed other running applications. Explicitly deferred: the current time-based benchmark (Story 1.6) already provides a real, working fallback mechanism; adding RAM-awareness is a refinement to an already-functional safety net, not a blocker for anything currently planned.
+
+## Epic 6: Guided Installer
+
+A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer (Python's own installer, VMware Workstation), not a bare `.exe` a player has to already know how to run from a terminal. Runs the existing benchmark first, lets the player choose which prerequisites to install via explicit checkboxes (pre-checked with a sensible recommendation, never silently decided for them), and finishes with an optional shortcut — all in a **separate executable** from `verselog.exe` itself, so a bug in the installer can never affect the app it installs, and vice versa.
+
+**Traces to:** SPEC.md's "never act without explicit confirmation" posture (Story 3.2/4.3/5.3's own precedent — this is the same principle applied to installation itself, arguably a *better* fit for it than Story 5.3's plain warning message), NFR7 (target platforms — Windows first, since that's where the double-click-to-install expectation is strongest)
+
+Added 2026-07-13: proposed directly by the project's own author after re-confirming, via a stale pre-Story-5.5 Windows build, how much CLI friction still exists for a first-time player (needing to know `--import-reference-data`, `--ship`, etc. exist at all). Modeled explicitly on Python's own installer and VMware Workstation's installer UX.
+
+### Story 6.1: Installer Wizard Shell &amp; Benchmark Step
+
+As a player installing VerseLog on Windows for the first time,
+I want a guided, step-by-step installer instead of a bare executable,
+So that I don't need to already know which CLI flags or prerequisites exist.
+
+**Acceptance Criteria:**
+
+**Given** no installer wizard exists today (just a bare `verselog.exe`/`verselog-linux` a player must already know how to run)
+**When** the player launches the new, separate installer executable
+**Then** a Tkinter wizard opens with Next/Back navigation, starting with a welcome step and immediately followed by a benchmark step that reuses the existing `Benchmark` class (Story 1.6) to show the player a real, running progress indicator and then the recommended capture tier
+**And** this installer is a genuinely separate build/executable from `verselog.exe` — a bug in one can never crash or block the other, and neither imports the other's entrypoint
+
+### Story 6.2: Component Selection &amp; Guided Installation
+
+As a player who just saw the installer's benchmark recommendation,
+I want to choose exactly which prerequisites get installed, with a sensible default already checked,
+So that I stay in control of what happens to my machine while not having to research each prerequisite myself.
+
+**Acceptance Criteria:**
+
+**Given** the benchmark step (6.1) has produced a recommended capture tier, and `PrerequisiteChecker` (Story 5.3) can already detect what's missing
+**When** the wizard reaches the component-selection step
+**Then** each missing prerequisite (Tesseract, Ollama, the vision model) is shown as its own checkbox, pre-checked only when the benchmark's recommended tier actually needs it (e.g. the vision model checkbox isn't pre-checked if the benchmark recommends the lighter OCR tier)
+**And** nothing is installed until the player explicitly clicks an "Install" button after reviewing their checkbox selections — consistent with this project's "never act without explicit confirmation" posture, now expressed as an installer UX instead of a plain warning message
+**And** the actual install step, for each checked item, launches that prerequisite's own official installer/download (not a silent, fully-scripted install this project's own WSL experience already showed the risk of) — the player still completes each official installer themselves
+
+### Story 6.3: Finish Screen &amp; Shortcut
+
+As a player who just finished installing VerseLog's prerequisites,
+I want a clear finish screen with the option to create a shortcut,
+So that launching VerseLog afterward doesn't require remembering a file path.
+
+**Acceptance Criteria:**
+
+**Given** the player has completed (or skipped) the component-selection step
+**When** the wizard reaches its final step
+**Then** it confirms completion plainly and offers a checkbox to create a desktop and/or Start Menu shortcut to `verselog.exe`
+**And** declining the shortcut is just as valid an ending as accepting it — the wizard never assumes

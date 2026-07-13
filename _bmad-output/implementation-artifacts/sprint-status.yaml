@@ -86,3 +86,9 @@ development_status:
   5-6-monitor-selection-for-capture: done
   5-7-ram-aware-benchmark-tier-selection: backlog
   epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-installer-wizard-shell-benchmark-step: backlog
+  6-2-component-selection-guided-installation: backlog
+  6-3-finish-screen-shortcut: backlog
+  epic-6-retrospective: optional
