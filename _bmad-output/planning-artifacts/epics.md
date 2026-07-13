@@ -495,3 +495,19 @@ So that a full test-suite run doesn't intermittently fail with an unrelated TclE
 **Then** a full `pytest` run no longer intermittently fails due to this class of error, confirmed by multiple consecutive clean full-suite runs
 
 Added 2026-07-13: raised after this same flake was observed independently in both Story 6.1 and Story 6.2, hitting a different, unrelated test file each time — confirmed not caused by either story's own code, but a real, recurring environment fragility (likely aggravated by OneDrive file-locking on the Tcl library files during rapid `tk.Tk()` churn) worth fixing once properly rather than re-discovering and re-documenting it in every future Tkinter-touching story. Explicitly deferred: not blocking any current story, and fixing it project-wide means touching several existing test files at once — a dedicated, focused piece of work rather than a drive-by fix.
+
+### Story 6.5: Package the Guided Installer (PyInstaller)
+
+As a player who wants a guided install experience instead of a bare `verselog.exe`,
+I want the installer wizard itself distributed as a single downloadable Windows executable,
+So that I don't need Python installed to run the installer any more than I need it to run VerseLog itself.
+
+**Acceptance Criteria:**
+
+**Given** Stories 6.1–6.3 have produced a functionally complete Tkinter wizard (`verselog_installer/__main__.py`) that is only runnable from source today
+**When** the packaging build runs
+**Then** it produces a single Windows executable (`verselog-installer.exe`) that launches the full wizard (Welcome → Benchmark → Component Selection → Finish) without a separately-installed Python
+**And** the executable is published as a GitHub Release asset (following Story 5.1's precedent — not committed into the repository itself)
+**And** `verselog.exe` and `verselog-installer.exe` remain two separate downloadable files — the installer's Finish-step shortcut still points at wherever `verselog.exe` is placed alongside it, exactly as Story 6.3 already assumed
+
+Added 2026-07-13: this is the piece every Story 6.1/6.2/6.3 Dev Notes entry explicitly deferred ("PyInstaller packaging of `verselog-installer.exe` itself is deliberately deferred until Story 6.3 completes") — now that all three wizard stories are done and the installer is functionally complete end-to-end, this is the natural next step before the guided installer can actually reach a player.
