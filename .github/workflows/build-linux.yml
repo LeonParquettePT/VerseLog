@@ -2,8 +2,6 @@ name: Build Linux executable
 
 on:
   workflow_dispatch:
-  push:
-    branches: [story-5.2-linux-packaging]
 
 jobs:
   build:

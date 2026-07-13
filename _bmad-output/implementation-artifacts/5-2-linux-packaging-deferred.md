@@ -71,6 +71,7 @@ claude-sonnet-5
 - Workflow run 29246686908 (temporary push-trigger, commit 6c3e9ac, after switching to `python3-tk` + `uv sync --python-preference only-system`): full success — tkinter import check passed, PyInstaller build succeeded, `./dist/verselog --help` and `./dist/verselog` (no args) printed output identical to the Windows build's equivalent checks, `verselog-linux` artifact uploaded.
 - Downloaded and inspected the `verselog-linux` artifact from run 29246686908 locally (30,532,232 bytes) to confirm the upload step actually produced a real file — then discarded it, since it was built from a pre-merge commit and Task 2/3 will use a fresh post-merge build instead (same principle as Story 5.1's Task 3 deferral).
 - Attempted `gh workflow run build-linux.yml --ref story-5.2-linux-packaging` before the workflow existed on `main`: `HTTP 404: workflow build-linux.yml not found on the default branch` — confirmed `workflow_dispatch` cannot be used at all until the workflow file is merged to the default branch, even when targeting a different ref. Used a temporary branch-scoped `push:` trigger to verify on the feature branch instead, then removed it before requesting review.
+- Code review flagged `runs-on: ubuntu-latest` as an unpinned dependency on whatever Python version the runner image ships, risking a future silent break with no local repro. Fixed by pinning to `ubuntu-24.04`; re-verified with workflow run 29247574525 (temporary push-trigger again, commit 099c6ab) — full success, same as before.
 
 ### Completion Notes List
 
