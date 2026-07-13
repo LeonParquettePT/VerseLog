@@ -21,3 +21,14 @@ class UIPort(ABC):
         no input injection (see SPEC.md non-goals).
         """
         ...
+
+    @abstractmethod
+    def select_ship(self, ship_names: list[str]) -> str | None:
+        """Ask the player which ship to use, when none was given on the command line.
+
+        Returns the chosen name, or None if the player cancelled/closed
+        without picking (or there was nothing to pick from) - callers must
+        treat None as "stop here", the same fail-closed spirit as
+        confirm_risky_contract.
+        """
+        ...

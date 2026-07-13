@@ -29,8 +29,8 @@ def main() -> None:
         LocationDataProvider(LocationReferenceStore()).refresh()
         return
 
-    if not args.ship:
-        parser.error("--ship is required unless --import-reference-data is passed")
+    if not args.ship and args.console_ui:
+        parser.error("--ship is required when using --console-ui")
 
     ui = ConsoleUIProvider() if args.console_ui else TkinterUIProvider()
     run(ship_name=args.ship, ui=ui)

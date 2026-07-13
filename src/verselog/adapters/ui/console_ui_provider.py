@@ -16,3 +16,20 @@ class ConsoleUIProvider(UIPort):
         print(f"  Risk: {risk.reason}")
         answer = input("Proceed anyway? [y/N]: ")
         return answer.strip().lower() in ("y", "yes")
+
+    def select_ship(self, ship_names: list[str]) -> str | None:
+        if not ship_names:
+            print("No ships found - run VerseLog with --import-reference-data first.")
+            return None
+
+        for index, name in enumerate(ship_names, start=1):
+            print(f"{index}. {name}")
+
+        answer = input("Select your ship (number): ")
+        try:
+            choice = int(answer) - 1
+        except ValueError:
+            return None
+        if 0 <= choice < len(ship_names):
+            return ship_names[choice]
+        return None

@@ -34,3 +34,17 @@ def test_saving_the_same_ship_twice_updates_rather_than_duplicates(tmp_path):
     store.save_ships([updated])
 
     assert store.get_ship("MISC Starlancer MAX").cargo_capacity_scu == 10
+
+
+def test_list_ship_names_is_empty_on_a_fresh_store(tmp_path):
+    store = ShipReferenceStore(db_path=tmp_path / "verselog.db")
+
+    assert store.list_ship_names() == []
+
+
+def test_list_ship_names_returns_saved_names_sorted_alphabetically(tmp_path):
+    store = ShipReferenceStore(db_path=tmp_path / "verselog.db")
+    zeus = ShipReference(**{**vars(ARROW), "name": "RSI Zeus Mk II"})
+    store.save_ships([zeus, ARROW])
+
+    assert store.list_ship_names() == ["MISC Starlancer MAX", "RSI Zeus Mk II"]

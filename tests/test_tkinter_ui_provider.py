@@ -67,3 +67,37 @@ def test_confirm_risky_contract_passes_through_the_dialogs_answer(monkeypatch):
 
     monkeypatch.setattr("verselog.adapters.ui.tkinter_ui_provider.messagebox.askyesno", lambda title, message: False)
     assert TkinterUIProvider().confirm_risky_contract(contract, risk) is False
+
+
+def _comboboxes(root: tk.Tk):
+    import tkinter.ttk as ttk
+
+    return [child for child in root.winfo_children() if isinstance(child, ttk.Combobox)]
+
+
+def test_build_ship_selection_window_prefills_a_combobox_with_the_ship_names():
+    root = TkinterUIProvider().build_ship_selection_window(["Aegis Avenger", "MISC Starlancer MAX"])
+    try:
+        combos = _comboboxes(root)
+        assert len(combos) == 1
+        assert list(combos[0].cget("values")) == ["Aegis Avenger", "MISC Starlancer MAX"]
+    finally:
+        root.destroy()
+
+
+def test_build_ship_selection_window_shows_a_message_when_no_ships_are_available():
+    root = TkinterUIProvider().build_ship_selection_window([])
+    try:
+        assert _comboboxes(root) == []
+        labels = [child for child in root.winfo_children() if isinstance(child, tk.Label)]
+        assert any("--import-reference-data" in label.cget("text") for label in labels)
+    finally:
+        root.destroy()
+
+
+def test_select_ship_returns_none_if_the_window_closes_without_a_selection():
+    provider = TkinterUIProvider()
+    root = provider.build_ship_selection_window(["Aegis Avenger"])
+    root.destroy()
+
+    assert provider._selected_ship is None
