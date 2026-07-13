@@ -419,10 +419,10 @@
       <p class="subtitle">A free, open-source logistics assistant for Star Citizen. Built solo-dev-and-agent through the BMad method — brainstorm → spec → architecture → epics → story-by-story implementation, each behind its own branch, PR and code review. This page retraces the whole build in order.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics closed</div></div>
-        <div class="stat"><div class="n tabnum">23</div><div class="l">Stories shipped</div></div>
-        <div class="stat"><div class="n tabnum">30</div><div class="l">PRs merged</div></div>
-        <div class="stat"><div class="n tabnum">158</div><div class="l">Tests passing</div></div>
-        <div class="stat"><div class="n tabnum">49</div><div class="l">Source modules</div></div>
+        <div class="stat"><div class="n tabnum">25</div><div class="l">Stories shipped</div></div>
+        <div class="stat"><div class="n tabnum">32</div><div class="l">PRs merged</div></div>
+        <div class="stat"><div class="n tabnum">176</div><div class="l">Tests passing</div></div>
+        <div class="stat"><div class="n tabnum">52</div><div class="l">Source modules</div></div>
       </div>
     </header>
 
@@ -765,8 +765,8 @@
     </section>
 
     <section id="epic6">
-      <h2>Epic 6 — Guided Installer <span class="tag">1 of 3 stories done · PR #30</span></h2>
-      <p class="lede">A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer, not a bare executable a player has to already know how to run. Modeled explicitly on Python's own installer and VMware Workstation's. In progress.</p>
+      <h2>Epic 6 — Guided Installer <span class="tag">3 of 3 stories done · PR #30–32</span></h2>
+      <p class="lede">A separate, guided installer wizard for Windows — the "Next, Next, Finish" experience of a familiar native installer, not a bare executable a player has to already know how to run. Modeled explicitly on Python's own installer and VMware Workstation's. The wizard itself is now functionally complete.</p>
       <div class="story-grid">
 
         <div class="story">
@@ -775,8 +775,22 @@
           <div class="story-note fix"><span class="lbl">Code review finding</span>Navigating Back then Next to the Benchmark step a second time called <code>build()</code> fresh (a brand-new label defaulting to "Checking your hardware...") and then <code>on_shown()</code> — which returned immediately since the result was already cached, skipping the label update entirely. The label stayed stuck on "Checking..." forever even though the result was known. Fixed so revisiting the step always refreshes the label from the cached result.</div>
         </div>
 
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.2</span><span class="story-title">Component Selection &amp; Guided Installation</span><span class="pill done">done</span></div>
+          <div class="story-body">A checkbox per missing prerequisite (Tesseract, Ollama, the vision model), pre-checked only when the benchmark's recommended tier actually needs it. Clicking "Install Selected" opens each checked item's own official installer/download — never a silent scripted install, consistent with this project's "never act without explicit confirmation" posture.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span><code>build()</code> reset every checkbox's <code>BooleanVar</code> on each call, so navigating Back then Next silently discarded the player's own manual choice back to the tier default. Fixed by preserving state across rebuilds — only a genuinely new missing item gets a fresh, tier-based default.</div>
+          <div class="story-note fix"><span class="lbl">Process finding</span>Story 6.1's own record claimed <code>src/verselog_installer/__main__.py</code> had been created — it hadn't; the file simply didn't exist. Created it for real here and corrected 6.1's record rather than leave the false claim standing.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.3</span><span class="story-title">Finish Screen &amp; Shortcut</span><span class="pill done">done</span></div>
+          <div class="story-body">A completion screen with two checkboxes (desktop / Start Menu shortcut, both checked by default) and a new <code>on_finish()</code> hook on the wizard — mirroring <code>on_shown()</code>'s shape — fired once, on the last step, right before the window closes. The real <code>.lnk</code> file is created via PowerShell's <code>WScript.Shell</code> COM automation, avoiding a new <code>pywin32</code> dependency for a single one-shot action.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span><code>on_finish()</code> called the shortcut creator with no error handling — a PowerShell blocked by group policy or antivirus on a locked-down machine raised an unhandled exception inside a Tkinter button callback, leaving the wizard window stuck open with a stderr traceback and no feedback to the player. Fixed with a wrapper that catches any failure, surfaces it via a message box, and still attempts the remaining shortcut.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>Shortcut and target paths were interpolated unescaped into a double-quoted PowerShell string — a path containing <code>$</code> or a backtick (both valid in NTFS filenames) would be reinterpreted as PowerShell variable/subexpression syntax instead of literal text. Fixed by single-quoting the values instead (PowerShell single-quoted strings never expand variables or subexpressions).</div>
+        </div>
+
       </div>
-      <p class="lede" style="margin-top:20px;"><strong>Remaining, not yet built:</strong> Story 6.2 (component selection via checkboxes, pre-checked from the benchmark's recommendation, guided installation that launches each prerequisite's own official installer rather than a silent scripted install) and Story 6.3 (finish screen with an optional desktop/Start Menu shortcut). PyInstaller packaging of <code>verselog-installer.exe</code> itself is deliberately deferred until Story 6.3 completes — no Release asset for a functionally incomplete installer.</p>
+      <p class="lede" style="margin-top:20px;"><strong>Next:</strong> PyInstaller packaging of <code>verselog-installer.exe</code> itself, deliberately deferred until the wizard's own three stories were done — no Release asset for a functionally incomplete installer.</p>
     </section>
 
     <section id="gaps">
@@ -801,7 +815,7 @@
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Guided installer only partly built (Epic 6, in progress).</strong> The wizard shell and benchmark step exist (Story 6.1); component selection, guided installation, and the finish screen (Stories 6.2/6.3) are next.</div>
+          <div class="g-body"><strong>Installer not yet packaged as an .exe (Epic 6 stays in progress).</strong> All three wizard stories (6.1–6.3) are done and functionally complete; only PyInstaller packaging of <code>verselog-installer.exe</code> and Story 6.4 (a project-wide fix for a known, pre-existing Tk()-creation test flake) remain.</div>
         </div>
       </div>
     </section>
@@ -831,12 +845,13 @@ adapters/
 
 verselog_installer/  <span style="opacity:.6;">— separate package, Epic 6, imports FROM verselog only —</span>
   __main__.py   wizard.py
-  steps/      welcome_step.py  benchmark_step.py</div>
+  steps/      welcome_step.py  benchmark_step.py
+              component_selection_step.py  finish_step.py</div>
     </section>
 
     <footer>
       <span>VerseLog — MIT licensed, open-source from the first commit.</span>
-      <span class="mono tabnum">125 commits · 30 PRs · 158 tests green</span>
+      <span class="mono tabnum">133 commits · 32 PRs · 176 tests green</span>
     </footer>
   </main>
 </div>

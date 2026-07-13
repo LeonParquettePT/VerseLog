@@ -419,10 +419,10 @@
       <p class="subtitle">Un assistant logistique gratuit et open-source pour Star Citizen. Construit en binome dev-et-agent via la methode BMad — brainstorm → spec → architecture → epics → implementation story par story, chacune derriere sa propre branche, sa PR et sa revue de code. Cette page retrace toute la construction, dans l'ordre.</p>
       <div class="stat-strip">
         <div class="stat"><div class="n tabnum">4</div><div class="l">Epics clos</div></div>
-        <div class="stat"><div class="n tabnum">23</div><div class="l">Stories livrees</div></div>
-        <div class="stat"><div class="n tabnum">30</div><div class="l">PR mergees</div></div>
-        <div class="stat"><div class="n tabnum">158</div><div class="l">Tests qui passent</div></div>
-        <div class="stat"><div class="n tabnum">49</div><div class="l">Modules source</div></div>
+        <div class="stat"><div class="n tabnum">25</div><div class="l">Stories livrees</div></div>
+        <div class="stat"><div class="n tabnum">32</div><div class="l">PR mergees</div></div>
+        <div class="stat"><div class="n tabnum">176</div><div class="l">Tests qui passent</div></div>
+        <div class="stat"><div class="n tabnum">52</div><div class="l">Modules source</div></div>
       </div>
     </header>
 
@@ -765,8 +765,8 @@
     </section>
 
     <section id="epic6">
-      <h2>Epic 6 — Installeur guide <span class="tag">1 story sur 3 terminee · PR #30</span></h2>
-      <p class="lede">Un assistant d'installation guide separe pour Windows — l'experience "Suivant, Suivant, Terminer" d'un installeur natif familier, pas un executable brut que le joueur doit deja savoir lancer. Modele explicitement sur l'installeur de Python et celui de VMware Workstation. En cours.</p>
+      <h2>Epic 6 — Installeur guide <span class="tag">3 stories sur 3 terminees · PR #30–32</span></h2>
+      <p class="lede">Un assistant d'installation guide separe pour Windows — l'experience "Suivant, Suivant, Terminer" d'un installeur natif familier, pas un executable brut que le joueur doit deja savoir lancer. Modele explicitement sur l'installeur de Python et celui de VMware Workstation. L'assistant lui-meme est maintenant fonctionnellement complet.</p>
       <div class="story-grid">
 
         <div class="story">
@@ -775,8 +775,22 @@
           <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Naviguer en arriere puis a nouveau vers l'etape benchmark appelait <code>build()</code> a nouveau (une nouvelle etiquette repartant de "Verification de votre materiel...") puis <code>on_shown()</code> — qui revenait immediatement puisque le resultat etait deja mis en cache, sautant la mise a jour de l'etiquette. L'etiquette restait bloquee sur "Verification..." pour toujours meme si le resultat etait deja connu. Corrige pour que revisiter l'etape rafraichisse toujours l'etiquette depuis le resultat mis en cache.</div>
         </div>
 
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.2</span><span class="story-title">Selection des composants &amp; installation guidee</span><span class="pill done">termine</span></div>
+          <div class="story-body">Une case a cocher par prerequis manquant (Tesseract, Ollama, le modele de vision), pre-cochee uniquement quand le tier recommande par le benchmark en a reellement besoin. Cliquer sur "Install Selected" ouvre l'installeur/telechargement officiel de chaque element coche — jamais une installation silencieuse scriptee, en coherence avec la posture "jamais d'action sans confirmation explicite" du projet.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span><code>build()</code> reinitialisait le <code>BooleanVar</code> de chaque case a chaque appel, si bien que naviguer en arriere puis a nouveau ecrasait silencieusement le choix manuel du joueur pour revenir au defaut du tier. Corrige en preservant l'etat entre les reconstructions — seul un element manquant genuinement nouveau recoit un defaut base sur le tier.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille de processus</span>Le dossier de la Story 6.1 affirmait que <code>src/verselog_installer/__main__.py</code> avait ete cree — ce n'etait pas le cas, le fichier n'existait tout simplement pas. Cree pour de vrai ici, et le dossier de la 6.1 corrige plutot que de laisser l'affirmation fausse en l'etat.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">6.3</span><span class="story-title">Ecran de fin &amp; raccourci</span><span class="pill done">termine</span></div>
+          <div class="story-body">Un ecran de fin avec deux cases a cocher (raccourci bureau / menu Demarrer, cochees par defaut) et un nouveau point d'ancrage <code>on_finish()</code> sur l'assistant — sur le meme modele que <code>on_shown()</code> — declenche une seule fois, a la derniere etape, juste avant la fermeture de la fenetre. Le vrai fichier <code>.lnk</code> est cree via l'automatisation COM <code>WScript.Shell</code> de PowerShell, evitant une nouvelle dependance <code>pywin32</code> pour une action ponctuelle.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span><code>on_finish()</code> appelait le createur de raccourci sans aucune gestion d'erreur — un PowerShell bloque par une strategie de groupe ou un antivirus sur une machine verrouillee levait une exception non geree a l'interieur d'un callback de bouton Tkinter, laissant la fenetre de l'assistant bloquee avec une trace d'erreur sur stderr et aucun retour au joueur. Corrige avec un wrapper qui intercepte tout echec, l'affiche via une boite de message, et tente quand meme le raccourci restant.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Les chemins du raccourci et de la cible etaient interpoles sans echappement dans une chaine PowerShell a guillemets doubles — un chemin contenant un <code>$</code> ou une apostrophe inversee (tous deux valides dans les noms de fichiers NTFS) aurait ete reinterprete comme de la syntaxe de variable/sous-expression PowerShell plutot que du texte litteral. Corrige en utilisant des guillemets simples a la place (les chaines PowerShell a guillemets simples n'expansent jamais de variables ni de sous-expressions).</div>
+        </div>
+
       </div>
-      <p class="lede" style="margin-top:20px;"><strong>Restant, pas encore construit :</strong> Story 6.2 (selection des composants par cases a cocher, pre-cochees selon la recommandation du benchmark, installation guidee qui lance l'installeur officiel de chaque prerequis plutot qu'une installation silencieuse scriptee) et Story 6.3 (ecran de fin avec un raccourci bureau/menu Demarrer optionnel). Le packaging PyInstaller de <code>verselog-installer.exe</code> lui-meme est deliberement reporte jusqu'a ce que la Story 6.3 soit terminee — pas d'asset de Release pour un installeur fonctionnellement incomplet.</p>
+      <p class="lede" style="margin-top:20px;"><strong>Suite :</strong> le packaging PyInstaller de <code>verselog-installer.exe</code> lui-meme, deliberement reporte jusqu'a ce que les trois stories de l'assistant soient terminees — pas d'asset de Release pour un installeur fonctionnellement incomplet.</p>
     </section>
 
     <section id="gaps">
@@ -801,7 +815,7 @@
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Installeur guide seulement partiellement construit (Epic 6, en cours).</strong> La coquille de l'assistant et l'etape benchmark existent (Story 6.1) ; la selection des composants, l'installation guidee et l'ecran de fin (Stories 6.2/6.3) sont la suite.</div>
+          <div class="g-body"><strong>Installeur pas encore empaquete en .exe (Epic 6 reste en cours).</strong> Les trois stories de l'assistant (6.1-6.3) sont terminees et fonctionnellement completes ; il reste le packaging PyInstaller de <code>verselog-installer.exe</code> et la Story 6.4 (un correctif projet-entier pour une instabilite connue et preexistante des tests a la creation de <code>Tk()</code>).</div>
         </div>
       </div>
     </section>
@@ -831,12 +845,13 @@ adapters/
 
 verselog_installer/  <span style="opacity:.6;">— package separe, Epic 6, importe DEPUIS verselog seulement —</span>
   __main__.py   wizard.py
-  steps/      welcome_step.py  benchmark_step.py</div>
+  steps/      welcome_step.py  benchmark_step.py
+              component_selection_step.py  finish_step.py</div>
     </section>
 
     <footer>
       <span>VerseLog — sous licence MIT, open-source depuis le premier commit.</span>
-      <span class="mono tabnum">125 commits · 30 PR · 158 tests au vert</span>
+      <span class="mono tabnum">133 commits · 32 PR · 176 tests au vert</span>
     </footer>
   </main>
 </div>
