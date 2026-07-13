@@ -79,8 +79,8 @@ development_status:
 
   epic-5: in-progress
   5-1-windows-packaging-pyinstaller: done
-  5-2-linux-packaging-deferred: review
-  5-3-prerequisite-check-tesseract-ollama: review
+  5-2-linux-packaging-deferred: done
+  5-3-prerequisite-check-tesseract-ollama: done
   5-4-code-signing-windows-build: backlog
   5-5-ship-selection-via-results-ui: done
   5-6-monitor-selection-for-capture: backlog

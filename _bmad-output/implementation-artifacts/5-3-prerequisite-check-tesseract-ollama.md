@@ -4,7 +4,7 @@ baseline_commit: 932c912
 
 # Story 5.3: Prerequisite Check for Tesseract/Ollama
 
-Status: review
+Status: done
 
 ## Story
 

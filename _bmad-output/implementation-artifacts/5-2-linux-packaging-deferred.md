@@ -4,7 +4,7 @@ baseline_commit: aedab3f
 
 # Story 5.2: Linux Packaging (via GitHub Actions)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -27,9 +27,9 @@ so that I'm not a second-class target despite NFR7 naming Linux explicitly.
   - [x] Created GitHub Release `v0.1.0-linux` (tagging merged `main` commit `71f9784`) with the `verselog-linux` binary attached as a release asset (built from the post-merge run, not the earlier feature-branch builds — those were discarded).
   - [x] Release notes mirror Story 5.1's Windows release notes structure: Tesseract/Ollama separate installs, `chmod +x` reminder, links to the companion Windows release, and an honest note that CI-only verification is done and Task 3's real-desktop verification is still pending (no caveat invented beyond what's actually true at this point).
   - [x] Updated `docs/index.html` and both `README.md`/`README.fr.md` with a Linux download row/line alongside the existing Windows one. Also fixed a real latent bug found while doing this: the Windows download link used `/releases/latest`, which — now that a newer `v0.1.0-linux` release exists — would silently point Windows users at the Linux binary. Changed both links to explicit `/releases/tag/v0.1.0-windows` and `/releases/tag/v0.1.0-linux` URLs.
-- [ ] Task 3: Manual verification on a real Linux desktop (AC: #1) — **requires the project author's own hardware (VMware/Ubuntu VM), not something completable by the dev agent** — genuinely pending, not skipped or forgotten.
-  - [ ] Download `verselog-linux` from the `v0.1.0-linux` release and run it on a real Linux desktop environment — confirm the Tkinter results window actually renders on a real display, not just that the binary launches headlessly in CI. CI (Task 1/2) only proves the binary runs and prints the expected CLI text; it cannot prove the GUI renders, since GitHub Actions runners have no display server.
-  - [ ] Once verified, document the outcome in Completion Notes and flip this task's checkbox — only then does this story reach the same fully-verified state Story 5.1 reached for Windows.
+- [x] Task 3: Manual verification on a real Linux desktop (AC: #1) — **done by the project author on a real Ubuntu VM (VMware Workstation)**, not something the dev agent could complete itself.
+  - [x] Downloaded `verselog-linux` from the `v0.1.0-linux` release and ran it on a fresh Ubuntu 24.04 Desktop VM: `chmod +x verselog-linux && ./verselog-linux --ship "..."` — the Tkinter results window rendered correctly on the real display, confirming the GUI works end-to-end on Linux, not just headlessly in CI.
+  - [x] First run surfaced a real, expected finding rather than a bug: Ollama was installed but its vision model (`qwen2.5vl:3b`) hadn't been pulled yet, producing "status code 404" inside the quarantine message. Not a packaging defect — a fresh Ollama install has zero models by default. This exact scenario is now separately detected and explained upfront by Story 5.3's prerequisite check (built immediately after, directly informed by this finding).
 - [x] Task 4: Tests (AC: #1)
   - [x] No new unit tests for the packaging/CI workflow itself — same reasoning as Story 5.1: this is build tooling, not application logic, and the meaningful verification is actually running the produced binary (Tasks 1 and 3), not something `pytest` can usefully assert.
   - [x] Ran the full existing test suite (`uv run --extra dev pytest -q`) locally on Windows: `114 passed in 4.54s` — confirms nothing in Epic 5's backlog additions (Stories 5.4/5.5/5.6, epics.md entries only, no code) broke anything, since this story makes no application code changes.
@@ -75,10 +75,11 @@ claude-sonnet-5
 - PR #26 merged to `main` (commit 71f9784). Dispatched the real post-merge build via `gh workflow run build-linux.yml --ref main` — run 29248135117, full success, first time `workflow_dispatch` actually worked (the workflow now exists on the default branch).
 - Downloaded the post-merge artifact (30,532,944 bytes), created git tag `v0.1.0-linux` on `main`, published GitHub Release `v0.1.0-linux` with the binary attached (`gh release create`).
 - While updating `docs/index.html`'s download links, found a real latent bug: the Windows row used `/releases/latest`, which — the instant `v0.1.0-linux` was published as a newer release — would have silently redirected Windows users to the Linux binary. Fixed both platform links to explicit `/releases/tag/...` URLs before this could confuse anyone.
+- Project author ran the real binary on a fresh Ubuntu 24.04 Desktop VM (VMware Workstation): `chmod +x verselog-linux && ./verselog-linux --ship "..."` — the Tkinter results window rendered correctly on a real display. First attempt surfaced Ollama's vision model not being pulled yet on the fresh VM ("status code 404"), which directly informed Story 5.3's later extension (detecting this exact case as its own distinct, clearly-worded prerequisite).
 
 ### Completion Notes List
 
-- Implemented Task 1 (GitHub Actions Linux build workflow), Task 2 (post-merge Release publishing + docs/README updates), and Task 4 (test suite regression check). Task 3 (manual verification on a real Linux desktop) is **not completed by the dev agent** — it genuinely requires the project author's own Linux hardware/VM, unlike Story 5.1 where the author's own machine was Windows. Left honestly unchecked rather than claimed done.
+- Implemented all 4 tasks: Task 1 (GitHub Actions Linux build workflow), Task 2 (post-merge Release publishing + docs/README updates), Task 3 (manual verification, done by the project author on a real Ubuntu VM — confirmed the Tkinter window renders correctly on Linux), and Task 4 (test suite regression check).
 - Real, corrected finding (build-time): the story's own Dev Notes originally proposed installing `tk-dev` before `uv sync` to fix `tkinter` on the Linux runner, based on a GitHub issue describing a *different* symptom (`TclError`, not `ModuleNotFoundError`). Actually running it in CI proved that plan wrong on the first attempt — the real fix is using the system Python (`python3-tk` + `uv sync --python-preference only-system`) instead of uv's own managed Python build, which doesn't ship a working tkinter regardless of system `tk-dev`. Both the failing and the fixed workflow runs are logged above; the Dev Notes section has been corrected in place rather than left wrong.
 - Real, corrected finding (docs-time): `docs/index.html`'s Windows download link used `/releases/latest`, which broke the instant a newer Linux release was published. Fixed to explicit tagged URLs for both platforms.
 - 114/114 tests passing, no application code changed by this story.
@@ -93,4 +94,5 @@ claude-sonnet-5
 ## Change Log
 
 - 2026-07-13: Story implemented — `.github/workflows/build-linux.yml` added and verified working via real CI runs (one failing, two fixed/passing) on the feature branch using a temporary push trigger, since `workflow_dispatch` requires the workflow to exist on `main` first. Real gotcha found and corrected: `uv`'s managed Python lacks working tkinter on Linux regardless of `tk-dev`; fixed by using the system Python instead. Code review fix: pinned `ubuntu-latest` to `ubuntu-24.04`. 114/114 tests passing, status moved to review, PR #26 merged.
-- 2026-07-13: Post-merge — dispatched the real build from `main`, published GitHub Release `v0.1.0-linux` with the binary attached, updated docs/READMEs (also fixing a real latent bug: the Windows download link used `/releases/latest`, which a newer Linux release would have hijacked). Task 3 (manual desktop verification) remains open, pending the project author's own Linux VM — story stays at `review` until that's done.
+- 2026-07-13: Post-merge — dispatched the real build from `main`, published GitHub Release `v0.1.0-linux` with the binary attached, updated docs/READMEs (also fixing a real latent bug: the Windows download link used `/releases/latest`, which a newer Linux release would have hijacked).
+- 2026-07-13: Task 3 completed — project author verified the real binary on a fresh Ubuntu 24.04 Desktop VM, confirming the Tkinter results window renders correctly. Story fully verified end-to-end on both platforms; marked done.
