@@ -4,7 +4,7 @@ baseline_commit: 09d471a
 
 # Story 6.3: Finish Screen & Shortcut
 
-Status: review
+Status: done
 
 ## Story
 
