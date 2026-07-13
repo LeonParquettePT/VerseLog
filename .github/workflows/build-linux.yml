@@ -1,0 +1,45 @@
+name: Build Linux executable
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Pinned (not ubuntu-latest): the build depends on the runner's system
+    # Python matching pyproject.toml's `requires-python = ">=3.12"`. A future
+    # ubuntu-latest bump could silently break this with no local repro.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # uv's own managed Python builds don't reliably ship a working tkinter
+      # (astral-sh/uv#7036) -- use the system Python (which apt's python3-tk
+      # wires up correctly) instead of letting uv download its own.
+      - name: Install system Python with tkinter support
+        run: sudo apt-get update && sudo apt-get install -y python3-tk python3-venv
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.2
+
+      - name: Sync dependencies
+        run: uv sync --extra dev --python-preference only-system
+
+      - name: Verify tkinter is importable
+        run: uv run python -c "import tkinter"
+
+      - name: Build with PyInstaller
+        run: uv run pyinstaller --onefile --name verselog --console --paths src src/verselog/__main__.py
+
+      - name: Verify the built binary runs
+        run: |
+          chmod +x dist/verselog
+          ./dist/verselog --help
+          if ./dist/verselog; then
+            echo "expected a non-zero exit for missing --ship" >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verselog-linux
+          path: dist/verselog
