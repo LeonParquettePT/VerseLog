@@ -72,9 +72,10 @@ def run(
     route_cost_calculator = RouteCostCalculator(location_store, ship_store)
     loading_plan_calculator = LoadingPlanCalculator(route_cost_calculator)
 
+    if monitor_index is not None:
+        settings_store.set("capture_monitor_index", monitor_index)
+
     if capture_port is None:
-        if monitor_index is not None:
-            settings_store.set("capture_monitor_index", monitor_index)
         resolved_monitor_index = settings_store.get("capture_monitor_index", 0)
         candidates: list[tuple[str, CapturePort]] = [
             ("vision", VisionProvider(monitor_index=resolved_monitor_index)),

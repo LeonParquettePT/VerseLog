@@ -511,3 +511,33 @@ def test_run_defaults_the_monitor_index_to_zero_when_nothing_was_ever_persisted(
     )
 
     assert constructed == {"vision": 0, "ocr": 0}
+
+
+def test_run_persists_monitor_index_even_when_a_capture_port_is_injected(tmp_path):
+    # Code-review finding: persistence must not silently depend on whether
+    # a capture_port happens to be injected (e.g. by a test or future
+    # caller) -- the player's monitor choice should always be saved.
+    ship_store, location_store = _stores(tmp_path)
+    settings_store = SettingsStore(path=tmp_path / "settings.json")
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI()
+
+    run(
+        ship_name="MISC Starlancer MAX",
+        capture_port=capture_port,
+        settings_store=settings_store,
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+        prerequisite_checker=_StubPrerequisiteChecker([]),
+        monitor_index=2,
+    )
+
+    assert settings_store.get("capture_monitor_index") == 2

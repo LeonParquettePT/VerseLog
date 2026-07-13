@@ -69,6 +69,7 @@ claude-sonnet-5
 - Interpreted "opens VerseLog's settings" as a CLI flag (`--monitor`), not a graphical settings screen, since no such screen exists anywhere in this project yet — documented explicitly in Dev Notes rather than silently narrowing scope or building an unscoped settings UI.
 - Confirmed via direct code reading (not assumption) that `take_screenshot()` is called outside both providers' `try/except` blocks — an out-of-range monitor index would otherwise crash the app with an uncaught `IndexError`. Validation happens in `__main__.py` instead, where the real monitor count can be cheaply queried.
 - 150/150 tests passing.
+- **Code review fix:** `settings_store.set("capture_monitor_index", ...)` was nested inside `if capture_port is None:`, so an explicit `monitor_index` was silently never persisted when a caller also injected a `capture_port` (not reachable from the real CLI today, but a real inconsistency for any future/test caller combining both). Moved the persistence line above the `capture_port is None` check so it always happens regardless. New regression test added. 151/151 tests passing after the fix.
 
 ### File List
 
