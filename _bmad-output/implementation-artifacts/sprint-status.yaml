@@ -1,5 +1,5 @@
 # generated: 2026-07-08
-# last_updated: 2026-07-10
+# last_updated: 2026-07-13
 # project: VerseLog
 # project_key: NOKEY
 # tracking_system: file-system
@@ -41,7 +41,7 @@
 # - Retrospective appends its action items to action_items; sprint-status surfaces open ones
 
 generated: 2026-07-08
-last_updated: 2026-07-10
+last_updated: 2026-07-13
 project: VerseLog
 project_key: NOKEY
 tracking_system: file-system
@@ -79,7 +79,7 @@ development_status:
 
   epic-5: in-progress
   5-1-windows-packaging-pyinstaller: done
-  5-2-linux-packaging-deferred: backlog
+  5-2-linux-packaging-deferred: in-progress
   5-3-prerequisite-check-tesseract-ollama: backlog
   5-4-code-signing-windows-build: backlog
   5-5-ship-selection-via-results-ui: backlog
