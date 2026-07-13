@@ -92,4 +92,5 @@ development_status:
   6-2-component-selection-guided-installation: done
   6-3-finish-screen-shortcut: done
   6-4-shared-tkinter-test-root: backlog
+  6-5-package-guided-installer-pyinstaller: review
   epic-6-retrospective: optional
