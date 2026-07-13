@@ -95,7 +95,15 @@
       <div class="t">Download — Windows</div>
       <div class="d">Single .exe, no Python required. Tesseract and Ollama still needed separately.</div>
     </div>
-    <a href="https://github.com/LeonParquettePT/VerseLog/releases/latest">Get verselog.exe →</a>
+    <a href="https://github.com/LeonParquettePT/VerseLog/releases/tag/v0.1.0-windows">Get verselog.exe →</a>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="t">Download — Linux</div>
+      <div class="d">Single binary, no Python required. Tesseract and Ollama still needed separately.</div>
+    </div>
+    <a href="https://github.com/LeonParquettePT/VerseLog/releases/tag/v0.1.0-linux">Get verselog-linux →</a>
   </div>
 
   <div class="row">
@@ -110,7 +118,7 @@
     <strong>Windows Smart App Control may block the .exe outright</strong> ("we've blocked an app that could put your device at risk... we couldn't verify its publisher"). This is a real limitation, not malware: the app isn't code-signed yet, and Smart App Control has no per-app "Run anyway" override — it's allow or block, re-evaluated on every launch. To run VerseLog: temporarily disable Smart App Control (Windows Security → App &amp; Browser Control → Smart App Control settings), then run the .exe. Re-enabling Smart App Control afterward will likely block it again on the next launch, since the file is still unsigned — either keep it disabled while you use VerseLog, or toggle it off each time you launch. Since an early-2026 Windows update this toggle no longer requires reinstalling Windows. If you instead see an older-style SmartScreen warning ("an app control policy has blocked this file"), that one does have "More info → Run anyway". See the Release page for details.
   </div>
   <div class="note">
-    <strong>Linux build not published yet.</strong> Windows is the only packaged build for now. Linux packaging is tracked for later. Tesseract and Ollama are always separate installs on any OS — VerseLog doesn't bundle them.
+    <strong>Linux build:</strong> run <code>chmod +x verselog-linux</code> after downloading. It's been verified in CI (builds and runs correctly headlessly), but manual verification that the graphical window renders on a real Linux desktop is still pending — see the Release page.
   </div>
 </main>
 </body>
