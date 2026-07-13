@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
+from verselog.core.missing_prerequisite import MissingPrerequisite
 from verselog.core.scan_result import ScanResult
 
 
@@ -19,6 +20,15 @@ class UIPort(ABC):
         decline) for the tool's own internal handling. Implementations must
         never perform the accept/decline as an in-game action themselves -
         no input injection (see SPEC.md non-goals).
+        """
+        ...
+
+    @abstractmethod
+    def warn_missing_prerequisites(self, missing: list[MissingPrerequisite]) -> None:
+        """Tell the player which third-party prerequisites (Tesseract, Ollama) are missing.
+
+        Purely informational - never installs anything, never blocks the
+        scan. Implementations must do nothing when the list is empty.
         """
         ...
 

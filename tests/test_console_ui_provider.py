@@ -2,6 +2,7 @@ from verselog.adapters.ui.console_ui_provider import ConsoleUIProvider
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
 from verselog.core.loading_plan_calculator import LoadingPlan, LoadingStep
+from verselog.core.missing_prerequisite import MissingPrerequisite
 from verselog.core.route_cost_calculator import RouteCost
 from verselog.core.scan_result import ScanResult
 from verselog.core.ship_reference import ShipReference
@@ -90,3 +91,24 @@ def test_select_ship_returns_none_when_no_ships_are_available(capsys):
 
     assert result is None
     assert "--import-reference-data" in capsys.readouterr().out
+
+
+def test_warn_missing_prerequisites_prints_each_missing_item(capsys):
+    missing = [
+        MissingPrerequisite(name="Tesseract OCR", install_instructions="https://example.com/tesseract"),
+        MissingPrerequisite(name="Ollama", install_instructions="https://example.com/ollama"),
+    ]
+
+    ConsoleUIProvider().warn_missing_prerequisites(missing)
+
+    output = capsys.readouterr().out
+    assert "Tesseract OCR" in output
+    assert "https://example.com/tesseract" in output
+    assert "Ollama" in output
+    assert "https://example.com/ollama" in output
+
+
+def test_warn_missing_prerequisites_prints_nothing_when_none_are_missing(capsys):
+    ConsoleUIProvider().warn_missing_prerequisites([])
+
+    assert capsys.readouterr().out == ""

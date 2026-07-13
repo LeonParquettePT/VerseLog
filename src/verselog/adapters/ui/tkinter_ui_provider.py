@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
+from verselog.core.missing_prerequisite import MissingPrerequisite
 from verselog.core.ports.ui_port import UIPort
 from verselog.core.scan_result import ScanResult
 
@@ -64,3 +65,10 @@ class TkinterUIProvider(UIPort):
 
         tk.Button(root, text="Start scan", command=_confirm).pack(pady=(0, 12))
         return root
+
+    def warn_missing_prerequisites(self, missing: list[MissingPrerequisite]) -> None:
+        if not missing:
+            return
+        lines = [f"{item.name}: {item.install_instructions}" for item in missing]
+        message = "The following prerequisites are missing:\n\n" + "\n".join(lines)
+        messagebox.showwarning(title="VerseLog — Missing Prerequisites", message=message)

@@ -49,10 +49,13 @@ def _contract_from_json(raw_json: str) -> Contract:
     )
 
 
+DEFAULT_VISION_MODEL = "qwen2.5vl:3b"
+
+
 class VisionProvider(CapturePort):
     """Vision-model capture via Ollama: screenshot, ask a local vision model for structured JSON."""
 
-    def __init__(self, model: str = "qwen2.5vl:3b") -> None:
+    def __init__(self, model: str = DEFAULT_VISION_MODEL) -> None:
         self._model = model
 
     def capture(self) -> CaptureResult:

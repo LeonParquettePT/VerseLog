@@ -1,5 +1,6 @@
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
+from verselog.core.missing_prerequisite import MissingPrerequisite
 from verselog.core.ports.ui_port import UIPort
 from verselog.core.scan_result import ScanResult
 
@@ -33,3 +34,7 @@ class ConsoleUIProvider(UIPort):
         if 0 <= choice < len(ship_names):
             return ship_names[choice]
         return None
+
+    def warn_missing_prerequisites(self, missing: list[MissingPrerequisite]) -> None:
+        for item in missing:
+            print(f"Missing prerequisite: {item.name} - install it from {item.install_instructions}")

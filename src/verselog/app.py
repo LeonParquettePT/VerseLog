@@ -1,6 +1,7 @@
 from verselog.adapters.capture.benchmark import Benchmark
 from verselog.adapters.capture.ocr_provider import OCRProvider
 from verselog.adapters.capture.vision_provider import VisionProvider
+from verselog.adapters.system.prerequisite_checker import PrerequisiteChecker
 from verselog.adapters.trigger.manual_trigger import ManualTriggerAdapter
 from verselog.adapters.ui.console_ui_provider import ConsoleUIProvider
 from verselog.core.legality_checker import LegalityChecker
@@ -51,12 +52,16 @@ def run(
     trust_layer: TrustLayer | None = None,
     ui: UIPort | None = None,
     legality_checker: LegalityChecker | None = None,
+    prerequisite_checker: PrerequisiteChecker | None = None,
 ) -> None:
     settings_store = settings_store if settings_store is not None else SettingsStore()
     ship_store = ship_store if ship_store is not None else ShipReferenceStore()
     location_store = location_store if location_store is not None else LocationReferenceStore()
     trust_layer = trust_layer if trust_layer is not None else TrustLayer()
     ui = ui if ui is not None else ConsoleUIProvider()
+    prerequisite_checker = prerequisite_checker if prerequisite_checker is not None else PrerequisiteChecker()
+
+    ui.warn_missing_prerequisites(prerequisite_checker.check_missing())
 
     if not ship_name:
         ship_name = ui.select_ship(ship_store.list_ship_names())

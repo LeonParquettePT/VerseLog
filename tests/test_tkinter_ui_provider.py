@@ -4,6 +4,7 @@ import tkinter.font
 from verselog.adapters.ui.tkinter_ui_provider import TkinterUIProvider
 from verselog.core.contract import Contract
 from verselog.core.legality_checker import LegalityRisk
+from verselog.core.missing_prerequisite import MissingPrerequisite
 from verselog.core.scan_result import ScanResult
 
 
@@ -101,3 +102,36 @@ def test_select_ship_returns_none_if_the_window_closes_without_a_selection():
     root.destroy()
 
     assert provider._selected_ship is None
+
+
+def test_warn_missing_prerequisites_shows_a_warning_with_each_missing_item(monkeypatch):
+    missing = [
+        MissingPrerequisite(name="Tesseract OCR", install_instructions="https://example.com/tesseract"),
+        MissingPrerequisite(name="Ollama", install_instructions="https://example.com/ollama"),
+    ]
+    seen = {}
+
+    def fake_showwarning(title, message):
+        seen["title"] = title
+        seen["message"] = message
+
+    monkeypatch.setattr("verselog.adapters.ui.tkinter_ui_provider.messagebox.showwarning", fake_showwarning)
+
+    TkinterUIProvider().warn_missing_prerequisites(missing)
+
+    assert "Tesseract OCR" in seen["message"]
+    assert "https://example.com/tesseract" in seen["message"]
+    assert "Ollama" in seen["message"]
+    assert "https://example.com/ollama" in seen["message"]
+
+
+def test_warn_missing_prerequisites_shows_nothing_when_none_are_missing(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        "verselog.adapters.ui.tkinter_ui_provider.messagebox.showwarning",
+        lambda title, message: calls.append((title, message)),
+    )
+
+    TkinterUIProvider().warn_missing_prerequisites([])
+
+    assert calls == []
