@@ -403,4 +403,19 @@ So that I don't have to launch VerseLog with a `--ship` command-line argument ev
 
 Added 2026-07-13: raised during real end-to-end manual testing of the packaged Windows exe — confirmed the app works correctly (quarantine path validated when tested outside the actual game), but requiring a CLI argument for ship selection is a real UX gap for players who expect a pure point-and-click experience. Explicitly deferred: Linux packaging (5.2) remains the priority; this is UX polish on an already-functional flow, not a blocker.
 
+### Story 5.6: Monitor Selection for Capture (Deferred — Tracked, Not Forgotten)
+
+As a player with more than one monitor,
+I want to tell VerseLog which screen I actually play on,
+So that captures aren't taken across every monitor by default, reducing noise and capture errors.
+
+**Acceptance Criteria:**
+
+**Given** capture today grabs all connected monitors by default (confirmed during real manual testing: a screenshot taken outside the game spanned both of the tester's screens)
+**When** a player opens VerseLog's settings
+**Then** they can select a specific monitor to capture instead of all of them, with "all screens" remaining the default so single-monitor players see no change
+**And** the selection persists across runs via `SettingsStore`, consistent with how the benchmark tier is already persisted
+
+Added 2026-07-13: raised by the project's own author after noticing their own multi-monitor Windows test screenshot captured both screens at once — a real precision/noise concern for anyone with more than one monitor, not a hypothetical. Explicitly deferred: not a blocker for the current single-screen-friendly default behavior, just a precision improvement.
+
 Added 2026-07-10: raised after the project's own author hit a real Smart App Control block running the packaged exe locally, confirming this isn't a hypothetical concern. Explicitly deferred: SignPath Foundation's application/review process takes days to weeks and is out of this session's control, and migrating the build to CI is real engineering work — not a five-minute fix. User's explicit call: finish Linux packaging (Story 5.2) first, since NFR7's cross-platform target is a bigger gap than the Windows-only signing friction.
