@@ -14,16 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Tk/Tcl dev headers must be present BEFORE uv provisions Python, or the
-      # managed interpreter's tkinter bindings don't link correctly (uv#7036).
-      - name: Install system Tk/Tcl dev headers
-        run: sudo apt-get update && sudo apt-get install -y tk-dev
+      # uv's own managed Python builds don't reliably ship a working tkinter
+      # (astral-sh/uv#7036) -- use the system Python (which apt's python3-tk
+      # wires up correctly) instead of letting uv download its own.
+      - name: Install system Python with tkinter support
+        run: sudo apt-get update && sudo apt-get install -y python3-tk python3-venv
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.3.2
 
       - name: Sync dependencies
-        run: uv sync --extra dev
+        run: uv sync --extra dev --python-preference only-system
 
       - name: Verify tkinter is importable
         run: uv run python -c "import tkinter"
