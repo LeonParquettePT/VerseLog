@@ -1,4 +1,3 @@
-import os
 import tkinter as tk
 from dataclasses import dataclass
 
@@ -30,10 +29,8 @@ class BenchmarkStep:
     def __init__(
         self,
         total_ram_bytes_reader=hardware_estimate.total_ram_bytes,
-        cpu_count_reader=os.cpu_count,
     ) -> None:
         self._total_ram_bytes_reader = total_ram_bytes_reader
-        self._cpu_count_reader = cpu_count_reader
         self.result: HardwareEstimateResult | None = None
         self._status_label: tk.Label | None = None
 
@@ -54,7 +51,6 @@ class BenchmarkStep:
         self._status_label.update()
 
         total_ram = self._total_ram_bytes_reader()
-        cpu_count = self._cpu_count_reader() or 1
-        tier_name = hardware_estimate.recommend_tier(total_ram_bytes=total_ram, cpu_count=cpu_count)
+        tier_name = hardware_estimate.recommend_tier(total_ram_bytes=total_ram)
         self.result = HardwareEstimateResult(tier_name=tier_name)
         self._status_label.config(text=f"Recommended capture method: {self.result.tier_name}")

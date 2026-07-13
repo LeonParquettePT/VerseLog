@@ -19,7 +19,6 @@ def test_on_shown_estimates_the_tier_once_updates_the_label_and_never_reestimate
     try:
         step = BenchmarkStep(
             total_ram_bytes_reader=lambda: 16 * _ONE_GIB,
-            cpu_count_reader=lambda: 8,
         )
 
         frame = step.build(root)
@@ -52,7 +51,6 @@ def test_on_shown_recommends_ocr_on_a_low_ram_machine():
     try:
         step = BenchmarkStep(
             total_ram_bytes_reader=lambda: 4 * _ONE_GIB,
-            cpu_count_reader=lambda: 4,
         )
 
         step.build(root)
@@ -71,7 +69,6 @@ def test_on_shown_never_touches_a_settings_store():
     try:
         step = BenchmarkStep(
             total_ram_bytes_reader=lambda: 16 * _ONE_GIB,
-            cpu_count_reader=lambda: 8,
         )
 
         step.build(root)

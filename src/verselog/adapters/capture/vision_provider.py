@@ -6,7 +6,7 @@ from verselog.adapters.capture.screenshot import take_screenshot
 from verselog.core.capture_result import CaptureResult
 from verselog.core.contract import Contract
 from verselog.core.ports.capture_port import CapturePort
-from verselog.core.vision_model import DEFAULT_VISION_MODEL
+from verselog.adapters.capture.vision_model import DEFAULT_VISION_MODEL
 
 _PROMPT = (
     "You are looking at a Star Citizen contract screen. Read the Reward, "

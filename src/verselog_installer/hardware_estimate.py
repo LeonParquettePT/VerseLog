@@ -25,7 +25,7 @@ def total_ram_bytes() -> int:
     return stat.ullTotalPhys
 
 
-def recommend_tier(total_ram_bytes: int, cpu_count: int) -> str:
+def recommend_tier(total_ram_bytes: int) -> str:
     """A rough, prerequisite-independent guess - `verselog.exe`'s own real, timed
     benchmark (Story 1.6) always supersedes this on first real launch.
     """
