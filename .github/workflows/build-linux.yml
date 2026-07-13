@@ -2,10 +2,15 @@ name: Build Linux executable
 
 on:
   workflow_dispatch:
+  push:
+    branches: [story-5.2-linux-packaging]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned (not ubuntu-latest): the build depends on the runner's system
+    # Python matching pyproject.toml's `requires-python = ">=3.12"`. A future
+    # ubuntu-latest bump could silently break this with no local repro.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
