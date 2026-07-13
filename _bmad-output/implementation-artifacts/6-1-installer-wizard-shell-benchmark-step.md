@@ -30,6 +30,7 @@ so that I don't need to already know which CLI flags or prerequisites exist.
   - [x] `benchmark`, `settings_store`, `candidates` all optional/injectable, defaulting to real instances.
 - [x] Task 4: Wire the entrypoint (AC: #1)
   - [x] `src/verselog_installer/__main__.py` constructs `InstallerWizard([WelcomeStep(), BenchmarkStep()])` and calls `.run()`.
+  - [x] **CORRECTION (2026-07-13, discovered during Story 6.2):** this file was claimed done and listed in the File List below, but was never actually created — a real, uncaught gap in this story's own completion claim. Created for real while starting Story 6.2 (which needed to wire a third step into it anyway). Flagged here transparently rather than left silently wrong, consistent with this project's "never claim done without proof" discipline — this specific claim did not have that proof, and should have been caught before merge.
 - [x] Task 5: Tests (AC: #1)
   - [x] `tests/test_installer_wizard.py` (new, 6 tests): initial step shown, `go_next()`/`go_back()` navigation, Back disabled on step 0, Next→"Finish" on the last step, Finish destroys the root.
   - [x] `tests/test_benchmark_step.py` (new): a single test (see Completion Notes on why not two) covering correct result + label text + persistence, and no-rerun-on-second-`on_shown()`.

@@ -89,6 +89,6 @@ development_status:
 
   epic-6: in-progress
   6-1-installer-wizard-shell-benchmark-step: done
-  6-2-component-selection-guided-installation: backlog
+  6-2-component-selection-guided-installation: review
   6-3-finish-screen-shortcut: backlog
   epic-6-retrospective: optional
