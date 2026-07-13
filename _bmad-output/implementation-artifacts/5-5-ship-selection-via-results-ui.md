@@ -74,6 +74,7 @@ claude-sonnet-5
 - Explicit regression test added per the project author's own concern raised mid-story: confirmed `ui.select_ship` is never called when `ship_name` is passed explicitly, so VoiceAttack (Story 1.4) and any other `--ship`-passing caller see zero behavior change.
 - Empty-ship-list edge case (no reference data imported yet) handled in both adapters, not just the Tkinter one — a real first-run scenario, not hypothetical.
 - 127/127 tests passing (114 pre-existing + 13 new); no regressions.
+- **Code review fix:** `app.run()` originally checked `if ship_name is None`, so an explicitly empty `--ship ""` (e.g. from a VoiceAttack profile whose variable substitution produced blank text) silently bypassed selection and proceeded with an invalid empty ship name instead of either prompting or erroring clearly — a real regression versus the pre-story behavior (which treated any falsy `--ship` as missing). Fixed to `if not ship_name` in both the initial check and the post-selection check, with a new regression test (`test_run_treats_an_empty_ship_name_the_same_as_none`). 128/128 tests passing after the fix.
 
 ### File List
 

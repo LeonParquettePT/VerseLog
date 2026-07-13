@@ -58,9 +58,9 @@ def run(
     trust_layer = trust_layer if trust_layer is not None else TrustLayer()
     ui = ui if ui is not None else ConsoleUIProvider()
 
-    if ship_name is None:
+    if not ship_name:
         ship_name = ui.select_ship(ship_store.list_ship_names())
-        if ship_name is None:
+        if not ship_name:
             return
 
     route_cost_calculator = RouteCostCalculator(location_store, ship_store)

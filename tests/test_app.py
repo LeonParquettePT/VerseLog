@@ -273,6 +273,34 @@ def test_run_stops_without_capturing_when_ship_selection_is_cancelled(tmp_path):
     assert ui.shown == []
 
 
+def test_run_treats_an_empty_ship_name_the_same_as_none(tmp_path):
+    # Code-review finding: a caller (e.g. a VoiceAttack profile whose variable
+    # substitution produced an empty string) passing ship_name="" must trigger
+    # selection too, not silently proceed with an invalid empty ship name.
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI(ship_to_select="MISC Starlancer MAX")
+
+    run(
+        ship_name="",
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+    )
+
+    assert ui.select_ship_calls == [["MISC Starlancer MAX"]]
+    assert ui.shown[0].route_cost.ship.name == "MISC Starlancer MAX"
+
+
 def test_run_never_calls_select_ship_when_ship_name_is_given_explicitly(tmp_path):
     # Regression guard: VoiceAttack (Story 1.4) and any other caller that
     # already passes --ship must see zero behavior change from this story.
