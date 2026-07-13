@@ -1,6 +1,7 @@
 # BMad Method / Claude Code tooling - internal planning process, not part of the product
 _bmad/
 .claude/
+_bmad-output/project-context.md
 
 # Raw planning-process logs - not meant for public reading
 **/.memlog.md
