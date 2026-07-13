@@ -381,6 +381,15 @@
       <a class="side-link epic" href="#epic3">Legalite &amp; reputation</a>
     </div>
     <div class="side-group">
+      <div class="side-label">Epic 4</div>
+      <a class="side-link epic" href="#epic4">Point d'entree &amp; interface de resultats</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 5</div>
+      <a class="side-link epic" href="#epic5">Packaging &amp; distribution</a>
+      <a class="side-link" href="#fieldlog2">Verification terrain</a>
+    </div>
+    <div class="side-group">
       <div class="side-label">Etat actuel</div>
       <a class="side-link" href="#gaps">Ce qui n'est pas encore construit</a>
       <a class="side-link" href="#tree">Plan des modules</a>
@@ -389,15 +398,15 @@
 
   <main>
     <header class="hero">
-      <div class="eyebrow">Revue de projet · 2026-07-07 → 2026-07-09</div>
-      <h1 class="title">VerseLog, de zero a trois epics clos</h1>
+      <div class="eyebrow">Revue de projet · 2026-07-07 → 2026-07-13</div>
+      <h1 class="title">VerseLog, de zero a une vraie application packagee sur deux plateformes</h1>
       <p class="subtitle">Un assistant logistique gratuit et open-source pour Star Citizen. Construit en binome dev-et-agent via la methode BMad — brainstorm → spec → architecture → epics → implementation story par story, chacune derriere sa propre branche, sa PR et sa revue de code. Cette page retrace toute la construction, dans l'ordre.</p>
       <div class="stat-strip">
-        <div class="stat"><div class="n tabnum">3</div><div class="l">Epics clos</div></div>
-        <div class="stat"><div class="n tabnum">14</div><div class="l">Stories livrees</div></div>
-        <div class="stat"><div class="n tabnum">16</div><div class="l">PR mergees</div></div>
-        <div class="stat"><div class="n tabnum">92</div><div class="l">Tests qui passent</div></div>
-        <div class="stat"><div class="n tabnum">25</div><div class="l">Modules source</div></div>
+        <div class="stat"><div class="n tabnum">4</div><div class="l">Epics clos</div></div>
+        <div class="stat"><div class="n tabnum">22</div><div class="l">Stories livrees</div></div>
+        <div class="stat"><div class="n tabnum">29</div><div class="l">PR mergees</div></div>
+        <div class="stat"><div class="n tabnum">151</div><div class="l">Tests qui passent</div></div>
+        <div class="stat"><div class="n tabnum">44</div><div class="l">Modules source</div></div>
       </div>
     </header>
 
@@ -607,17 +616,149 @@
       </div>
     </section>
 
+    <section id="epic4">
+      <h2>Epic 4 — Point d'entree &amp; interface de resultats <span class="tag">3 stories · PR #20–22</span></h2>
+      <p class="lede">Relier tout ce que les Epics 1 a 3 ont construit en une seule application qui tourne, avec une vraie fenetre graphique de resultats — le dernier ecart entre "teste isolement" et "quelque chose qu'un joueur peut reellement lancer."</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">4.1</span><span class="story-title">Cablage du point d'entree applicatif</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>app.run()</code> compose declencheur → capture → couche de confiance → (verification de legalite optionnelle) → interface en un seul flux, avec un retour anticipe sur trois issues terminales : mis en quarantaine, refuse (risque de legalite), ou le chemin nominal.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Le bloc <code>except ValueError</code> d'origine remettait <em>a la fois</em> <code>route_cost</code> et <code>loading_plan</code> a <code>None</code>, meme quand le calcul du cout de route avait deja reussi et que seule la verification de capacite de cargaison, plus tardive, avait echoue. Corrige en pre-initialisant les deux en dehors du <code>try</code> et en ne les remettant plus a zero dans le except — confirme correct par un agent de verification independant.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">4.2</span><span class="story-title">Fenetre de resultats (adaptateur UI Tkinter)</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>TkinterUIProvider</code> implemente enfin reellement <code>UIPort</code> — une etiquette par <code>ScanResult</code>, une police grande et lisible (NFR9). <code>build_results_window()</code> est separee de l'appel bloquant <code>show_results()</code>/<code>.mainloop()</code> justement pour rester testable unitairement.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Un import inutilise <code>from tkinter import font</code> dans le code de production s'est avere etre une dependance cachee d'un effet de bord d'un test. Retire de la production ; le test importe desormais <code>tkinter.font</code> explicitement.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">4.3</span><span class="story-title">Popup de confirmation d'un contrat risque</span><span class="pill done">termine</span></div>
+          <div class="story-body"><code>TkinterUIProvider.confirm_risky_contract()</code> via <code>messagebox.askyesno</code>. <code>app.run()</code> encapsule l'appel dans un large <code>except Exception</code> — une boite de confirmation cassee ou fermee est traitee comme un refus, jamais comme un consentement implicite a continuer (protege contre le risque <code>EOFError</code> de <code>ConsoleUIProvider</code> sur une entree standard fermee).</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="epic5">
+      <h2>Epic 5 — Packaging &amp; distribution <span class="tag">5 stories terminees · 2 reportees · PR #24–29</span></h2>
+      <p class="lede">Transformer un arbre de sources qui fonctionne en quelque chose qu'un joueur telecharge et lance d'un double-clic — sur les deux plateformes que la NFR7 nomme explicitement.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.1</span><span class="story-title">Packaging Windows (PyInstaller)</span><span class="pill done">termine</span></div>
+          <div class="story-body">Build monofichier <code>--onefile</code>, publie comme fichier joint d'une Release GitHub. La preparation de cette story a revele un vrai manque : <code>__main__.py</code> n'avait jamais surcharge le <code>ConsoleUIProvider</code> par defaut d'<code>app.run()</code>, donc le vrai CLI n'avait jamais affiche la fenetre Tkinter construite par la Story 4.2. Corrige en passant <code>TkinterUIProvider</code> par defaut, avec un nouveau <code>--console-ui</code> pour s'en exclure.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille reelle, premier lancement</span>Le Controle intelligent des applications de Windows a bloque l'exe fraichement construit et non signe — un blocage categorique, sans bouton "executer quand meme" par application, contrairement a l'avertissement SmartScreen plus doux. Documente clairement dans les notes de Release plutot que cache ; la vraie solution (signature de code) est suivie en Story 5.4, deliberement reportee.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.2</span><span class="story-title">Packaging Linux (via GitHub Actions)</span><span class="pill done">termine</span></div>
+          <div class="story-body">Une installation WSL locale s'est averee impraticablement lente sur cette machine (confirme via la doc officielle que le vrai telechargement ne fait qu'environ 300&nbsp;Mo — la vitesse observee etait environ cent fois plus lente que le debit annonce de la connexion). Bascule vers un runner GitHub Actions <code>ubuntu-24.04</code> jetable a la place — aucune trace locale, aucun risque a repeter.</div>
+          <div class="story-note fix"><span class="lbl">Vraie embuche, trouvee par un run CI en echec</span><code>uv</code> ne fournit pas de maniere fiable un <code>tkinter</code> fonctionnel sur Linux avec son propre Python gere, meme si <code>tk-dev</code> systeme est installe. Corrige en utilisant le Python systeme a la place (<code>python3-tk</code> + <code>uv sync --python-preference only-system</code>) — confirme par un second run CI reussi, pas suppose depuis la documentation seule.</div>
+          <div class="story-note"><span class="lbl">Verifie manuellement</span>L'asset de la vraie Release <code>v0.1.0-linux</code> a ete telecharge et lance sur une VM Ubuntu 24.04 Desktop fraiche — la fenetre de resultats Tkinter s'est affichee correctement sur un vrai ecran, ce que la CI seule ne peut jamais prouver (aucun serveur d'affichage sur le runner).</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.3</span><span class="story-title">Verification des prerequis Tesseract/Ollama</span><span class="pill done">termine</span></div>
+          <div class="story-body">Un nouvel adaptateur <code>PrerequisiteChecker</code> et <code>UIPort.warn_missing_prerequisites()</code> disent clairement au joueur ce qui manque, avec un lien d'installation — purement informatif, sans jamais rien installer automatiquement (le meme risque d'elevation/fiabilite que la tentative WSL venait de demontrer directement, deliberement garde hors de l'installeur de VerseLog).</div>
+          <div class="story-note fix"><span class="lbl">Etendue apres une vraie trouvaille</span>Un test manuel sur une VM Linux est tombe exactement sur la situation que cette story doit prevenir : Ollama installe et joignable, mais son modele de vision non telecharge, se manifestant par un simple "status code 404" plutot qu'une explication claire. Etendue en cours de story pour detecter ce cas precis et distinctement, plutot que de le confondre avec "Ollama pas du tout installe".</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.5</span><span class="story-title">Selection du vaisseau via l'interface de resultats</span><span class="pill done">termine</span></div>
+          <div class="story-body">Un ecran de selection du vaisseau Tkinter apparait quand <code>--ship</code> est omis, alimente par les donnees deja importees de <code>ShipReferenceStore</code>. <code>--ship</code> reste pleinement respecte pour les appels VoiceAttack/scriptes — confirme par un test de non-regression explicite montrant que <code>select_ship()</code> n'est jamais appele quand un nom de vaisseau est fourni.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Un <code>--ship ""</code> explicitement vide (par exemple un profil VoiceAttack dont la substitution de variable produit un texte vide) contournait silencieusement la selection au lieu de la declencher. Corrige en traitant toute valeur fausse — pas seulement <code>None</code> — de la meme maniere.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.6</span><span class="story-title">Selection de l'ecran pour la capture</span><span class="pill done">termine</span></div>
+          <div class="story-body">Un nouveau flag <code>--monitor</code> (<code>0</code> = tous les ecrans combines, le defaut actuel ; <code>1..N</code> = un ecran precis), persiste via <code>SettingsStore</code>. Valide contre le vrai nombre d'ecrans connectes dans <code>__main__.py</code> avant de pouvoir atteindre <code>take_screenshot()</code>, appelee en dehors des blocs <code>try/except</code> des deux fournisseurs de capture — un index invalide ferait sinon planter l'application sans etre rattrape.</div>
+          <div class="story-note fix"><span class="lbl">Trouvaille en revue de code</span>Le parametre persiste etait a l'origine ignore des qu'un <code>capture_port</code> etait injecte — une vraie incoherence pour tout futur appelant combinant les deux, meme si inatteignable depuis le CLI livre aujourd'hui. Corrige pour que la persistance ne depende jamais de cela.</div>
+        </div>
+
+      </div>
+      <p class="lede" style="margin-top:20px;"><strong>Reporte, suivi, pas oublie :</strong> Story 5.4 (signature de code via SignPath Foundation — gratuite pour les projets open-source eligibles, deliberement placee apres le packaging Linux) et Story 5.7 (un tier de benchmark sensible a la RAM, souleve apres qu'une vraie inference du modele de vision a epuise la memoire d'une VM de test a 4&nbsp;Go et declenche le tueur de processus par manque de memoire du systeme).</p>
+    </section>
+
+    <section id="fieldlog2">
+      <h2>Verification terrain — Epics 4 &amp; 5 <span class="tag">Vraies captures, vraie VM, vrais echecs</span></h2>
+      <p class="lede">Le packaging et la distribution, c'est le moment ou un projet rencontre des machines sur lesquelles il n'a pas ete developpe. Chaque entree ci-dessous n'a ete decouverte qu'en lancant reellement l'artefact construit quelque part de reel.</p>
+
+      <div class="fieldlog">
+        <div class="entry">
+          <div class="entry-tag">Windows · packaging</div>
+          <div class="entry-body">
+            <h4>Le vrai CLI n'avait jamais affiche la fenetre construite par la Story 4.2</h4>
+            <p>Le parametre <code>ui</code> d'<code>app.run()</code> avait pour defaut <code>ConsoleUIProvider</code> pour que les tests n'aient pas besoin d'un affichage — mais ce meme defaut s'etait silencieusement infiltre dans l'executable reellement packagee.</p>
+            <div class="verdict bad">Trouve en preparant la Story 5.1, pas par un test — aucun test n'exercait le defaut du vrai point d'entree</div>
+            <p style="margin-top:8px;">Corrige en passant <code>__main__.py</code> a <code>TkinterUIProvider</code> par defaut, avec <code>--console-ui</code> comme exclusion explicite.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">WSL · tentative Linux locale</div>
+          <div class="entry-body">
+            <h4>Un telechargement d'environ 300&nbsp;Mo qui ne s'est jamais termine</h4>
+            <p>En tentant une installation WSL locale pour le packaging Linux, le telechargement du paquet Ubuntu est reste bloque a 33% apres environ 20 minutes sur une connexion annoncee a 100&nbsp;Mbps — confirme via la documentation officielle de Microsoft que le vrai paquet ne fait qu'environ 300 a 340&nbsp;Mo, ce qui signifie un debit observe environ cent fois plus lent qu'attendu.</p>
+            <div class="verdict bad">Abandonne par l'auteur du projet lui-meme plutot que force</div>
+            <p style="margin-top:8px;">Bascule vers un runner GitHub Actions jetable a la place — aucune autre tentative d'installation Linux locale cette session.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Windows · distribution</div>
+          <div class="entry-body">
+            <h4>Le Controle intelligent des applications a bloque l'exe fraichement construit</h4>
+            <p>Reconstruire <code>verselog.exe</code> depuis <code>main</code> fusionne et le lancer a declenche "nous avons bloque une application qui pourrait mettre votre appareil en danger" — confirme par recherche que c'est un blocage categorique pour les binaires non signes, <strong>sans exception possible par application</strong>, contrairement a l'avertissement SmartScreen plus doux.</p>
+            <div class="verdict bad">Confirme par l'auteur du projet lui-meme sur sa propre machine</div>
+            <p style="margin-top:8px;">Documente clairement dans les notes de Release et le README plutot que cache ; la vraie solution (signature de code) suivie en Story 5.4.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Linux · packaging (CI)</div>
+          <div class="entry-body">
+            <h4>Deux runs CI avant un build Linux qui fonctionne — un echec, une correction</h4>
+            <p>La premiere tentative (installer <code>tk-dev</code>, laisser <code>uv</code> fournir son propre Python) a echoue avec <code>ModuleNotFoundError: No module named 'tkinter'</code> — le Python gere par <code>uv</code> ne fournit tout simplement pas de maniere fiable un <code>tkinter</code> fonctionnel sur Linux, quels que soient les paquets systeme.</p>
+            <div class="verdict bad">Run 1 — ModuleNotFoundError, tkinter non importable</div>
+            <p style="margin-top:8px;">Corrige en utilisant le Python systeme a la place (<code>python3-tk</code> + <code>uv sync --python-preference only-system</code>) — confirme par le Run 2, qui a construit et verifie l'executable avec succes.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Linux · verification manuelle sur bureau</div>
+          <div class="entry-body">
+            <h4>Le vrai modele de vision n'etait pas encore telecharge sur une VM fraiche</h4>
+            <p>Lancer le binaire Linux packagee sur une VM Ubuntu 24.04 Desktop fraiche a bien produit la fenetre Tkinter correcte — mais le scan s'est mis en quarantaine avec "model qwen2.5vl... not found, status code 404". Ollama etait installe et fonctionnait ; son modele de vision n'avait simplement pas encore ete telecharge, un vrai manque de premier lancement pour toute nouvelle installation.</p>
+            <div class="verdict good">La fenetre s'est affichee correctement — le veritable objectif de cette verification</div>
+            <p style="margin-top:8px;">A directement informe l'extension en cours de story de la Story 5.3 : detecter "Ollama joignable, modele manquant" comme un cas distinct et correctement formule.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Linux · inference du modele de vision</div>
+          <div class="entry-body">
+            <h4>Faire tourner le modele de vision pour de vrai a epuise une VM de test a 4&nbsp;Go</h4>
+            <p>Une fois le modele telecharge et reellement invoque pour l'inference (pas juste lance), la memoire de la VM a ete epuisee et le moniteur de memoire faible du systeme a force l'arret du processus le plus gourmand — emportant le navigateur avec lui. Tout va bien a 4&nbsp;Go jusqu'a ce que le modele soit reellement utilise.</p>
+            <div class="verdict bad">Un vrai crash par epuisement memoire, pas juste "lent"</div>
+            <p style="margin-top:8px;">Documente comme une vraie consideration materielle pour le tier vision ; a directement souleve la Story 5.7 (selection du tier de benchmark sensible a la RAM).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="gaps">
       <h2>Ce qui n'est pas encore construit <span class="tag">Assume, pas cache</span></h2>
-      <p class="lede">Chaque story jusqu'ici releve de <code>core/</code> et des adaptateurs de capture/source de donnees. Deux choses ont ete systematiquement reportees plutot que devinees :</p>
+      <p class="lede">Reporte deliberement, chacun avec une raison documentee plutot que devinee :</p>
       <div class="gap-list">
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Aucun point d'entree applicatif.</strong> Rien ne relie encore declencheur → capture → couche de confiance → interface en une application qui tourne — chaque piece est construite et testee isolement.</div>
+          <div class="g-body"><strong>Pas encore de signature de code (Story 5.4).</strong> Le build Windows n'est pas signe, donc le Controle intelligent des applications le bloque d'office. SignPath Foundation (gratuit pour les projets open-source eligibles) est le candidat principal ; deliberement place apres le packaging Linux.</div>
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>Aucun adaptateur d'interface concret.</strong> <code>UIPort</code> (fenetre de resultats, popup de contrat risque) n'a encore aucune implementation — le seed Tkinter reste sur la liste des elements reportes.</div>
+          <div class="g-body"><strong>Pas encore de tier de benchmark sensible a la RAM (Story 5.7).</strong> Le benchmark choisit un tier de capture uniquement par le temps mesure — pas selon que la machine a reellement assez de memoire libre pour le modele de vision, confirme important par un vrai crash par manque de memoire.</div>
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
@@ -627,14 +768,19 @@
           <div class="g-mark">–</div>
           <div class="g-body"><strong>Aucun jeu de donnees lieu→faction verifie.</strong> Le mapping territorial de <code>LegalityChecker</code> est un dictionnaire injecte, en attendant qu'une vraie source soit trouvee.</div>
         </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>Pas encore d'installeur graphique.</strong> Un assistant d'installation guide separe (benchmark d'abord, puis selection des composants par cases a cocher, un ecran de fin proposant un raccourci) est propose comme un nouvel epic — pas encore demarre.</div>
+        </div>
       </div>
     </section>
 
     <section id="tree">
       <h2>Plan des modules <span class="tag">src/verselog/</span></h2>
-      <div class="tree">core/
+      <div class="tree">__main__.py   app.py
+core/
   <span class="new">contract.py            capture_result.py       settings_store.py</span>
-  <span class="new">trust_layer.py          batch_scanner.py</span>
+  <span class="new">trust_layer.py          batch_scanner.py         scan_result.py</span>
   <span class="new">ship_reference.py       ship_reference_store.py</span>
   <span class="new">location_reference.py   location_reference_store.py</span>
   <span class="new">route_cost_calculator.py</span>
@@ -642,18 +788,20 @@
   <span class="new">combined_route_planner.py</span>
   <span class="new">fuel_override_store.py</span>
   <span class="new">reputation_store.py     legality_checker.py</span>
+  <span class="new">missing_prerequisite.py</span>
   ports/
     capture_port.py  datasource_port.py  trigger_port.py  ui_port.py
 adapters/
   capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  screenshot.py  benchmark.py
   datasource/ community_api_provider.py  location_data_provider.py
   trigger/    manual_trigger.py  voice_trigger.py
-  ui/         <span class="tree" style="color:var(--gap);">— vide, reporte —</span></div>
+  ui/         console_ui_provider.py  tkinter_ui_provider.py
+  system/     prerequisite_checker.py</div>
     </section>
 
     <footer>
       <span>VerseLog — sous licence MIT, open-source depuis le premier commit.</span>
-      <span class="mono tabnum">75 commits · 16 PR · 92 tests au vert</span>
+      <span class="mono tabnum">120 commits · 29 PR · 151 tests au vert</span>
     </footer>
   </main>
 </div>

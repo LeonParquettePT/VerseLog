@@ -381,6 +381,15 @@
       <a class="side-link epic" href="#epic3">Legality &amp; Reputation Safety</a>
     </div>
     <div class="side-group">
+      <div class="side-label">Epic 4</div>
+      <a class="side-link epic" href="#epic4">Application Entrypoint &amp; Results UI</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Epic 5</div>
+      <a class="side-link epic" href="#epic5">Packaging &amp; Distribution</a>
+      <a class="side-link" href="#fieldlog2">Real-world testing log</a>
+    </div>
+    <div class="side-group">
       <div class="side-label">State</div>
       <a class="side-link" href="#gaps">What's not built yet</a>
       <a class="side-link" href="#tree">Module map</a>
@@ -389,15 +398,15 @@
 
   <main>
     <header class="hero">
-      <div class="eyebrow">Project review · 2026-07-07 → 2026-07-09</div>
-      <h1 class="title">VerseLog, from zero to three closed epics</h1>
+      <div class="eyebrow">Project review · 2026-07-07 → 2026-07-13</div>
+      <h1 class="title">VerseLog, from zero to a real, packaged app on two platforms</h1>
       <p class="subtitle">A free, open-source logistics assistant for Star Citizen. Built solo-dev-and-agent through the BMad method — brainstorm → spec → architecture → epics → story-by-story implementation, each behind its own branch, PR and code review. This page retraces the whole build in order.</p>
       <div class="stat-strip">
-        <div class="stat"><div class="n tabnum">3</div><div class="l">Epics closed</div></div>
-        <div class="stat"><div class="n tabnum">14</div><div class="l">Stories shipped</div></div>
-        <div class="stat"><div class="n tabnum">16</div><div class="l">PRs merged</div></div>
-        <div class="stat"><div class="n tabnum">92</div><div class="l">Tests passing</div></div>
-        <div class="stat"><div class="n tabnum">25</div><div class="l">Source modules</div></div>
+        <div class="stat"><div class="n tabnum">4</div><div class="l">Epics closed</div></div>
+        <div class="stat"><div class="n tabnum">22</div><div class="l">Stories shipped</div></div>
+        <div class="stat"><div class="n tabnum">29</div><div class="l">PRs merged</div></div>
+        <div class="stat"><div class="n tabnum">151</div><div class="l">Tests passing</div></div>
+        <div class="stat"><div class="n tabnum">44</div><div class="l">Source modules</div></div>
       </div>
     </header>
 
@@ -607,17 +616,149 @@
       </div>
     </section>
 
+    <section id="epic4">
+      <h2>Epic 4 — Application Entrypoint &amp; Results UI <span class="tag">3 stories · PR #20–22</span></h2>
+      <p class="lede">Wire everything Epics 1–3 built into one running app with a real graphical results window — the last gap standing between "tested in isolation" and "something a player can actually launch."</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">4.1</span><span class="story-title">Application Entrypoint Wiring</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>app.run()</code> composes trigger → capture → trust layer → (optional legality check) → UI into one flow, with an early-return pattern across three terminal outcomes: quarantined, declined (legality risk), or the happy path.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>The original <code>except ValueError</code> block reset <em>both</em> <code>route_cost</code> and <code>loading_plan</code> to <code>None</code> even when route-cost calculation had already succeeded and only the later cargo-capacity check failed. Fixed by pre-initializing both outside the <code>try</code> and no longer resetting on except — confirmed correct by an independent verification agent.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">4.2</span><span class="story-title">Results Window (Tkinter UI Adapter)</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>TkinterUIProvider</code> finally implements <code>UIPort</code> for real — one label per <code>ScanResult</code>, a large readable font (NFR9). <code>build_results_window()</code> is split out from the blocking <code>show_results()</code>/<code>.mainloop()</code> call specifically so it stays unit-testable.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>An unused <code>from tkinter import font</code> import in production code turned out to be a hidden dependency of a test's own side effect. Removed from production; the test now imports <code>tkinter.font</code> explicitly instead.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">4.3</span><span class="story-title">Risky Contract Confirmation Popup</span><span class="pill done">done</span></div>
+          <div class="story-body"><code>TkinterUIProvider.confirm_risky_contract()</code> via <code>messagebox.askyesno</code>. <code>app.run()</code> wraps the call in a broad <code>except Exception</code> — a broken or closed confirmation dialog is treated as a decline, never as implicit consent to proceed (guards against <code>ConsoleUIProvider</code>'s <code>EOFError</code> risk on closed stdin).</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="epic5">
+      <h2>Epic 5 — Packaging &amp; Distribution <span class="tag">5 stories done · 2 deferred · PR #24–29</span></h2>
+      <p class="lede">Turn a working source tree into something a player downloads and double-clicks — on both platforms NFR7 actually names.</p>
+      <div class="story-grid">
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.1</span><span class="story-title">Windows Packaging (PyInstaller)</span><span class="pill done">done</span></div>
+          <div class="story-body">Single-file <code>--onefile</code> build, published as a GitHub Release asset. Preparing this story surfaced a real gap: <code>__main__.py</code> had never overridden <code>app.run()</code>'s <code>ConsoleUIProvider</code> default, so the real CLI had never actually shown the Tkinter window Story 4.2 built. Fixed by defaulting to <code>TkinterUIProvider</code>, with a new <code>--console-ui</code> opt-out.</div>
+          <div class="story-note fix"><span class="lbl">Real finding, first run</span>Windows Smart App Control blocked the freshly-built, unsigned exe outright — a categorical block with no per-app "Run anyway" override, unlike SmartScreen. Documented transparently in the Release notes rather than hidden; the real fix (code signing) is tracked as Story 5.4, deliberately deferred.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.2</span><span class="story-title">Linux Packaging (via GitHub Actions)</span><span class="pill done">done</span></div>
+          <div class="story-body">A local WSL install proved impractically slow on this machine (confirmed via official docs the real download is only ~300MB — the observed speed was roughly two orders of magnitude below the connection's stated throughput). Pivoted to a disposable <code>ubuntu-24.04</code> GitHub Actions runner instead — no local footprint, no repeat risk.</div>
+          <div class="story-note fix"><span class="lbl">Real gotcha, found by a failing CI run</span><code>uv</code>'s own managed Python doesn't reliably ship a working <code>tkinter</code> on Linux, regardless of system <code>tk-dev</code> being installed. Fixed by using the system Python instead (<code>python3-tk</code> + <code>uv sync --python-preference only-system</code>) — confirmed by a second, passing CI run, not assumed from documentation alone.</div>
+          <div class="story-note"><span class="lbl">Manually verified</span>Downloaded the real <code>v0.1.0-linux</code> Release asset and ran it on a fresh Ubuntu 24.04 Desktop VM — the Tkinter results window rendered correctly on a real display, something CI itself can never prove (no display server on the runner).</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.3</span><span class="story-title">Prerequisite Check for Tesseract/Ollama</span><span class="pill done">done</span></div>
+          <div class="story-body">A new <code>PrerequisiteChecker</code> adapter and <code>UIPort.warn_missing_prerequisites()</code> tell the player plainly what's missing, with an install link — purely informational, never installs anything automatically (the same elevation/reliability risk the WSL attempt had just demonstrated firsthand, kept out of VerseLog's own installer by design).</div>
+          <div class="story-note fix"><span class="lbl">Extended after a real finding</span>Manual Linux VM testing hit exactly the gap this story exists to prevent: Ollama installed and reachable, but its vision model not pulled, surfacing as a bare "status code 404" instead of a plain explanation. Extended mid-story to detect this as its own distinct, correctly-worded case rather than lumping it in with "Ollama not installed at all."</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.5</span><span class="story-title">Ship Selection via the Results UI</span><span class="pill done">done</span></div>
+          <div class="story-body">A Tkinter ship-selection screen appears when <code>--ship</code> is omitted, populated from <code>ShipReferenceStore</code>'s already-imported data. <code>--ship</code> remains fully honored for VoiceAttack/scripted callers — confirmed with an explicit regression test that <code>select_ship()</code> is never invoked when a ship name is given.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>An explicitly empty <code>--ship ""</code> (e.g. a VoiceAttack profile whose variable substitution produced blank text) originally bypassed selection silently instead of triggering it. Fixed by treating any falsy ship name — not just <code>None</code> — the same way.</div>
+        </div>
+
+        <div class="story">
+          <div class="story-head"><span class="story-id">5.6</span><span class="story-title">Monitor Selection for Capture</span><span class="pill done">done</span></div>
+          <div class="story-body">A new <code>--monitor</code> flag (<code>0</code> = all screens combined, the existing default; <code>1..N</code> = a specific screen), persisted via <code>SettingsStore</code>. Validated against the real connected-monitor count in <code>__main__.py</code> before it can reach <code>take_screenshot()</code>, which is called outside both capture providers' <code>try/except</code> blocks — an unvalidated index would otherwise crash the app uncaught.</div>
+          <div class="story-note fix"><span class="lbl">Code review finding</span>The persisted setting was originally skipped whenever a <code>capture_port</code> happened to be injected — a real inconsistency for any future caller combining both, even though unreachable from the shipped CLI today. Fixed so persistence never depends on that.</div>
+        </div>
+
+      </div>
+      <p class="lede" style="margin-top:20px;"><strong>Deferred, tracked, not forgotten:</strong> Story 5.4 (code signing via SignPath Foundation — free for qualifying open-source projects, deliberately queued behind Linux packaging) and Story 5.7 (a RAM-aware benchmark tier, raised after real vision-model inference exhausted a 4&nbsp;GB test VM's memory and triggered the OS's out-of-memory killer).</p>
+    </section>
+
+    <section id="fieldlog2">
+      <h2>Real-world testing log — Epics 4 &amp; 5 <span class="tag">Real screenshots, a real VM, real failures</span></h2>
+      <p class="lede">Packaging and distribution is where a project meets machines it wasn't developed on. Every entry below is something that only surfaced by actually running the built artifact somewhere real.</p>
+
+      <div class="fieldlog">
+        <div class="entry">
+          <div class="entry-tag">Windows · packaging</div>
+          <div class="entry-body">
+            <h4>The real CLI had never shown the window Story 4.2 built</h4>
+            <p><code>app.run()</code>'s <code>ui</code> parameter defaulted to <code>ConsoleUIProvider</code> so tests wouldn't need a display — but that same default had silently leaked into the actual packaged executable.</p>
+            <div class="verdict bad">Found while preparing Story 5.1, not by a test — no test exercised the real entrypoint's default</div>
+            <p style="margin-top:8px;">Fixed by defaulting <code>__main__.py</code> to <code>TkinterUIProvider</code>, with <code>--console-ui</code> as an explicit opt-out.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">WSL · local Linux attempt</div>
+          <div class="entry-body">
+            <h4>A ~300&nbsp;MB download that never finished</h4>
+            <p>Attempting a local WSL install for Linux packaging, the Ubuntu package download sat at 33% after roughly 20 minutes on a connection stated at 100&nbsp;Mbps — confirmed against Microsoft's own docs that the real package is only ~300–340&nbsp;MB, meaning the observed throughput was roughly two orders of magnitude below expected.</p>
+            <div class="verdict bad">Abandoned by the project's own author rather than pushed through</div>
+            <p style="margin-top:8px;">Pivoted to a disposable GitHub Actions runner instead — no further local Linux install attempted this session.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Windows · distribution</div>
+          <div class="entry-body">
+            <h4>Windows Smart App Control blocked the freshly-built exe</h4>
+            <p>Rebuilding <code>verselog.exe</code> from merged <code>main</code> and running it triggered "we've blocked an app that could put your device at risk" — confirmed via research this is a categorical block for unsigned binaries with <strong>no per-app override</strong>, unlike the milder SmartScreen warning.</p>
+            <div class="verdict bad">Confirmed by the project's own author on their own machine</div>
+            <p style="margin-top:8px;">Documented plainly in the Release notes and README rather than hidden; the real fix (code signing) tracked as Story 5.4.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Linux · packaging (CI)</div>
+          <div class="entry-body">
+            <h4>Two CI runs before a working Linux build — one failing, one fixed</h4>
+            <p>The first attempt (install <code>tk-dev</code>, let <code>uv</code> provision its own Python) failed with <code>ModuleNotFoundError: No module named 'tkinter'</code> — <code>uv</code>'s managed Python simply doesn't reliably ship a working <code>tkinter</code> on Linux, regardless of system packages.</p>
+            <div class="verdict bad">Run 1 — ModuleNotFoundError, tkinter not importable</div>
+            <p style="margin-top:8px;">Fixed by using the system Python instead (<code>python3-tk</code> + <code>uv sync --python-preference only-system</code>) — confirmed by Run 2, which built and verified the executable successfully.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Linux · manual desktop verification</div>
+          <div class="entry-body">
+            <h4>The real vision model wasn't pulled yet on a fresh VM</h4>
+            <p>Running the packaged Linux binary on a fresh Ubuntu 24.04 Desktop VM produced the correct Tkinter window — but the scan quarantined with "model qwen2.5vl... not found, status code 404". Ollama was installed and running; its vision model simply hadn't been pulled yet, a real first-run gap for any new install.</p>
+            <div class="verdict good">Window rendered correctly — the actual goal of this verification</div>
+            <p style="margin-top:8px;">Directly informed Story 5.3's mid-story extension: detect "Ollama reachable, model missing" as its own distinct, correctly-worded case.</p>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-tag">Linux · vision-model inference</div>
+          <div class="entry-body">
+            <h4>Running the vision model for real exhausted a 4&nbsp;GB test VM</h4>
+            <p>Once the model was pulled and actually invoked for inference (not just launched), the VM's memory was exhausted and the OS's low-memory monitor force-stopped the heaviest process — taking the browser down alongside it. Fine on 4&nbsp;GB right up until the model is actually used.</p>
+            <div class="verdict bad">A real memory-exhaustion crash, not merely "slow"</div>
+            <p style="margin-top:8px;">Documented as a real hardware consideration for the vision tier; raised Story 5.7 (RAM-aware benchmark tier selection) as a direct result.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="gaps">
       <h2>What's not built yet <span class="tag">Stated, not hidden</span></h2>
-      <p class="lede">Every story so far is <code>core/</code> and capture/data-source adapters. Two things were consistently deferred rather than guessed at:</p>
+      <p class="lede">Deferred deliberately, each with a reason on file rather than guessed at:</p>
       <div class="gap-list">
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>No application entrypoint.</strong> Nothing yet wires trigger → capture → trust layer → UI together into a running app — each piece is built and tested in isolation.</div>
+          <div class="g-body"><strong>No code signing yet (Story 5.4).</strong> The Windows build is unsigned, so Smart App Control blocks it outright. SignPath Foundation (free for qualifying open-source projects) is the leading candidate; deliberately queued behind Linux packaging.</div>
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
-          <div class="g-body"><strong>No concrete UI adapter.</strong> <code>UIPort</code> (results window, risky-contract popup) has no implementation yet — the Tkinter seed UI is still on the deferred list.</div>
+          <div class="g-body"><strong>No RAM-aware benchmark tier (Story 5.7).</strong> The benchmark picks a capture tier purely by measured time — not by whether the machine actually has enough free memory for the vision model, confirmed to matter by a real out-of-memory crash.</div>
         </div>
         <div class="gap-item">
           <div class="g-mark">–</div>
@@ -627,14 +768,19 @@
           <div class="g-mark">–</div>
           <div class="g-body"><strong>No verified location→faction dataset.</strong> <code>LegalityChecker</code>'s territory mapping is an injected dict until a real source is found.</div>
         </div>
+        <div class="gap-item">
+          <div class="g-mark">–</div>
+          <div class="g-body"><strong>No graphical installer yet.</strong> A separate, guided installer wizard (benchmark first, then checkbox-driven component selection, a finish screen offering a shortcut) is proposed as a new epic — not yet started.</div>
+        </div>
       </div>
     </section>
 
     <section id="tree">
       <h2>Module map <span class="tag">src/verselog/</span></h2>
-      <div class="tree">core/
+      <div class="tree">__main__.py   app.py
+core/
   <span class="new">contract.py            capture_result.py       settings_store.py</span>
-  <span class="new">trust_layer.py          batch_scanner.py</span>
+  <span class="new">trust_layer.py          batch_scanner.py         scan_result.py</span>
   <span class="new">ship_reference.py       ship_reference_store.py</span>
   <span class="new">location_reference.py   location_reference_store.py</span>
   <span class="new">route_cost_calculator.py</span>
@@ -642,18 +788,20 @@
   <span class="new">combined_route_planner.py</span>
   <span class="new">fuel_override_store.py</span>
   <span class="new">reputation_store.py     legality_checker.py</span>
+  <span class="new">missing_prerequisite.py</span>
   ports/
     capture_port.py  datasource_port.py  trigger_port.py  ui_port.py
 adapters/
   capture/    ocr_parser.py  ocr_provider.py  vision_provider.py  screenshot.py  benchmark.py
   datasource/ community_api_provider.py  location_data_provider.py
   trigger/    manual_trigger.py  voice_trigger.py
-  ui/         <span class="tree" style="color:var(--gap);">— empty, deferred —</span></div>
+  ui/         console_ui_provider.py  tkinter_ui_provider.py
+  system/     prerequisite_checker.py</div>
     </section>
 
     <footer>
       <span>VerseLog — MIT licensed, open-source from the first commit.</span>
-      <span class="mono tabnum">75 commits · 16 PRs · 92 tests green</span>
+      <span class="mono tabnum">120 commits · 29 PRs · 151 tests green</span>
     </footer>
   </main>
 </div>
