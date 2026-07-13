@@ -4,7 +4,7 @@ baseline_commit: 0f00818
 
 # Story 6.2: Component Selection & Guided Installation
 
-Status: review
+Status: done
 
 ## Story
 
