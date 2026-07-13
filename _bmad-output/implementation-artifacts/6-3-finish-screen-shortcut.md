@@ -60,23 +60,27 @@ claude-sonnet-5
 - `uv run --extra dev pytest -q` → `174 passed` (166 from Story 6.2's baseline + 8 new).
 - Known pre-existing Tk()-creation environment flake observed twice more during this story, on different files each time (`test_finish_step.py`'s shared fixture once, `test_installer_wizard.py` once) — confirmed by immediate re-runs, not a defect from this story's changes. Still tracked as Story 6.4, not fixed here.
 - Real verification of `_create_shortcut()` (the actual, non-injected implementation): ran it against `.../scratchpad/VerseLog-test.lnk` pointing at an arbitrary real file — confirmed a genuine 1664-byte `.lnk` was created via the PowerShell `WScript.Shell` COM approach, then deleted the scratch artifact immediately. Never touched the real desktop or Start Menu.
+- Post-review: `uv run --extra dev pytest -q` → `176 passed` (2 more regression tests added by the code-review fixes below). Hit the same pre-existing Tk() flake once more mid-run (`test_tkinter_ui_provider.py`, an unrelated file) — confirmed clean on immediate re-run.
 
 ### Completion Notes List
 
 - Implemented all 4 tasks: `InstallerWizard.go_next()` gained an `on_finish()` hook (mirroring `on_shown()`'s existing shape), `FinishStep` shows a completion message + two shortcut checkboxes (checked by default), `on_finish()` creates a shortcut per checked box via an injectable, real-by-default `shortcut_creator` (PowerShell COM automation, no new dependency), and it's wired in as the wizard's new last step.
 - Applied Story 6.2's own code-review lesson (checkbox state must survive Back-then-Next re-entry) proactively from the start, rather than needing it caught again in review — confirmed by a dedicated regression test.
 - Epic 6 is now functionally complete (all 3 stories done) — PyInstaller packaging of `verselog-installer.exe` itself, deliberately deferred since Story 6.1, is the natural next piece of work, not part of this story.
-- 174/174 tests passing.
+- **Code review fix (error handling):** `on_finish()` called `_shortcut_creator` directly with no error handling — a blocked/restricted PowerShell (locked-down machine, group policy, antivirus) would raise inside a Tkinter button callback, leaving the wizard window stuck open with only a stderr traceback and no feedback to the player, and `root.destroy()` never reached. Fixed with a `_create_shortcut_safely()` wrapper that catches any `shortcut_creator` failure, shows it via an injectable `message_shower` (defaults to `messagebox.showerror`, matching `ComponentSelectionStep`'s existing pattern), and still attempts the remaining shortcut. Regression test added.
+- **Code review fix (PowerShell escaping):** `shortcut_path`/`target_path` were interpolated into a double-quoted PowerShell string unescaped — a path containing `$` or a backtick (both valid in NTFS filenames) would be reinterpreted by PowerShell as variable/subexpression syntax instead of literal text, at best corrupting the shortcut silently, at worst executing arbitrary code via `$(...)`. Fixed with a `_ps_quote()` helper that single-quotes the value (PowerShell single-quoted strings never expand `$vars` or subexpressions) and escapes embedded literal single quotes by doubling them. Regression test added.
+- 176/176 tests passing after the review fixes.
 
 ### File List
 
 - `src/verselog_installer/wizard.py` (modified — new `on_finish()` hook)
-- `src/verselog_installer/steps/finish_step.py` (new)
+- `src/verselog_installer/steps/finish_step.py` (new; modified post-review — `_ps_quote()` escaping, `_create_shortcut_safely()` error handling)
 - `src/verselog_installer/__main__.py` (modified — adds `FinishStep()`)
 - `tests/test_installer_wizard.py` (modified — new tests)
-- `tests/test_finish_step.py` (new)
+- `tests/test_finish_step.py` (new; modified post-review — 2 new regression tests)
 - `tests/test_installer_main.py` (modified — updated for 4 steps)
 
 ## Change Log
 
 - 2026-07-13: Story implemented — `on_finish()` wizard hook, `FinishStep` (completion message, shortcut checkboxes, real PowerShell-based shortcut creation), wired as the installer's final step. Epic 6 is now functionally complete. 174/174 tests passing, status moved to review.
+- 2026-07-13: Code review (high effort) found 2 real issues: unhandled shortcut-creation failures could strand the wizard open with no player feedback, and unescaped path interpolation into the PowerShell command was vulnerable to `$`/backtick reinterpretation. Both fixed (`_create_shortcut_safely()` + `_ps_quote()`), 2 regression tests added, 176/176 passing.

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from verselog_installer.steps.finish_step import FinishStep
+from verselog_installer.steps.finish_step import FinishStep, _ps_quote
 
 
 @pytest.fixture(scope="module")
@@ -77,3 +77,41 @@ def test_build_preserves_the_players_choice_across_a_back_then_next_re_entry(roo
 
     assert step._desktop_var.get() is False
     assert step._start_menu_var.get() is True
+
+
+def test_on_finish_shows_an_error_and_still_attempts_the_other_shortcut_when_one_fails(root):
+    attempted: list = []
+
+    def flaky_creator(shortcut_path: Path, target_path: Path) -> None:
+        attempted.append(shortcut_path)
+        if shortcut_path.parent == Path("C:/fake/Desktop"):
+            raise RuntimeError("PowerShell execution is disabled by policy")
+
+    shown: list = []
+    step = FinishStep(
+        target_path=Path("C:/fake/verselog.exe"),
+        desktop_dir=Path("C:/fake/Desktop"),
+        start_menu_dir=Path("C:/fake/StartMenu"),
+        shortcut_creator=flaky_creator,
+        message_shower=lambda title, message: shown.append((title, message)),
+    )
+    step.build(root)
+
+    step.on_finish()  # must not raise, even though the desktop shortcut fails
+
+    assert attempted == [
+        Path("C:/fake/Desktop") / "VerseLog.lnk",
+        Path("C:/fake/StartMenu") / "VerseLog.lnk",
+    ]
+    assert len(shown) == 1
+    assert "PowerShell execution is disabled by policy" in shown[0][1]
+
+
+def test_ps_quote_escapes_embedded_single_quotes_and_neutralizes_variable_expansion():
+    path = Path("C:/Users/o'brien/$(calc)/verselog.exe")
+
+    quoted = _ps_quote(path)
+
+    assert quoted == "'" + str(path).replace("'", "''") + "'"
+    # Single-quoted PowerShell strings never expand $variables or `$(...)`
+    # subexpressions - the payload stays inert text, not executable code.
