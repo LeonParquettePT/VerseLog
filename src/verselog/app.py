@@ -42,7 +42,7 @@ def _select_capture_port(
 
 
 def run(
-    ship_name: str,
+    ship_name: str | None = None,
     *,
     capture_port: CapturePort | None = None,
     settings_store: SettingsStore | None = None,
@@ -57,6 +57,11 @@ def run(
     location_store = location_store if location_store is not None else LocationReferenceStore()
     trust_layer = trust_layer if trust_layer is not None else TrustLayer()
     ui = ui if ui is not None else ConsoleUIProvider()
+
+    if not ship_name:
+        ship_name = ui.select_ship(ship_store.list_ship_names())
+        if not ship_name:
+            return
 
     route_cost_calculator = RouteCostCalculator(location_store, ship_store)
     loading_plan_calculator = LoadingPlanCalculator(route_cost_calculator)

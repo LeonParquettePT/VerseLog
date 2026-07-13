@@ -65,3 +65,28 @@ def test_confirm_risky_contract_returns_true_only_for_explicit_yes(monkeypatch, 
 
     output = capsys.readouterr().out
     assert "Standing too low." in output
+
+
+def test_select_ship_returns_the_chosen_name(monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda _prompt: "2")
+
+    result = ConsoleUIProvider().select_ship(["Aegis Avenger", "MISC Starlancer MAX"])
+
+    assert result == "MISC Starlancer MAX"
+
+
+def test_select_ship_returns_none_for_an_out_of_range_or_invalid_answer(monkeypatch):
+    provider = ConsoleUIProvider()
+
+    monkeypatch.setattr("builtins.input", lambda _prompt: "99")
+    assert provider.select_ship(["Aegis Avenger"]) is None
+
+    monkeypatch.setattr("builtins.input", lambda _prompt: "not a number")
+    assert provider.select_ship(["Aegis Avenger"]) is None
+
+
+def test_select_ship_returns_none_when_no_ships_are_available(capsys):
+    result = ConsoleUIProvider().select_ship([])
+
+    assert result is None
+    assert "--import-reference-data" in capsys.readouterr().out

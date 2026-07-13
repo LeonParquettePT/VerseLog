@@ -59,6 +59,11 @@ class ShipReferenceStore:
                 ],
             )
 
+    def list_ship_names(self) -> list[str]:
+        with self._connect() as conn:
+            rows = conn.execute("SELECT name FROM ships ORDER BY name").fetchall()
+        return [row[0] for row in rows]
+
     def get_ship(self, name: str) -> ShipReference | None:
         with self._connect() as conn:
             row = conn.execute(

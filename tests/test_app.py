@@ -14,20 +14,28 @@ from verselog.core.trust_layer import TrustLayer
 class _FakeCapturePort(CapturePort):
     def __init__(self, result: CaptureResult) -> None:
         self._result = result
+        self.capture_calls = 0
 
     def capture(self) -> CaptureResult:
+        self.capture_calls += 1
         return self._result
 
 
 class _SpyUI:
-    def __init__(self) -> None:
+    def __init__(self, ship_to_select: str | None = None) -> None:
         self.shown: list[ScanResult] = []
+        self._ship_to_select = ship_to_select
+        self.select_ship_calls: list[list[str]] = []
 
     def show_results(self, results: list[ScanResult]) -> None:
         self.shown.extend(results)
 
     def confirm_risky_contract(self, contract, risk) -> bool:
         return True
+
+    def select_ship(self, ship_names: list[str]) -> str | None:
+        self.select_ship_calls.append(ship_names)
+        return self._ship_to_select
 
 
 def _stores(tmp_path):
@@ -211,3 +219,110 @@ def test_select_capture_port_uses_the_persisted_tier_without_rerunning_the_bench
     # capture() should have been invoked by the benchmark itself.
     assert vision_calls == []
     assert ocr_calls == []
+
+
+def test_run_asks_the_ui_to_select_a_ship_when_none_is_given(tmp_path):
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI(ship_to_select="MISC Starlancer MAX")
+
+    run(
+        ship_name=None,
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+    )
+
+    assert ui.select_ship_calls == [["MISC Starlancer MAX"]]
+    result = ui.shown[0]
+    assert result.route_cost is not None
+    assert result.route_cost.ship.name == "MISC Starlancer MAX"
+
+
+def test_run_stops_without_capturing_when_ship_selection_is_cancelled(tmp_path):
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI(ship_to_select=None)
+
+    run(
+        ship_name=None,
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+    )
+
+    assert capture_port.capture_calls == 0
+    assert ui.shown == []
+
+
+def test_run_treats_an_empty_ship_name_the_same_as_none(tmp_path):
+    # Code-review finding: a caller (e.g. a VoiceAttack profile whose variable
+    # substitution produced an empty string) passing ship_name="" must trigger
+    # selection too, not silently proceed with an invalid empty ship name.
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI(ship_to_select="MISC Starlancer MAX")
+
+    run(
+        ship_name="",
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+    )
+
+    assert ui.select_ship_calls == [["MISC Starlancer MAX"]]
+    assert ui.shown[0].route_cost.ship.name == "MISC Starlancer MAX"
+
+
+def test_run_never_calls_select_ship_when_ship_name_is_given_explicitly(tmp_path):
+    # Regression guard: VoiceAttack (Story 1.4) and any other caller that
+    # already passes --ship must see zero behavior change from this story.
+    ship_store, location_store = _stores(tmp_path)
+    contract = Contract(
+        departure="Port Tressler",
+        arrival="Greycat Stanton IV Production Complex-A",
+        scu=6,
+        reward=50250.0,
+    )
+    capture_port = _FakeCapturePort(CaptureResult(contract=contract, source_image=b"png"))
+    ui = _SpyUI(ship_to_select="should never be used")
+
+    run(
+        ship_name="MISC Starlancer MAX",
+        capture_port=capture_port,
+        settings_store=SettingsStore(path=tmp_path / "settings.json"),
+        ship_store=ship_store,
+        location_store=location_store,
+        trust_layer=TrustLayer(quarantine_dir=tmp_path / "quarantine"),
+        ui=ui,
+    )
+
+    assert ui.select_ship_calls == []
+    assert capture_port.capture_calls == 1
